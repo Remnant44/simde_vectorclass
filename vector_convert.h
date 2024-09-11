@@ -39,32 +39,32 @@ namespace VCL_NAMESPACE {
 
 // sign extend
 static inline Vec16s extend (Vec16c const a) {
-    return _mm256_cvtepi8_epi16(a);
+    return simde_mm256_cvtepi8_epi16(a);
 }
 
 // zero extend
 static inline Vec16us extend (Vec16uc const a) {
-    return _mm256_cvtepu8_epi16(a);
+    return simde_mm256_cvtepu8_epi16(a);
 }
 
 // sign extend
 static inline Vec8i extend (Vec8s const a) {
-    return _mm256_cvtepi16_epi32(a);
+    return simde_mm256_cvtepi16_epi32(a);
 }
 
 // zero extend
 static inline Vec8ui extend (Vec8us const a) {
-    return _mm256_cvtepu16_epi32(a);
+    return simde_mm256_cvtepu16_epi32(a);
 }
 
 // sign extend
 static inline Vec4q extend (Vec4i const a) {
-    return _mm256_cvtepi32_epi64(a);
+    return simde_mm256_cvtepi32_epi64(a);
 }
 
 // zero extend
 static inline Vec4uq extend (Vec4ui const a) {
-    return _mm256_cvtepu32_epi64(a);
+    return simde_mm256_cvtepu32_epi64(a);
 }
 
 
@@ -106,12 +106,12 @@ static inline Vec4uq extend (Vec4ui const a) {
 
 // float to double
 static inline Vec4d to_double (Vec4f const a) {
-    return _mm256_cvtps_pd(a);
+    return simde_mm256_cvtps_pd(a);
 }
 
 // double to float
 static inline Vec4f to_float (Vec4d const a) {
-    return _mm256_cvtpd_ps(a);
+    return simde_mm256_cvtpd_ps(a);
 }
 
 #else  // no AVX2. 256 bit float vectors are emulated
@@ -141,52 +141,52 @@ static inline Vec4f to_float (Vec4d const a) {
 
 // compress functions. overflow wraps around
 static inline Vec16c compress (Vec16s const a) {
-    return _mm256_cvtepi16_epi8(a);
+    return simde_mm256_cvtepi16_epi8(a);
 }
 
 static inline Vec16uc compress (Vec16us const a) {
-    return _mm256_cvtepi16_epi8(a);
+    return simde_mm256_cvtepi16_epi8(a);
 }
 
 static inline Vec8s compress (Vec8i const a) {
-    return _mm256_cvtepi32_epi16(a);
+    return simde_mm256_cvtepi32_epi16(a);
 }
 
 static inline Vec8us compress (Vec8ui const a) {
-    return _mm256_cvtepi32_epi16(a);
+    return simde_mm256_cvtepi32_epi16(a);
 }
 
 static inline Vec4i compress (Vec4q const a) {
-    return _mm256_cvtepi64_epi32(a);
+    return simde_mm256_cvtepi64_epi32(a);
 }
 
 static inline Vec4ui compress (Vec4uq const a) {
-    return _mm256_cvtepi64_epi32(a);
+    return simde_mm256_cvtepi64_epi32(a);
 }
 
 // compress_saturated functions. overflow saturates
 static inline Vec16c compress_saturated (Vec16s const a) {
-    return _mm256_cvtsepi16_epi8(a);
+    return simde_mm256_cvtsepi16_epi8(a);
 }
 
 static inline Vec16uc compress_saturated (Vec16us const a) {
-    return _mm256_cvtusepi16_epi8(a);
+    return simde_mm256_cvtusepi16_epi8(a);
 }
 
 static inline Vec8s compress_saturated (Vec8i const a) {
-    return _mm256_cvtsepi32_epi16(a);
+    return simde_mm256_cvtsepi32_epi16(a);
 }
 
 static inline Vec8us compress_saturated (Vec8ui const a) {
-    return _mm256_cvtusepi32_epi16(a);
+    return simde_mm256_cvtusepi32_epi16(a);
 }
 
 static inline Vec4i compress_saturated (Vec4q const a) {
-    return _mm256_cvtsepi64_epi32(a);
+    return simde_mm256_cvtsepi64_epi32(a);
 }
 
 static inline Vec4ui compress_saturated (Vec4uq const a) {
-    return _mm256_cvtusepi64_epi32(a);
+    return simde_mm256_cvtusepi64_epi32(a);
 }
 
 

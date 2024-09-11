@@ -189,7 +189,7 @@ We need different version checks with and whithout __apple_build_version__
 #endif
 
 #if defined (__GNUC__) && __GNUC__ < 10 && !defined(__clang__)
-// Gcc 9 and earlier donot have _mm256_zextsi128_si256 and similar functions for xero-extending vector registers
+// Gcc 9 and earlier donot have simde_mm256_zextsi128_si256 and similar functions for xero-extending vector registers
 #define ZEXT_MISSING
 #endif
 

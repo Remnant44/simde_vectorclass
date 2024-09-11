@@ -107,7 +107,7 @@ public:
     }
     // Constructor to build from two Vec8f:
     Vec16f(Vec8f const a0, Vec8f const a1) {
-        zmm = _mm512_castpd_ps(_mm512_insertf64x4(_mm512_castps_pd(_mm512_castps256_ps512(a0)), _mm256_castps_pd(a1), 1));
+        zmm = _mm512_castpd_ps(_mm512_insertf64x4(_mm512_castps_pd(_mm512_castps256_ps512(a0)), simde_mm256_castps_pd(a1), 1));
     }
     // Constructor to convert from type __m512 used in intrinsics:
     Vec16f(__m512 const x) {
@@ -183,7 +183,7 @@ public:
         return _mm512_castps512_ps256(zmm);
     }
     Vec8f get_high() const {
-        return _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(zmm),1));
+        return simde_mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(zmm),1));
     }
     static constexpr int size() {
         return 16;
@@ -1337,8 +1337,8 @@ static inline Vec8d to_double(Vec8i const a) {
 
 // function compress: convert two Vec8d to one Vec16f
 static inline Vec16f compress (Vec8d const low, Vec8d const high) {
-    __m256 t1 = _mm512_cvtpd_ps(low);
-    __m256 t2 = _mm512_cvtpd_ps(high);
+    simde__m256 t1 = _mm512_cvtpd_ps(low);
+    simde__m256 t2 = _mm512_cvtpd_ps(high);
     return Vec16f(t1, t2);
 }
 
@@ -2013,7 +2013,7 @@ template <int i0, int i1, int i2, int i3, int i4, int i5, int i6, int i7,
 
 template <int i0, int i1, int i2, int i3, int i4, int i5, int i6, int i7>
 static inline void scatter(Vec8d const data, double * array) {
-    __m256i indx = constant8ui<i0,i1,i2,i3,i4,i5,i6,i7>();
+    simde__m256i indx = constant8ui<i0,i1,i2,i3,i4,i5,i6,i7>();
     Vec8db mask(i0>=0, i1>=0, i2>=0, i3>=0, i4>=0, i5>=0, i6>=0, i7>=0);
     _mm512_mask_i32scatter_pd(array, mask, indx, data, 8);
 }
@@ -2037,7 +2037,7 @@ static inline void scatter(Vec8q const index, uint32_t limit, Vec8d const data, 
 
 static inline void scatter(Vec8i const index, uint32_t limit, Vec8d const data, double * destination) {
 #if INSTRSET >= 10 // __AVX512VL__, __AVX512DQ__
-    __mmask8 mask = _mm256_cmplt_epu32_mask(index, Vec8ui(limit));
+    __mmask8 mask = simde_mm256_cmplt_epu32_mask(index, Vec8ui(limit));
 #else
     __mmask16 mask = _mm512_cmplt_epu32_mask(_mm512_castsi256_si512(index), _mm512_castsi256_si512(Vec8ui(limit)));
 #endif

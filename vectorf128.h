@@ -2763,8 +2763,8 @@ static inline Vec4f lookup4(Vec4i const index, Vec4f const table) {
 
 static inline Vec4f lookup8(Vec4i const index, Vec4f const table0, Vec4f const table1) {
 #if INSTRSET >= 8  // AVX2
-    __m256 tt = _mm256_insertf128_ps(_mm256_castps128_ps256(table0), table1, 1); // combine tables
-    __m128 r  = _mm256_castps256_ps128(_mm256_permutevar8x32_ps(tt, _mm256_castsi128_si256(index)));
+    simde__m256 tt = simde_mm256_insertf128_ps(simde_mm256_castps128_ps256(table0), table1, 1); // combine tables
+    __m128 r  = simde_mm256_castps256_ps128(simde_mm256_permutevar8x32_ps(tt, simde_mm256_castsi128_si256(index)));
     return r;
 
 #elif INSTRSET >= 7  // AVX
@@ -2793,8 +2793,8 @@ static inline Vec4f lookup(Vec4i const index, float const * table) {
     if constexpr (n <= 4) return lookup4(index, Vec4f().load(table));
     if constexpr (n <= 8) {
 #if INSTRSET >= 8  // AVX2
-        __m256 tt = _mm256_loadu_ps(table);
-        __m128 r  = _mm256_castps256_ps128(_mm256_permutevar8x32_ps(tt, _mm256_castsi128_si256(index)));
+        simde__m256 tt = simde_mm256_loadu_ps(table);
+        __m128 r  = simde_mm256_castps256_ps128(simde_mm256_permutevar8x32_ps(tt, simde_mm256_castsi128_si256(index)));
         return r;
 #else   // not AVX2
         return lookup8(index, Vec4f().load(table), Vec4f().load(table + 4));

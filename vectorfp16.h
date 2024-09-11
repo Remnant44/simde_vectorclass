@@ -506,8 +506,8 @@ static inline _Float16 horizontal_add(Vec8h const a) {
 #if MAX_VECTOR_SIZE >= 256
 // same, with high precision
 static inline float horizontal_add_x(Vec8h const a) {
-    //Vec8f b = _mm256_cvtph_ps(a); // declaration of _mm256_cvtph_ps has __m128i parameter because it was defined before __m128h was defined
-    Vec8f b = _mm256_cvtph_ps(_mm_castph_si128(a));
+    //Vec8f b = simde_mm256_cvtph_ps(a); // declaration of simde_mm256_cvtph_ps has __m128i parameter because it was defined before __m128h was defined
+    Vec8f b = simde_mm256_cvtph_ps(_mm_castph_si128(a));
     return horizontal_add(b);
 }
 #endif
@@ -704,12 +704,12 @@ static inline Vec8h convert4f_8h (Vec4f f) {
 // conversions Vec8h <-> Vec8f
 // extend precision: Vec8h -> Vec8f
 static inline Vec8f to_float (Vec8h h) {
-    return _mm256_cvtph_ps(_mm_castph_si128(h));
+    return simde_mm256_cvtph_ps(_mm_castph_si128(h));
 }
 
 // reduce precision: Vec8f -> Vec8h
 static inline Vec8h to_float16 (Vec8f f) {
-    return _mm_castsi128_ph(_mm256_cvtps_ph(f, 0));
+    return _mm_castsi128_ph(simde_mm256_cvtps_ph(f, 0));
 } 
 #endif
 
@@ -821,101 +821,101 @@ typedef Vec16b Vec16hb;  // compact boolean vector
 
 class Vec16h {
 protected:
-    __m256h ymm; // Float vector
+    simde__m256h ymm; // Float vector
 public:
     // Default constructor:
     Vec16h() = default;
     // Constructor to broadcast the same value into all elements:
     Vec16h(_Float16 f) {
-        ymm = _mm256_set1_ph (f);
+        ymm = simde_mm256_set1_ph (f);
     }
     // Constructor to build from all elements:
     Vec16h(_Float16 f0, _Float16 f1, _Float16 f2, _Float16 f3, _Float16 f4, _Float16 f5, _Float16 f6, _Float16 f7,
     _Float16 f8, _Float16 f9, _Float16 f10, _Float16 f11, _Float16 f12, _Float16 f13, _Float16 f14, _Float16 f15) {
-        ymm = _mm256_setr_ph (f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15);
+        ymm = simde_mm256_setr_ph (f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15);
     }
     // Constructor to build from two Vec8h:
     Vec16h(Vec8h const a0, Vec8h const a1) {     
-        ymm = _mm256_castps_ph(_mm256_insertf128_ps(_mm256_castps128_ps256(_mm_castph_ps(a0)),_mm_castph_ps(a1),1));
+        ymm = simde_mm256_castps_ph(simde_mm256_insertf128_ps(simde_mm256_castps128_ps256(_mm_castph_ps(a0)),_mm_castph_ps(a1),1));
     }
-    // Constructor to convert from type __m256h used in intrinsics:
-    Vec16h(__m256h const x) {
+    // Constructor to convert from type simde__m256h used in intrinsics:
+    Vec16h(simde__m256h const x) {
         ymm = x;
     }
-    // Assignment operator to convert from type __m256h used in intrinsics:
-    Vec16h & operator = (__m256h const x) {
+    // Assignment operator to convert from type simde__m256h used in intrinsics:
+    Vec16h & operator = (simde__m256h const x) {
         ymm = x;
         return *this;
     }
-    // Type cast operator to convert to __m256h used in intrinsics
-    operator __m256h() const {
+    // Type cast operator to convert to simde__m256h used in intrinsics
+    operator simde__m256h() const {
         return ymm;
     }
     // Member function to load from array (unaligned)
     Vec16h & load(void const * p) {
-        ymm = _mm256_loadu_ph (p);
+        ymm = simde_mm256_loadu_ph (p);
         return *this;
     }
     // Member function to load from array, aligned by 32
     // You may use load_a instead of load if you are certain that p points to an address
     // divisible by 32. In most cases there is no difference in speed between load and load_a
     Vec16h & load_a(void const * p) {
-        ymm = _mm256_load_ph (p);
+        ymm = simde_mm256_load_ph (p);
         return *this;
     }
     // Member function to store into array (unaligned)
     void store(void * p) const {
-        _mm256_storeu_ph (p, ymm);
+        simde_mm256_storeu_ph (p, ymm);
     }
     // Member function storing into array, aligned by 32
     // You may use store_a instead of store if you are certain that p points to an address
     // divisible by 32.
     void store_a(void * p) const {
-        _mm256_store_ph (p, ymm);
+        simde_mm256_store_ph (p, ymm);
     }
     // Member function storing to aligned uncached memory (non-temporal store).
     // This may be more efficient than store_a when storing large blocks of memory if it 
     // is unlikely that the data will stay in the cache until it is read again.
     // Note: Will generate runtime error if p is not aligned by 32
     void store_nt(void * p) const {
-        _mm256_stream_ps((float*)p, _mm256_castph_ps(ymm));
+        simde_mm256_stream_ps((float*)p, simde_mm256_castph_ps(ymm));
     }
     // Partial load. Load n elements and set the rest to 0
     Vec16h & load_partial(int n, void const * p) {
-        ymm = _mm256_castsi256_ph(_mm256_maskz_loadu_epi16(__mmask16((1u << n) - 1), p));
+        ymm = simde_mm256_castsi256_ph(simde_mm256_maskz_loadu_epi16(__mmask16((1u << n) - 1), p));
         return *this;
     }
     // Partial store. Store n elements
     void store_partial(int n, void * p) const {
-        _mm256_mask_storeu_epi16(p, __mmask16((1u << n) - 1), _mm256_castph_si256(ymm));
+        simde_mm256_mask_storeu_epi16(p, __mmask16((1u << n) - 1), simde_mm256_castph_si256(ymm));
     }
     // cut off vector to n elements. The last 8-n elements are set to zero
     Vec16h & cutoff(int n) {
-        ymm = _mm256_castsi256_ph(_mm256_maskz_mov_epi16(__mmask16((1u << n) - 1), _mm256_castph_si256(ymm)));
+        ymm = simde_mm256_castsi256_ph(simde_mm256_maskz_mov_epi16(__mmask16((1u << n) - 1), simde_mm256_castph_si256(ymm)));
         return *this;
     }
     // Member function to change a single element in vector
     Vec16h const insert(int index, _Float16 a) {
-        __m256h aa = _mm256_set1_ph (a);
-        ymm = _mm256_castsi256_ph(_mm256_mask_mov_epi16(_mm256_castph_si256(ymm), __mmask16(1u << index), _mm256_castph_si256(aa)));
+        simde__m256h aa = simde_mm256_set1_ph (a);
+        ymm = simde_mm256_castsi256_ph(simde_mm256_mask_mov_epi16(simde_mm256_castph_si256(ymm), __mmask16(1u << index), simde_mm256_castph_si256(aa)));
         return *this;
     }
     // Member function extract a single element from vector
     _Float16 extract(int index) const {
 #if INSTRSET >= 10 && defined (__AVX512VBMI2__)
-        __m256i x = _mm256_maskz_compress_epi16(__mmask16(1u << index), _mm256_castph_si256(ymm));
-        return _mm256_cvtsh_h(_mm256_castsi256_ph(x));
+        simde__m256i x = simde_mm256_maskz_compress_epi16(__mmask16(1u << index), simde_mm256_castph_si256(ymm));
+        return simde_mm256_cvtsh_h(simde_mm256_castsi256_ph(x));
 #elif 0
         union {
-            __m256h v;
+            simde__m256h v;
             _Float16 f[16];
         } y;
         y.v = ymm;
         return y.f[index & 15];
 #else
-        Vec8ui x = _mm256_maskz_compress_epi32(__mmask16(1u << (index >> 1)), _mm256_castph_si256(ymm));  // extract int32_t
+        Vec8ui x = simde_mm256_maskz_compress_epi32(__mmask16(1u << (index >> 1)), simde_mm256_castph_si256(ymm));  // extract int32_t
         x >>= uint32_t((index & 1) << 4);  // get upper 16 bits if index odd
-        return _mm256_cvtsh_h(_mm256_castsi256_ph(x));
+        return simde_mm256_cvtsh_h(simde_mm256_castsi256_ph(x));
 #endif
     }
     // Extract a single element. Use store function if extracting more than one element.
@@ -924,10 +924,10 @@ public:
         return extract(index);
     }
     Vec8h get_low() const {
-        return _mm256_castph256_ph128(ymm);
+        return simde_mm256_castph256_ph128(ymm);
     }
     Vec8h get_high() const {
-        return _mm_castps_ph(_mm256_extractf128_ps(_mm256_castph_ps(ymm),1));
+        return _mm_castps_ph(simde_mm256_extractf128_ps(simde_mm256_castph_ps(ymm),1));
     }
     static constexpr int size() {
         return 16;
@@ -935,7 +935,7 @@ public:
     static constexpr int elementtype() {
         return 15;
     }
-    typedef __m256h registertype;
+    typedef simde__m256h registertype;
 };
 
 
@@ -947,7 +947,7 @@ public:
 
 // vector operator + : add element by element
 static inline Vec16h operator + (Vec16h const a, Vec16h const b) {
-    return _mm256_add_ph(a, b);
+    return simde_mm256_add_ph(a, b);
 }
 
 // vector operator + : add vector and scalar
@@ -979,7 +979,7 @@ static inline Vec16h & operator ++ (Vec16h & a) {
 
 // vector operator - : subtract element by element
 static inline Vec16h operator - (Vec16h const a, Vec16h const b) {
-    return _mm256_sub_ph(a, b);
+    return simde_mm256_sub_ph(a, b);
 }
 
 // vector operator - : subtract vector and scalar
@@ -993,7 +993,7 @@ static inline Vec16h operator - (float a, Vec16h const b) {
 // vector operator - : unary minus
 // Change sign bit, even for 0, INF and NAN
 static inline Vec16h operator - (Vec16h const a) {
-    return _mm256_castps_ph(_mm256_xor_ps(_mm256_castph_ps(a), _mm256_castsi256_ps(_mm256_set1_epi32(0x80008000))));
+    return simde_mm256_castps_ph(simde_mm256_xor_ps(simde_mm256_castph_ps(a), simde_mm256_castsi256_ps(simde_mm256_set1_epi32(0x80008000))));
 }
 
 // vector operator -= : subtract
@@ -1017,7 +1017,7 @@ static inline Vec16h & operator -- (Vec16h & a) {
 
 // vector operator * : multiply element by element
 static inline Vec16h operator * (Vec16h const a, Vec16h const b) {
-    return _mm256_mul_ph(a, b);
+    return simde_mm256_mul_ph(a, b);
 }
 
 // vector operator * : multiply vector and scalar
@@ -1036,7 +1036,7 @@ static inline Vec16h & operator *= (Vec16h & a, Vec16h const b) {
 
 // vector operator / : divide all elements by same integer
 static inline Vec16h operator / (Vec16h const a, Vec16h const b) {
-    return _mm256_div_ph(a, b);
+    return simde_mm256_div_ph(a, b);
 }
 
 // vector operator / : divide vector and scalar
@@ -1055,39 +1055,39 @@ static inline Vec16h & operator /= (Vec16h & a, Vec16h const b) {
 
 // vector operator == : returns true for elements for which a == b
 static inline Vec16hb operator == (Vec16h const a, Vec16h const b) {
-    return _mm256_cmp_ph_mask(a, b, 0);
+    return simde_mm256_cmp_ph_mask(a, b, 0);
 }
 
 // vector operator != : returns true for elements for which a != b
 static inline Vec16hb operator != (Vec16h const a, Vec16h const b) {
-    return _mm256_cmp_ph_mask(a, b, 4);
+    return simde_mm256_cmp_ph_mask(a, b, 4);
 }
 
 // vector operator < : returns true for elements for which a < b
 static inline Vec16hb operator < (Vec16h const a, Vec16h const b) {
-    return _mm256_cmp_ph_mask(a, b, 1);
+    return simde_mm256_cmp_ph_mask(a, b, 1);
 }
 
 // vector operator <= : returns true for elements for which a <= b
 static inline Vec16hb operator <= (Vec16h const a, Vec16h const b) {
-    return _mm256_cmp_ph_mask(a, b, 2);
+    return simde_mm256_cmp_ph_mask(a, b, 2);
 }
 
 // vector operator > : returns true for elements for which a > b
 static inline Vec16hb operator > (Vec16h const a, Vec16h const b) {
-    return _mm256_cmp_ph_mask(a, b, 6+8);
+    return simde_mm256_cmp_ph_mask(a, b, 6+8);
 }
 
 // vector operator >= : returns true for elements for which a >= b
 static inline Vec16hb operator >= (Vec16h const a, Vec16h const b) {
-    return _mm256_cmp_ph_mask(a, b, 5+8);
+    return simde_mm256_cmp_ph_mask(a, b, 5+8);
 }
 
 // Bitwise logical operators
 
 // vector operator & : bitwise and
 static inline Vec16h operator & (Vec16h const a, Vec16h const b) {
-    return _mm256_castps_ph(_mm256_and_ps(_mm256_castph_ps(a), _mm256_castph_ps(b)));
+    return simde_mm256_castps_ph(simde_mm256_and_ps(simde_mm256_castph_ps(a), simde_mm256_castph_ps(b)));
 }
 
 // vector operator &= : bitwise and
@@ -1098,7 +1098,7 @@ static inline Vec16h & operator &= (Vec16h & a, Vec16h const b) {
 
 // vector operator & : bitwise and of Vec16h and Vec16hb
 static inline Vec16h operator & (Vec16h const a, Vec16hb const b) {
-    return _mm256_castsi256_ph(_mm256_maskz_mov_epi16(b, _mm256_castph_si256(a)));
+    return simde_mm256_castsi256_ph(simde_mm256_maskz_mov_epi16(b, simde_mm256_castph_si256(a)));
 }
 static inline Vec16h operator & (Vec16hb const a, Vec16h const b) {
     return b & a;
@@ -1106,7 +1106,7 @@ static inline Vec16h operator & (Vec16hb const a, Vec16h const b) {
 
 // vector operator | : bitwise or
 static inline Vec16h operator | (Vec16h const a, Vec16h const b) {
-    return _mm256_castps_ph(_mm256_or_ps(_mm256_castph_ps(a), _mm256_castph_ps(b)));
+    return simde_mm256_castps_ph(simde_mm256_or_ps(simde_mm256_castph_ps(a), simde_mm256_castph_ps(b)));
 }
 
 // vector operator |= : bitwise or
@@ -1117,7 +1117,7 @@ static inline Vec16h & operator |= (Vec16h & a, Vec16h const b) {
 
 // vector operator ^ : bitwise xor
 static inline Vec16h operator ^ (Vec16h const a, Vec16h const b) {
-    return _mm256_castps_ph(_mm256_xor_ps(_mm256_castph_ps(a), _mm256_castph_ps(b)));
+    return simde_mm256_castps_ph(simde_mm256_xor_ps(simde_mm256_castph_ps(a), simde_mm256_castph_ps(b)));
 }
 
 // vector operator ^= : bitwise xor
@@ -1141,27 +1141,27 @@ static inline Vec16hb operator ! (Vec16h const a) {
 // Select between two operands. Corresponds to this pseudocode:
 // for (int i = 0; i < 4; i++) result[i] = s[i] ? a[i] : b[i];
 static inline Vec16h select(Vec16hb const s, Vec16h const a, Vec16h const b) {
-    return _mm256_castsi256_ph(_mm256_mask_mov_epi16(_mm256_castph_si256(b), s, _mm256_castph_si256(a)));
+    return simde_mm256_castsi256_ph(simde_mm256_mask_mov_epi16(simde_mm256_castph_si256(b), s, simde_mm256_castph_si256(a)));
 }
 
 // Conditional add: For all vector elements i: result[i] = f[i] ? (a[i] + b[i]) : a[i]
 static inline Vec16h if_add(Vec16hb const f, Vec16h const a, Vec16h const b) {
-    return _mm256_mask_add_ph (a, f, a, b);
+    return simde_mm256_mask_add_ph (a, f, a, b);
 }
 
 // Conditional subtract: For all vector elements i: result[i] = f[i] ? (a[i] - b[i]) : a[i]
 static inline Vec16h if_sub(Vec16hb const f, Vec16h const a, Vec16h const b) {
-    return _mm256_mask_sub_ph (a, f, a, b);
+    return simde_mm256_mask_sub_ph (a, f, a, b);
 }
 
 // Conditional multiply: For all vector elements i: result[i] = f[i] ? (a[i] * b[i]) : a[i]
 static inline Vec16h if_mul(Vec16hb const f, Vec16h const a, Vec16h const b) {
-    return _mm256_mask_mul_ph (a, f, a, b);
+    return simde_mm256_mask_mul_ph (a, f, a, b);
 }
 
 // Conditional divide: For all vector elements i: result[i] = f[i] ? (a[i] / b[i]) : a[i]
 static inline Vec16h if_div(Vec16hb const f, Vec16h const a, Vec16h const b) {
-    return _mm256_mask_div_ph (a, f, a, b);
+    return simde_mm256_mask_div_ph (a, f, a, b);
 }
 
 // Sign functions
@@ -1171,7 +1171,7 @@ static inline Vec16h if_div(Vec16hb const f, Vec16h const a, Vec16h const b) {
 // Note that sign_bit(Vec16h(-0.0f16)) gives true, while Vec16h(-0.0f16) < Vec16h(0.0f16) gives false
 // (the underscore in the name avoids a conflict with a macro in Intel's mathimf.h)
 static inline Vec16hb sign_bit(Vec16h const a) {
-    Vec16s t1 = _mm256_castph_si256(a);    // reinterpret as 16-bit integer
+    Vec16s t1 = simde_mm256_castph_si256(a);    // reinterpret as 16-bit integer
     Vec16s t2 = t1 >> 15;                  // extend sign bit
     return t2 != 0;
 }
@@ -1188,14 +1188,14 @@ static inline Vec16h sign_combine(Vec16h const a, Vec16h const b) {
 // false for INF and NAN
 // (the underscore in the name avoids a conflict with a macro in Intel's mathimf.h)
 static inline Vec16hb is_finite(Vec16h const a) {
-    return __mmask16(_mm256_fpclass_ph_mask(a, 0x99) ^ 0xFFFF);
+    return __mmask16(simde_mm256_fpclass_ph_mask(a, 0x99) ^ 0xFFFF);
 }
 
 // Function is_inf: gives true for elements that are +INF or -INF
 // false for finite numbers and NAN
 // (the underscore in the name avoids a conflict with a macro in Intel's mathimf.h)
 static inline Vec16hb is_inf(Vec16h const a) {
-    return __mmask16(_mm256_fpclass_ph_mask(a, 0x18));
+    return __mmask16(simde_mm256_fpclass_ph_mask(a, 0x18));
 }
 
 // Function is_nan: gives true for elements that are +NAN or -NAN
@@ -1203,24 +1203,24 @@ static inline Vec16hb is_inf(Vec16h const a) {
 // (the underscore in the name avoids a conflict with a macro in Intel's mathimf.h)
 static inline Vec16hb is_nan(Vec16h const a) {
     // assume that compiler does not optimize this away with -ffinite-math-only:
-    return Vec16sb(_mm256_fpclass_ph_mask(a, 0x81));
+    return Vec16sb(simde_mm256_fpclass_ph_mask(a, 0x81));
 }
 
 // Function is_subnormal: gives true for elements that are subnormal
 // false for finite numbers, zero, NAN and INF
 static inline Vec16hb is_subnormal(Vec16h const a) {
-    return Vec16hb(_mm256_fpclass_ph_mask(a, 0x20));
+    return Vec16hb(simde_mm256_fpclass_ph_mask(a, 0x20));
 }
 
 // Function is_zero_or_subnormal: gives true for elements that are zero or subnormal
 // false for finite numbers, NAN and INF
 static inline Vec16hb is_zero_or_subnormal(Vec16h const a) {
-    return Vec16hb(_mm256_fpclass_ph_mask(a, 0x26));
+    return Vec16hb(simde_mm256_fpclass_ph_mask(a, 0x26));
 }
 
 // Function infinite16h: returns a vector where all elements are +INF
 static inline Vec16h infinite16h() {
-    return _mm256_castsi256_ph(_mm256_set1_epi16(0x7C00));
+    return simde_mm256_castsi256_ph(simde_mm256_set1_epi16(0x7C00));
 }
 
 // template for producing quiet NAN
@@ -1243,7 +1243,7 @@ static inline Vec16h nan16h(uint32_t n = 0x10) {
 
 // This function returns the code hidden in a NAN. The sign bit is ignored
 static inline Vec16us nan_code(Vec16h const x) {
-    Vec16us a = Vec16us(_mm256_castph_si256(x));
+    Vec16us a = Vec16us(simde_mm256_castph_si256(x));
     Vec16us const n = 0x3FF;
     return select(is_nan(x), a & n, Vec16us(0));
 }
@@ -1258,30 +1258,30 @@ static inline _Float16 horizontal_add(Vec16h const a) {
 #if MAX_VECTOR_SIZE >= 512
 // same, with high precision
 static inline float horizontal_add_x(Vec16h const a) {
-    Vec16f b =  _mm512_cvtph_ps(_mm256_castph_si256(a));
+    Vec16f b =  _mm512_cvtph_ps(simde_mm256_castph_si256(a));
     return horizontal_add(b);
 }
 #endif
 
 // function max: a > b ? a : b
 static inline Vec16h max(Vec16h const a, Vec16h const b) {
-    return _mm256_max_ph(a, b);
+    return simde_mm256_max_ph(a, b);
 }
 
 // function min: a < b ? a : b
 static inline Vec16h min(Vec16h const a, Vec16h const b) {
-    return _mm256_min_ph(a, b);
+    return simde_mm256_min_ph(a, b);
 }
 // NAN-safe versions of maximum and minimum are in vector_convert.h
 
 // function abs: absolute value
 static inline Vec16h abs(Vec16h const a) {
-    return _mm256_abs_ph(a);
+    return simde_mm256_abs_ph(a);
 }
 
 // function sqrt: square root
 static inline Vec16h sqrt(Vec16h const a) {
-    return _mm256_sqrt_ph(a);
+    return simde_mm256_sqrt_ph(a);
 }
 
 // function square: a * a
@@ -1318,72 +1318,72 @@ Vec16h pow(Vec16h const a, Const_int_t<n>) {
 
 
 static inline Vec16h round(Vec16h const a) {
-    return _mm256_roundscale_ph (a, 8);
+    return simde_mm256_roundscale_ph (a, 8);
 }
 
 // function truncate: round towards zero. (result as float vector)
 static inline Vec16h truncate(Vec16h const a) {
-    return _mm256_roundscale_ph(a, 3 + 8);
+    return simde_mm256_roundscale_ph(a, 3 + 8);
 }
 
 // function floor: round towards minus infinity. (result as float vector)
 static inline Vec16h floor(Vec16h const a) {
-    return _mm256_roundscale_ph(a, 1 + 8);
+    return simde_mm256_roundscale_ph(a, 1 + 8);
 }
 
 // function ceil: round towards plus infinity. (result as float vector)
 static inline Vec16h ceil(Vec16h const a) {
-    return _mm256_roundscale_ph(a, 2 + 8);
+    return simde_mm256_roundscale_ph(a, 2 + 8);
 }
 
 // function roundi: round to nearest integer (even). (result as integer vector)
 static inline Vec16s roundi(Vec16h const a) {
     // Note: assume MXCSR control register is set to rounding
-    return _mm256_cvtph_epi16(a);
+    return simde_mm256_cvtph_epi16(a);
 }
 
 // function truncatei: round towards zero. (result as integer vector)
 static inline Vec16s truncatei(Vec16h const a) {
-    return _mm256_cvttph_epi16(a);
+    return simde_mm256_cvttph_epi16(a);
 }
 
 // function to_float: convert integer vector to float vector
 static inline Vec16h to_float16(Vec16s const a) {
-    return _mm256_cvtepi16_ph(a);
+    return simde_mm256_cvtepi16_ph(a);
 }
 
 // function to_float: convert unsigned integer vector to float vector
 static inline Vec16h to_float16(Vec16us const a) {
-    return _mm256_cvtepu16_ph(a);
+    return simde_mm256_cvtepu16_ph(a);
 }
 
 // Approximate math functions
 
 // reciprocal (almost exact)
 static inline Vec16h approx_recipr(Vec16h const a) {
-    return _mm256_rcp_ph (a);
+    return simde_mm256_rcp_ph (a);
 }
 
 // reciprocal squareroot (almost exact)
 static inline Vec16h approx_rsqrt(Vec16h const a) {
-    return _mm256_rsqrt_ph(a);
+    return simde_mm256_rsqrt_ph(a);
 }
 
 // Fused multiply and add functions
 
 // Multiply and add. a*b+c
 static inline Vec16h mul_add(Vec16h const a, Vec16h const b, Vec16h const c) {
-    return _mm256_fmadd_ph(a, b, c);
+    return simde_mm256_fmadd_ph(a, b, c);
 }
 
 // Multiply and subtract. a*b-c
 static inline Vec16h mul_sub(Vec16h const a, Vec16h const b, Vec16h const c) {
-    return _mm256_fmsub_ph(a, b, c);
+    return simde_mm256_fmsub_ph(a, b, c);
 }
 
 // Multiply and inverse subtract
 static inline Vec16h nmul_add(Vec16h const a, Vec16h const b, Vec16h const c) {
-    return _mm256_fnmadd_ph(a, b, c);
+    return simde_mm256_fnmadd_ph(a, b, c);
 }
 
 // Math functions using fast bit manipulation
@@ -1392,7 +1392,7 @@ static inline Vec16h nmul_add(Vec16h const a, Vec16h const b, Vec16h const c) {
 // exponent(a) = floor(log2(abs(a)));
 // exponent(1.0f) = 0, exponent(0.0f) = -127, exponent(INF) = +128, exponent(NAN) = +128
 static inline Vec16s exponent(Vec16h const a) {
-    Vec16us t1 = _mm256_castph_si256(a);   // reinterpret as 16-bit integer
+    Vec16us t1 = simde_mm256_castph_si256(a);   // reinterpret as 16-bit integer
     Vec16us t2 = t1 << 1;                  // shift out sign bit
     Vec16us t3 = t2 >> 11;                 // shift down logical to position 0
     Vec16s  t4 = Vec16s(t3) - 0x0F;        // subtract bias from exponent
@@ -1404,7 +1404,7 @@ static inline Vec16s exponent(Vec16h const a) {
 // fraction(1.0f) = 1.0f, fraction(5.0f) = 1.25f
 // NOTE: The name fraction clashes with an ENUM in MAC XCode CarbonCore script.h !
 static inline Vec16h fraction(Vec16h const a) {
-    return _mm256_getmant_ph(a, _MM_MANT_NORM_1_2, _MM_MANT_SIGN_zero);
+    return simde_mm256_getmant_ph(a, _MM_MANT_NORM_1_2, _MM_MANT_SIGN_zero);
 }
 
 // Fast calculation of pow(2,n) with n integer
@@ -1417,7 +1417,7 @@ static inline Vec16h exp2(Vec16s const n) {
     Vec16s t2 = min(t1, 16);
     Vec16s t3 = t2 + 15;                // add bias
     Vec16s t4 = t3 << 10;               // put exponent into position 10
-    return _mm256_castsi256_ph(t4);     // reinterpret as float
+    return simde_mm256_castsi256_ph(t4);     // reinterpret as float
 }
 //static Vec16h exp2(Vec16h const x);    // defined in vectormath_exp.h ??
 
@@ -1428,7 +1428,7 @@ template <int i0, int i1, int i2, int i3, int i4, int i5, int i6, int i7,
 int i8, int i9, int i10, int i11, int i12, int i13, int i14, int i15>
 Vec16h change_sign(Vec16h const a) {
     if constexpr ((i0 | i1 | i2 | i3 | i4 | i5 | i6 | i7 | i8 | i9 | i10 | i11 | i12 | i13 | i14 | i15) == 0) return a;
-    __m256i mask = constant8ui<
+    simde__m256i mask = constant8ui<
         (i0  ? 0x8000 : 0) | (i1  ? 0x80000000 : 0), 
         (i2  ? 0x8000 : 0) | (i3  ? 0x80000000 : 0), 
         (i4  ? 0x8000 : 0) | (i5  ? 0x80000000 : 0), 
@@ -1437,7 +1437,7 @@ Vec16h change_sign(Vec16h const a) {
         (i10 ? 0x8000 : 0) | (i11 ? 0x80000000 : 0), 
         (i12 ? 0x8000 : 0) | (i13 ? 0x80000000 : 0), 
         (i14 ? 0x8000 : 0) | (i15 ? 0x80000000 : 0) >();
-    return  _mm256_castps_ph(_mm256_xor_ps(_mm256_castph_ps(a), _mm256_castsi256_ps(mask)));     // flip sign bits
+    return  simde_mm256_castps_ph(simde_mm256_xor_ps(simde_mm256_castph_ps(a), simde_mm256_castsi256_ps(mask)));     // flip sign bits
 }
 
 /*****************************************************************************
@@ -1448,12 +1448,12 @@ Vec16h change_sign(Vec16h const a) {
 #if MAX_VECTOR_SIZE >= 512
 // extend precision: Vec8h -> Vec8f
 static inline Vec16f to_float (Vec16h h) {
-    return _mm512_cvtph_ps(_mm256_castph_si256(h));
+    return _mm512_cvtph_ps(simde_mm256_castph_si256(h));
 }
 
 // reduce precision: Vec8f -> Vec8h
 static inline Vec16h to_float16 (Vec16f f) {
-    return _mm256_castsi256_ph(_mm512_cvtps_ph(f, 0));
+    return simde_mm256_castsi256_ph(_mm512_cvtps_ph(f, 0));
 }
 #endif
 
@@ -1463,25 +1463,25 @@ static inline Vec16h to_float16 (Vec16f f) {
 *
 *****************************************************************************/
 
-static inline __m256i reinterpret_i(__m256h const x) {
-    return _mm256_castph_si256(x);
+static inline simde__m256i reinterpret_i(simde__m256h const x) {
+    return simde_mm256_castph_si256(x);
 }
 
-static inline __m256h reinterpret_h(__m256i const x) {
-    return _mm256_castsi256_ph(x);
+static inline simde__m256h reinterpret_h(simde__m256i const x) {
+    return simde_mm256_castsi256_ph(x);
 }
 
-static inline __m256  reinterpret_f(__m256h const x) {
-    return _mm256_castph_ps(x);
+static inline simde__m256  reinterpret_f(simde__m256h const x) {
+    return simde_mm256_castph_ps(x);
 }
 
-static inline __m256d reinterpret_d(__m256h const x) {
-    return _mm256_castph_pd(x);
+static inline simde__m256d reinterpret_d(simde__m256h const x) {
+    return simde_mm256_castph_pd(x);
 }
 
 static inline Vec16h extend_z(Vec8h a) {
-    //return _mm256_zextsi128_si256(a);
-    return _mm256_zextph128_ph256(a);
+    //return simde_mm256_zextsi128_si256(a);
+    return simde_mm256_zextph128_ph256(a);
 }
 
 
@@ -1501,9 +1501,9 @@ static inline Vec16h extend_z(Vec8h a) {
 template <int i0, int i1, int i2, int i3, int i4, int i5, int i6, int i7, 
 int i8, int i9, int i10, int i11, int i12, int i13, int i14, int i15>
 Vec16h permute16(Vec16h const a) {
-    return _mm256_castsi256_ph (
+    return simde_mm256_castsi256_ph (
     permute16<i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15> (
-    Vec16s(_mm256_castph_si256(a))));
+    Vec16s(simde_mm256_castph_si256(a))));
 }
 
 
@@ -1517,9 +1517,9 @@ Vec16h permute16(Vec16h const a) {
 template <int i0, int i1, int i2, int i3, int i4, int i5, int i6, int i7, 
 int i8, int i9, int i10, int i11, int i12, int i13, int i14, int i15>
 Vec16h blend16(Vec16h const a, Vec16h const b) {
-    return _mm256_castsi256_ph (
+    return simde_mm256_castsi256_ph (
     blend16<i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15> (
-    Vec16s(_mm256_castph_si256(a)), Vec16s(_mm256_castph_si256(b))));
+    Vec16s(simde_mm256_castph_si256(a)), Vec16s(simde_mm256_castph_si256(b))));
 }
 
 
@@ -1535,12 +1535,12 @@ Vec16h blend16(Vec16h const a, Vec16h const b) {
 *****************************************************************************/
 
 static inline Vec16h lookup16 (Vec16s const index, Vec16h const table) {
-    return _mm256_castsi256_ph(lookup16(index, Vec16s(_mm256_castph_si256(table))));
+    return simde_mm256_castsi256_ph(lookup16(index, Vec16s(simde_mm256_castph_si256(table))));
 }
 
 template <int n>
 Vec16h lookup(Vec16s const index, void const * table) {
-    return _mm256_castsi256_ph(lookup<n>(index, (void const *)(table)));
+    return simde_mm256_castsi256_ph(lookup<n>(index, (void const *)(table)));
 }
 
 
@@ -1592,7 +1592,7 @@ public:
     }
     // Constructor to build from two Vec16h:
     Vec32h(Vec16h const a0, Vec16h const a1) {     
-        zmm = _mm512_castps_ph(_mm512_insertf32x8(_mm512_castps256_ps512(_mm256_castph_ps(a0)),_mm256_castph_ps(a1),1));
+        zmm = _mm512_castps_ph(_mm512_insertf32x8(_mm512_castps256_ps512(simde_mm256_castph_ps(a0)),simde_mm256_castph_ps(a1),1));
     }
     // Constructor to convert from type __m512h used in intrinsics:
     Vec32h(__m512h const x) {
@@ -1683,7 +1683,7 @@ public:
         return _mm512_castph512_ph256(zmm);
     }
     Vec16h get_high() const {
-        return _mm256_castps_ph(_mm512_extractf32x8_ps(_mm512_castph_ps(zmm),1));
+        return simde_mm256_castps_ph(_mm512_extractf32x8_ps(_mm512_castph_ps(zmm),1));
     }
     static constexpr int size() {
         return 32;
@@ -2013,8 +2013,8 @@ static inline _Float16 horizontal_add(Vec32h const a) {
 }
 // same, with high precision
 static inline float horizontal_add_x(Vec32h const a) {
-    Vec16f b1 = _mm512_cvtph_ps(_mm256_castph_si256(a.get_low()));   //_mm512_cvtph_ps(a.get_low());
-    Vec16f b2 = _mm512_cvtph_ps(_mm256_castph_si256(a.get_high()));
+    Vec16f b1 = _mm512_cvtph_ps(simde_mm256_castph_si256(a.get_low()));   //_mm512_cvtph_ps(a.get_low());
+    Vec16f b2 = _mm512_cvtph_ps(simde_mm256_castph_si256(a.get_high()));
     return horizontal_add(b1 + b2);
 }
 

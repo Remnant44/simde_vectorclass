@@ -67,6 +67,10 @@ protected:
 public:
     // Default constructor:
     Vec256b() = default;
+    Vec256b(simde_mm256 sm) { // construct from simde
+        y0 = sm.m128[0];
+        y1 = sm.m128[1];
+    }
     Vec256b(__m128i x0, __m128i x1) {  // constructor to build from two __m128i
         y0 = x0;  y1 = x1;
     }

@@ -438,77 +438,77 @@ static Vec8h convert4f_8h (Vec4f x) {
 
 // extend precision: Vec8h -> Vec8f
 static inline Vec8f to_float (Vec8h h) {
-    return _mm256_cvtph_ps(h);
+    return simde_mm256_cvtph_ps(h);
 }
 
 // reduce precision: Vec8f -> Vec8h
 static inline Vec8h to_float16 (Vec8f f) {
-    return _mm256_cvtps_ph(f, 0);
+    return simde_mm256_cvtps_ph(f, 0);
 }
 
 #elif INSTRSET >= 8 // __F16C__ not defined, AVX2 supported
 
 // extend precision: Vec8h -> Vec8f
 static Vec8f to_float (Vec8h x) {
-    __m256i a = _mm256_cvtepu16_epi32(x);                            // zero-extend each element to 32 bits
-    __m256i b = _mm256_slli_epi32(a, 16);                            // left-justify
-    __m256i c = _mm256_and_si256(b, _mm256_set1_epi32(0x80000000));  // isolate sign bit
-    __m256i d = _mm256_andnot_si256(_mm256_set1_epi32(0x80000000),b);// remove sign bit
-    __m256i e = _mm256_srli_epi32(d, 3);                             // put exponent and mantissa in place
-    __m256i f = _mm256_add_epi32(e, _mm256_set1_epi32(0x38000000));  // adjust exponent bias
+    simde__m256i a = simde_mm256_cvtepu16_epi32(x);                            // zero-extend each element to 32 bits
+    simde__m256i b = simde_mm256_slli_epi32(a, 16);                            // left-justify
+    simde__m256i c = simde_mm256_and_si256(b, simde_mm256_set1_epi32(0x80000000));  // isolate sign bit
+    simde__m256i d = simde_mm256_andnot_si256(simde_mm256_set1_epi32(0x80000000),b);// remove sign bit
+    simde__m256i e = simde_mm256_srli_epi32(d, 3);                             // put exponent and mantissa in place
+    simde__m256i f = simde_mm256_add_epi32(e, simde_mm256_set1_epi32(0x38000000));  // adjust exponent bias
     // check for subnormal, INF, and NAN
-    __m256i xx = _mm256_set1_epi32(0x7C00);                          // exponent field in fp16
-    __m256i g  = _mm256_and_si256(a, xx);                            // isolate exponent (low position)
-    __m256i zd = _mm256_cmpeq_epi32(g, _mm256_setzero_si256());      // -1 if x is zero or subnormal
-    __m256i in = _mm256_cmpeq_epi32(g, xx);                          // -1 if x is INF or NAN
-    __m256i ma = _mm256_and_si256(a, _mm256_set1_epi32(0x3FF));      // isolate mantissa
-    __m256  sn = _mm256_mul_ps(_mm256_cvtepi32_ps(ma), _mm256_set1_ps(1.f/16777216.f)); // converted subnormal = mantissa * 2^-24
-    __m256i snm = _mm256_and_si256(_mm256_castps_si256(sn), zd);     // converted subnormal, masked
-    __m256i inm = _mm256_and_si256(in,_mm256_set1_epi32(0x7F800000));// INF or NAN exponent field, masked off if not INF or NAN
-    __m256i fm = _mm256_andnot_si256(zd, f);                         // normal result, masked off if zero or subnormal
-    __m256i r = _mm256_or_si256(fm, c);                              // insert sign bit
-    __m256i s = _mm256_or_si256(snm, inm);                           // combine branches
-    __m256i t = _mm256_or_si256(r, s);                               // combine branches
-    return _mm256_castsi256_ps(t);                                   // cast result to float
+    simde__m256i xx = simde_mm256_set1_epi32(0x7C00);                          // exponent field in fp16
+    simde__m256i g  = simde_mm256_and_si256(a, xx);                            // isolate exponent (low position)
+    simde__m256i zd = simde_mm256_cmpeq_epi32(g, simde_mm256_setzero_si256());      // -1 if x is zero or subnormal
+    simde__m256i in = simde_mm256_cmpeq_epi32(g, xx);                          // -1 if x is INF or NAN
+    simde__m256i ma = simde_mm256_and_si256(a, simde_mm256_set1_epi32(0x3FF));      // isolate mantissa
+    simde__m256  sn = simde_mm256_mul_ps(simde_mm256_cvtepi32_ps(ma), simde_mm256_set1_ps(1.f/16777216.f)); // converted subnormal = mantissa * 2^-24
+    simde__m256i snm = simde_mm256_and_si256(simde_mm256_castps_si256(sn), zd);     // converted subnormal, masked
+    simde__m256i inm = simde_mm256_and_si256(in,simde_mm256_set1_epi32(0x7F800000));// INF or NAN exponent field, masked off if not INF or NAN
+    simde__m256i fm = simde_mm256_andnot_si256(zd, f);                         // normal result, masked off if zero or subnormal
+    simde__m256i r = simde_mm256_or_si256(fm, c);                              // insert sign bit
+    simde__m256i s = simde_mm256_or_si256(snm, inm);                           // combine branches
+    simde__m256i t = simde_mm256_or_si256(r, s);                               // combine branches
+    return simde_mm256_castsi256_ps(t);                                   // cast result to float
 }
 
 // reduce precision: Vec8f -> Vec8h
 static Vec8h to_float16 (Vec8f x) {
-    __m256i a = _mm256_castps_si256(x);                              // bit-cast to integer
+    simde__m256i a = simde_mm256_castps_si256(x);                              // bit-cast to integer
     // 23 bit mantissa rounded to 10 bits - nearest or even
-    __m256i r = _mm256_srli_epi32(a, 12);                            // get first discarded mantissa bit
-    __m256i s = _mm256_and_si256(a, _mm256_set1_epi32(0x2FFF));      // 0x2000 indicates if odd, 0x0FFF if remaining bits are nonzero
-    __m256i u = _mm256_cmpeq_epi32(s, _mm256_setzero_si256());       // false if odd or remaining bits nonzero
-    __m256i v = _mm256_andnot_si256(u, r);                           // bit 0 = 1 if we have to round up
-    __m256i w = _mm256_and_si256(v, _mm256_set1_epi32(1));           // = 1 if we need to round up
-    __m256i m = _mm256_srli_epi32(a, 13);                            // get mantissa in place
-    __m256i n = _mm256_and_si256(m, _mm256_set1_epi32(0x3FF));       // mantissa isolated
-    __m256i e = _mm256_and_si256(a, _mm256_set1_epi32(0x7FFFFFFF));  // remove sign bit
-    __m256i f = _mm256_sub_epi32(e, _mm256_set1_epi32(0x70 << 23));  // adjust exponent bias (underflow will be caught by uu below)
-    __m256i g = _mm256_srli_epi32(f, 13);                            // shift exponent into new place
-    __m256i h = _mm256_and_si256(g, _mm256_set1_epi32(0x3FC00));     // isolate exponent 
-    __m256i i = _mm256_or_si256(n, h);                               // combine exponent and mantissa
-    __m256i j = _mm256_add_epi32(i, w);                              // round mantissa. Overflow will carry into exponent
+    simde__m256i r = simde_mm256_srli_epi32(a, 12);                            // get first discarded mantissa bit
+    simde__m256i s = simde_mm256_and_si256(a, simde_mm256_set1_epi32(0x2FFF));      // 0x2000 indicates if odd, 0x0FFF if remaining bits are nonzero
+    simde__m256i u = simde_mm256_cmpeq_epi32(s, simde_mm256_setzero_si256());       // false if odd or remaining bits nonzero
+    simde__m256i v = simde_mm256_andnot_si256(u, r);                           // bit 0 = 1 if we have to round up
+    simde__m256i w = simde_mm256_and_si256(v, simde_mm256_set1_epi32(1));           // = 1 if we need to round up
+    simde__m256i m = simde_mm256_srli_epi32(a, 13);                            // get mantissa in place
+    simde__m256i n = simde_mm256_and_si256(m, simde_mm256_set1_epi32(0x3FF));       // mantissa isolated
+    simde__m256i e = simde_mm256_and_si256(a, simde_mm256_set1_epi32(0x7FFFFFFF));  // remove sign bit
+    simde__m256i f = simde_mm256_sub_epi32(e, simde_mm256_set1_epi32(0x70 << 23));  // adjust exponent bias (underflow will be caught by uu below)
+    simde__m256i g = simde_mm256_srli_epi32(f, 13);                            // shift exponent into new place
+    simde__m256i h = simde_mm256_and_si256(g, simde_mm256_set1_epi32(0x3FC00));     // isolate exponent 
+    simde__m256i i = simde_mm256_or_si256(n, h);                               // combine exponent and mantissa
+    simde__m256i j = simde_mm256_add_epi32(i, w);                              // round mantissa. Overflow will carry into exponent
     // check for overflow and underflow
-    __m256i k = _mm256_cmpgt_epi32(j, _mm256_set1_epi32(0x7BFF));    // overflow
-    __m256i ee = _mm256_srli_epi32(e, 23);                           // exponent at position 0
-    __m256i ii = _mm256_cmpeq_epi32(ee, _mm256_set1_epi32(0xFF));    // check for INF and NAN
-    __m256i uu = _mm256_cmpgt_epi32(_mm256_set1_epi32(0x71), ee);    // check for exponent underflow
-    __m256i pp = _mm256_or_si256(j, _mm256_set1_epi32(0x7C00));      // insert exponent if INF or NAN
+    simde__m256i k = simde_mm256_cmpgt_epi32(j, simde_mm256_set1_epi32(0x7BFF));    // overflow
+    simde__m256i ee = simde_mm256_srli_epi32(e, 23);                           // exponent at position 0
+    simde__m256i ii = simde_mm256_cmpeq_epi32(ee, simde_mm256_set1_epi32(0xFF));    // check for INF and NAN
+    simde__m256i uu = simde_mm256_cmpgt_epi32(simde_mm256_set1_epi32(0x71), ee);    // check for exponent underflow
+    simde__m256i pp = simde_mm256_or_si256(j, simde_mm256_set1_epi32(0x7C00));      // insert exponent if INF or NAN
     // compute potential subnormal result
-    __m256i ss = _mm256_add_epi32(e, _mm256_set1_epi32(24 << 23));   // add 24 to exponent
-    __m256i tt = _mm256_cvtps_epi32(_mm256_castsi256_ps(ss));        // convert float to int with rounding
-    __m256i vv = _mm256_and_si256(tt, _mm256_set1_epi32(0x7FF));     // mantissa of subnormal number (possible overflow to normal)
+    simde__m256i ss = simde_mm256_add_epi32(e, simde_mm256_set1_epi32(24 << 23));   // add 24 to exponent
+    simde__m256i tt = simde_mm256_cvtps_epi32(simde_mm256_castsi256_ps(ss));        // convert float to int with rounding
+    simde__m256i vv = simde_mm256_and_si256(tt, simde_mm256_set1_epi32(0x7FF));     // mantissa of subnormal number (possible overflow to normal)
     // combine results
-    __m256i bb = _mm256_blendv_epi8(j, _mm256_set1_epi32(0x7C00), k);// select INF if overflow
-    __m256i dd = _mm256_blendv_epi8(bb, pp, ii);                     // select INF or NAN    
-    __m256i cc = _mm256_blendv_epi8(dd, vv, uu);                     // select if subnormal or zero or exponent underflow
-    __m256i sa = _mm256_srai_epi32(a, 16);                           // extend sign bit to avoid saturation in pack instruction below
-    __m256i sb = _mm256_and_si256(sa, _mm256_set1_epi32(0xFFFF8000));// isolate sign
-    __m256i sc = _mm256_andnot_si256(_mm256_set1_epi32(0xFFFF8000), cc);// isolate exponent and mantissa
-    __m256i rr = _mm256_or_si256(sb, sc);                            // combine with sign
-    __m128i rl = _mm256_castsi256_si128(rr);                         // low half of results
-    __m128i rh = _mm256_extractf128_si256(rr, 1);                    // high half of results
+    simde__m256i bb = simde_mm256_blendv_epi8(j, simde_mm256_set1_epi32(0x7C00), k);// select INF if overflow
+    simde__m256i dd = simde_mm256_blendv_epi8(bb, pp, ii);                     // select INF or NAN    
+    simde__m256i cc = simde_mm256_blendv_epi8(dd, vv, uu);                     // select if subnormal or zero or exponent underflow
+    simde__m256i sa = simde_mm256_srai_epi32(a, 16);                           // extend sign bit to avoid saturation in pack instruction below
+    simde__m256i sb = simde_mm256_and_si256(sa, simde_mm256_set1_epi32(0xFFFF8000));// isolate sign
+    simde__m256i sc = simde_mm256_andnot_si256(simde_mm256_set1_epi32(0xFFFF8000), cc);// isolate exponent and mantissa
+    simde__m256i rr = simde_mm256_or_si256(sb, sc);                            // combine with sign
+    __m128i rl = simde_mm256_castsi256_si128(rr);                         // low half of results
+    __m128i rh = simde_mm256_extractf128_si256(rr, 1);                    // high half of results
     __m128i rc = _mm_packs_epi32(rl, rh);                            // pack into 16-bit words (words are sign extended so they will not saturate)
     return  rc;                                                      // return as Vec8h
 } 
@@ -1229,7 +1229,7 @@ typedef Vec16sb Vec16hb;  // broad boolean vector
 
 static inline Vec16hb Vec16fb2hb (Vec16fb const a) {
     // boolean vector needs compression from 32 bits to 16 bits per element
-    Vec8fb lo = a.get_low();           // (cannot use _mm256_packs_epi32)
+    Vec8fb lo = a.get_low();           // (cannot use simde_mm256_packs_epi32)
     Vec8fb hi = a.get_high();
     return Vec16hb(Vec8fb2hb(lo), Vec8fb2hb(hi));
 }
@@ -1261,17 +1261,17 @@ public:
     Vec16h(Vec8h const a0, Vec8h const a1) : Vec16s(Vec8s(a0), Vec8s(a1)) {};
 
 #if INSTRSET >= 8
-    // Constructor to convert from type __m256i used in intrinsics:
-    Vec16h(__m256i const x) {
+    // Constructor to convert from type simde__m256i used in intrinsics:
+    Vec16h(simde__m256i const x) {
         ymm = x;
     }
-    // Assignment operator to convert from type __m256i used in intrinsics:
-    Vec16h & operator = (__m256i const x) {
+    // Assignment operator to convert from type simde__m256i used in intrinsics:
+    Vec16h & operator = (simde__m256i const x) {
         ymm = x;
         return *this;
     }
-    // Type cast operator to convert to __m256i used in intrinsics
-    operator __m256i() const {
+    // Type cast operator to convert to simde__m256i used in intrinsics
+    operator simde__m256i() const {
         return ymm;
     }
 #else
@@ -1428,7 +1428,7 @@ static inline Vec16h operator - (Float16 a, Vec16h const b) {
 // Change sign bit, even for 0, INF and NAN
 static inline Vec16h operator - (Vec16h const a) {
 #if INSTRSET >= 8  // AVX2
-    return _mm256_xor_si256(a, _mm256_set1_epi32(0x80008000));
+    return simde_mm256_xor_si256(a, simde_mm256_set1_epi32(0x80008000));
 #else
     return Vec16h(-a.get_low(), -a.get_high());
 #endif
@@ -1527,7 +1527,7 @@ static inline Vec16hb operator >= (Vec16h const a, Vec16h const b) {
 // vector operator & : bitwise and
 static inline Vec16h operator & (Vec16h const a, Vec16h const b) {
 #if INSTRSET >= 8         
-    return _mm256_and_si256(__m256i(a), __m256i(b));
+    return simde_mm256_and_si256(simde__m256i(a), simde__m256i(b));
 #else
     return Vec16h(a.get_low() & b.get_low(), a.get_high() & b.get_high());
 #endif
@@ -1542,9 +1542,9 @@ static inline Vec16h & operator &= (Vec16h & a, Vec16h const b) {
 // vector operator & : bitwise and of Vec16h and Vec16hb
 static inline Vec16h operator & (Vec16h const a, Vec16hb const b) {
 #if INSTRSET >= 10         
-    return __m256i(_mm256_maskz_mov_epi16(b, __m256i(a)));
+    return simde__m256i(simde_mm256_maskz_mov_epi16(b, simde__m256i(a)));
 #elif INSTRSET >= 8
-    return _mm256_and_si256(__m256i(a), __m256i(b));
+    return simde_mm256_and_si256(simde__m256i(a), simde__m256i(b));
 #else
     return Vec16h(a.get_low() & b.get_low(), a.get_high() & b.get_high());
 #endif
@@ -1556,7 +1556,7 @@ static inline Vec16h operator & (Vec16hb const a, Vec16h const b) {
 // vector operator | : bitwise or
 static inline Vec16h operator | (Vec16h const a, Vec16h const b) {
 #if INSTRSET >= 8         
-    return _mm256_or_si256(__m256i(a), __m256i(b));
+    return simde_mm256_or_si256(simde__m256i(a), simde__m256i(b));
 #else
     return Vec16h(a.get_low() | b.get_low(), a.get_high() | b.get_high());
 #endif
@@ -1571,7 +1571,7 @@ static inline Vec16h & operator |= (Vec16h & a, Vec16h const b) {
 // vector operator ^ : bitwise xor
 static inline Vec16h operator ^ (Vec16h const a, Vec16h const b) {
 #if INSTRSET >= 8         
-    return _mm256_xor_si256(__m256i(a), __m256i(b));
+    return simde_mm256_xor_si256(simde__m256i(a), simde__m256i(b));
 #else
     return Vec16h(a.get_low() ^ b.get_low(), a.get_high() ^ b.get_high());
 #endif
@@ -1594,18 +1594,18 @@ static inline Vec16hb operator ! (Vec16h const a) {
 *
 *****************************************************************************/
 #if INSTRSET >= 8
-static inline __m256i reinterpret_h(__m256i const x) {
+static inline simde__m256i reinterpret_h(simde__m256i const x) {
     return x;
 }
 
-#if defined(__GNUC__) && __GNUC__ <= 9 // GCC v. 9 is missing the _mm256_zextsi128_si256 intrinsic
+#if defined(__GNUC__) && __GNUC__ <= 9 // GCC v. 9 is missing the simde_mm256_zextsi128_si256 intrinsic
 static inline Vec16h extend_z(Vec8h a) {
     return Vec16h(a, Vec8h(Float16(0.f)));
 }
 
 #else
 static inline Vec16h extend_z(Vec8h a) {
-    return _mm256_zextsi128_si256(a);
+    return simde_mm256_zextsi128_si256(a);
 }
 #endif
 
@@ -1636,9 +1636,9 @@ static inline Vec16h extend_z(Vec8h a) {
 // for (int i = 0; i < 4; i++) result[i] = s[i] ? a[i] : b[i];
 static inline Vec16h select(Vec16hb const s, Vec16h const a, Vec16h const b) {
 #if INSTRSET >= 10
-    return __m256i(_mm256_mask_mov_epi16(__m256i(b), s, __m256i(a)));
+    return simde__m256i(simde_mm256_mask_mov_epi16(simde__m256i(b), s, simde__m256i(a)));
 #elif INSTRSET >= 8
-    return __m256i(select(Vec16sb(s), Vec16s(__m256i(a)), Vec16s(__m256i(b))));
+    return simde__m256i(select(Vec16sb(s), Vec16s(simde__m256i(a)), Vec16s(simde__m256i(b))));
 #else
     return Vec16h(select(s.get_low(), a.get_low(), b.get_low()), select(s.get_high(), a.get_high(), b.get_high()));
 #endif
@@ -1930,7 +1930,7 @@ int i8, int i9, int i10, int i11, int i12, int i13, int i14, int i15>
 Vec16h change_sign(Vec16h const a) {
 #if INSTRSET >= 8
     if constexpr ((i0 | i1 | i2 | i3 | i4 | i5 | i6 | i7 | i8 | i9 | i10 | i11 | i12 | i13 | i14 | i15) == 0) return a;
-    __m256i mask = constant8ui<
+    simde__m256i mask = constant8ui<
         (i0  ? 0x8000 : 0) | (i1  ? 0x80000000 : 0), 
         (i2  ? 0x8000 : 0) | (i3  ? 0x80000000 : 0), 
         (i4  ? 0x8000 : 0) | (i5  ? 0x80000000 : 0), 
@@ -1939,7 +1939,7 @@ Vec16h change_sign(Vec16h const a) {
         (i10 ? 0x8000 : 0) | (i11 ? 0x80000000 : 0), 
         (i12 ? 0x8000 : 0) | (i13 ? 0x80000000 : 0), 
         (i14 ? 0x8000 : 0) | (i15 ? 0x80000000 : 0) >();
-    return Vec16h(_mm256_xor_si256(a, mask));     // flip sign bits
+    return Vec16h(simde_mm256_xor_si256(a, mask));     // flip sign bits
 #else
     return Vec16h(change_sign<i0,i1,i2,i3,i4,i5,i6,i7>(a.get_low()), change_sign<i8,i9,i10,i11,i12,i13,i14,i15>(a.get_high()));
 #endif
@@ -2074,12 +2074,12 @@ public:
     Vec32h(__m512i const x) {
         zmm = x;
     }
-    // Assignment operator to convert from type __m256i used in intrinsics:
+    // Assignment operator to convert from type simde__m256i used in intrinsics:
     Vec32h & operator = (__m512i const x) {
         zmm = x;
         return *this;
     }
-    // Type cast operator to convert to __m256i used in intrinsics
+    // Type cast operator to convert to simde__m256i used in intrinsics
     operator __m512i() const {
         return zmm;
     }
@@ -2142,7 +2142,7 @@ public:
     }
     Vec16h get_low() const {
 #if INSTRSET >= 8
-        return __m256i(Vec32s::get_low());
+        return simde__m256i(Vec32s::get_low());
 #else
         return reinterpret_h(Vec32s::get_low());
 #endif
@@ -2150,7 +2150,7 @@ public:
 
     Vec16h get_high() const {
 #if INSTRSET >= 8
-        return __m256i(Vec32s::get_high());
+        return simde__m256i(Vec32s::get_high());
 #else
         return reinterpret_h(Vec32s::get_high());
 #endif

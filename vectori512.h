@@ -1847,7 +1847,7 @@ int i8, int i9, int i10, int i11, int i12, int i13, int i14, int i15>
 
 template <int i0, int i1, int i2, int i3, int i4, int i5, int i6, int i7>
 static inline void scatter(Vec8q const data, void * array) {
-    __m256i indx = constant8ui<i0,i1,i2,i3,i4,i5,i6,i7>();
+    simde__m256i indx = constant8ui<i0,i1,i2,i3,i4,i5,i6,i7>();
     Vec8qb mask(i0>=0, i1>=0, i2>=0, i3>=0, i4>=0, i5>=0, i6>=0, i7>=0);
     _mm512_mask_i32scatter_epi64((long long *)array, mask, indx, data, 8);
 }
@@ -1871,7 +1871,7 @@ static inline void scatter(Vec8q const index, uint32_t limit, Vec8q const data, 
 
 static inline void scatter(Vec8i const index, uint32_t limit, Vec8q const data, void * destination) {
 #if INSTRSET >= 10 //  __AVX512VL__
-    __mmask16 mask = _mm256_cmplt_epu32_mask(index, Vec8ui(limit));
+    __mmask16 mask = simde_mm256_cmplt_epu32_mask(index, Vec8ui(limit));
 #else
     __mmask16 mask = _mm512_mask_cmplt_epu32_mask(0xFFu, _mm512_castsi256_si512(index), _mm512_castsi256_si512(Vec8ui(limit)));
 #endif

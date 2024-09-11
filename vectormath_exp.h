@@ -618,9 +618,9 @@ static inline Vec2d fraction_2(Vec2d const a) {
 
 static inline Vec8f fraction_2(Vec8f const a) {
 #if defined (VECTORI256_H) && VECTORI256_H > 2             // 256 bit integer vectors are available, AVX2
-    Vec8ui t1 = _mm256_castps_si256(a);                    // reinterpret as 32-bit integer
+    Vec8ui t1 = simde_mm256_castps_si256(a);                    // reinterpret as 32-bit integer
     Vec8ui t2 = (t1 & 0x007FFFFF) | 0x3F000000;            // set exponent to 0 + bias
-    return _mm256_castsi256_ps(t2);
+    return simde_mm256_castsi256_ps(t2);
 #else
     return Vec8f(fraction_2(a.get_low()), fraction_2(a.get_high()));
 #endif
@@ -628,9 +628,9 @@ static inline Vec8f fraction_2(Vec8f const a) {
 
 static inline Vec4d fraction_2(Vec4d const a) {
 #if VECTORI256_H > 1  // AVX2
-    Vec4uq t1 = _mm256_castpd_si256(a);                    // reinterpret as 64-bit integer
+    Vec4uq t1 = simde_mm256_castpd_si256(a);                    // reinterpret as 64-bit integer
     Vec4uq t2 = Vec4uq((t1 & 0x000FFFFFFFFFFFFFll) | 0x3FE0000000000000ll); // set exponent to 0 + bias
-    return _mm256_castsi256_pd(t2);
+    return simde_mm256_castsi256_pd(t2);
 #else
     return Vec4d(fraction_2(a.get_low()), fraction_2(a.get_high()));
 #endif
@@ -716,8 +716,8 @@ static inline Vec2d exponent_f(Vec2d const x) {
 static inline Vec8f exponent_f(Vec8f const x) {
 #if INSTRSET >= 10
     // prevent returning -inf for x=0
-    //return _mm256_maskz_getexp_ps(x != 0.f, x);
-    return _mm256_maskz_getexp_ps(_mm256_cmp_ps_mask(x,Vec8f(0.f),4), x);
+    //return simde_mm256_maskz_getexp_ps(x != 0.f, x);
+    return simde_mm256_maskz_getexp_ps(simde_mm256_cmp_ps_mask(x,Vec8f(0.f),4), x);
 #else
     const float pow2_23 =  8388608.0f;           // 2^23
     const float bias = 127.f;                    // bias in exponent
@@ -735,8 +735,8 @@ static inline Vec8f exponent_f(Vec8f const x) {
 static inline Vec4d exponent_f(Vec4d const x) {
 #if INSTRSET >= 10
     // prevent returning -inf for x=0
-    //return _mm256_maskz_getexp_pd(x != 0., x);
-    return _mm256_maskz_getexp_pd(_mm256_cmp_pd_mask(x,Vec4d(0.),4), x);
+    //return simde_mm256_maskz_getexp_pd(x != 0., x);
+    return simde_mm256_maskz_getexp_pd(simde_mm256_cmp_pd_mask(x,Vec4d(0.),4), x);
 #else
     const double pow2_52 = 4503599627370496.0;   // 2^52
     const double bias = 1023.0;                  // bias in exponent
@@ -835,13 +835,13 @@ static inline Vec16f log_special_cases(Vec16f const x1, Vec16f const r) {
 static inline Vec4d log_special_cases(Vec4d const x1, Vec4d const r) {
     Vec4d res = r;
 #if INSTRSET >= 10  // AVX512DQ AVX512VL
-    __mmask8 specialcases = _mm256_fpclass_pd_mask(x1, 0x7E);  // zero, subnormal, negative, +-inf
+    __mmask8 specialcases = simde_mm256_fpclass_pd_mask(x1, 0x7E);  // zero, subnormal, negative, +-inf
     if (specialcases == 0) {
         return res;          // normal path
     }
-    res = _mm256_fixupimm_pd(res, x1, Vec4q(0x03530411), 0);   // handle most cases
-    res = _mm256_mask_mov_pd(res, _mm256_fpclass_pd_mask(x1, 0x26), -infinite_vec<Vec4d>());  // subnormal -> -INF
-    res = _mm256_mask_mov_pd(res, _mm256_fpclass_pd_mask(x1, 0x50), nan_vec<Vec4d>(NAN_LOG)); // negative -> specific NAN
+    res = simde_mm256_fixupimm_pd(res, x1, Vec4q(0x03530411), 0);   // handle most cases
+    res = simde_mm256_mask_mov_pd(res, simde_mm256_fpclass_pd_mask(x1, 0x26), -infinite_vec<Vec4d>());  // subnormal -> -INF
+    res = simde_mm256_mask_mov_pd(res, simde_mm256_fpclass_pd_mask(x1, 0x50), nan_vec<Vec4d>(NAN_LOG)); // negative -> specific NAN
     return res;
 #else
     Vec4db overflow = !is_finite(x1);
@@ -861,13 +861,13 @@ static inline Vec4d log_special_cases(Vec4d const x1, Vec4d const r) {
 static inline Vec8f log_special_cases(Vec8f const x1, Vec8f const r) {
     Vec8f res = r;
 #if INSTRSET >= 10  // AVX512DQ AVX512VL
-    __mmask8 specialcases = _mm256_fpclass_ps_mask(x1, 0x7E); // zero, subnormal, negative, +-inf
+    __mmask8 specialcases = simde_mm256_fpclass_ps_mask(x1, 0x7E); // zero, subnormal, negative, +-inf
     if (specialcases == 0) {
         return res;          // normal path
     }
-    res = _mm256_fixupimm_ps(res, x1, Vec8i(0x03530411), 0);  // handle most cases
-    res = _mm256_mask_mov_ps(res, _mm256_fpclass_ps_mask(x1, 0x26), -infinite_vec<Vec8f>());  // subnormal -> -INF
-    res = _mm256_mask_mov_ps(res, _mm256_fpclass_ps_mask(x1, 0x50), nan_vec<Vec8f>(NAN_LOG)); // negative -> specific NAN
+    res = simde_mm256_fixupimm_ps(res, x1, Vec8i(0x03530411), 0);  // handle most cases
+    res = simde_mm256_mask_mov_ps(res, simde_mm256_fpclass_ps_mask(x1, 0x26), -infinite_vec<Vec8f>());  // subnormal -> -INF
+    res = simde_mm256_mask_mov_ps(res, simde_mm256_fpclass_ps_mask(x1, 0x50), nan_vec<Vec8f>(NAN_LOG)); // negative -> specific NAN
     return res;
 #else
     Vec8fb overflow = !is_finite(x1);
@@ -1462,8 +1462,8 @@ static inline Vec16f wm_pow_case_x0(Vec16fb const xiszero, Vec16f const y, Vec16
 
 static inline Vec4d wm_pow_case_x0(Vec4db const xiszero, Vec4d const y, Vec4d const z) {
 //#if INSTRSET >= 10
-    //const __m256i table = Vec4q(0x85858A00);
-    //return _mm256_mask_fixupimm_pd(z, xiszero, y, table, 0);
+    //const simde__m256i table = Vec4q(0x85858A00);
+    //return simde_mm256_mask_fixupimm_pd(z, xiszero, y, table, 0);
 //#else
     return select(xiszero, select(y < 0., infinite_vec<Vec4d>(), select(y == 0., Vec4d(1.), Vec4d(0.))), z);
 //#endif

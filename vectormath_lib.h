@@ -649,223 +649,223 @@ static inline Vec2d cdfnorminv (Vec2d const x) { // inverse cumulative normal di
 
 // exponential and power functions
 static inline Vec8f exp(Vec8f const x) {       // exponential function
-    return _mm256_exp_ps(x);
+    return simde_mm256_exp_ps(x);
 }
 static inline Vec4d exp(Vec4d const x) {       // exponential function
-    return _mm256_exp_pd(x);
+    return simde_mm256_exp_pd(x);
 }
 static inline Vec8f expm1(Vec8f const x) {     // exp(x)-1. Avoids loss of precision if x is close to 1
-    return _mm256_expm1_ps(x);
+    return simde_mm256_expm1_ps(x);
 }
 static inline Vec4d expm1(Vec4d const x) {     // exp(x)-1. Avoids loss of precision if x is close to 1
-    return _mm256_expm1_pd(x);
+    return simde_mm256_expm1_pd(x);
 }
 static inline Vec8f exp2(Vec8f const x) {      // pow(2,x)
-    return _mm256_exp2_ps(x);
+    return simde_mm256_exp2_ps(x);
 }
 static inline Vec4d exp2(Vec4d const x) {      // pow(2,x)
-    return _mm256_exp2_pd(x);
+    return simde_mm256_exp2_pd(x);
 }
 static inline Vec8f exp10(Vec8f const x) {     // pow(10,x)
-    return _mm256_exp10_ps(x);
+    return simde_mm256_exp10_ps(x);
 }
 static inline Vec4d exp10(Vec4d const x) {     // pow(10,x)
-    return _mm256_exp10_pd(x);
+    return simde_mm256_exp10_pd(x);
 }
 static inline Vec8f pow(Vec8f const a, Vec8f const b) { // pow(a,b) = a to the power of b
-    return _mm256_pow_ps(a, b);
+    return simde_mm256_pow_ps(a, b);
 }
 static inline Vec8f pow(Vec8f const a, float const b) {  // pow(a,b) = a to the power of b
-    return _mm256_pow_ps(a, Vec8f(b));
+    return simde_mm256_pow_ps(a, Vec8f(b));
 }
 static inline Vec4d pow(Vec4d const a, Vec4d const b) {  // pow(a,b) = a to the power of b
-    return _mm256_pow_pd(a, b);
+    return simde_mm256_pow_pd(a, b);
 }
 static inline Vec4d pow(Vec4d const a, double const b) { // pow(a,b) = a to the power of b
-    return _mm256_pow_pd(a, Vec4d(b));
+    return simde_mm256_pow_pd(a, Vec4d(b));
 }
 static inline Vec8f cbrt(Vec8f const x) {      // pow(x,1/3)
-    return _mm256_cbrt_ps(x);
+    return simde_mm256_cbrt_ps(x);
 }
 static inline Vec4d cbrt(Vec4d const x) {      // pow(x,1/3)
-    return _mm256_cbrt_pd(x);
+    return simde_mm256_cbrt_pd(x);
 }
 // logarithms
 static inline Vec8f log(Vec8f const x) {       // natural logarithm
-    return _mm256_log_ps(x);
+    return simde_mm256_log_ps(x);
 }
 static inline Vec4d log(Vec4d const x) {       // natural logarithm
-    return _mm256_log_pd(x);
+    return simde_mm256_log_pd(x);
 }
 static inline Vec8f log1p(Vec8f const x) {     // log(1+x). Avoids loss of precision if 1+x is close to 1
-    return _mm256_log1p_ps(x);
+    return simde_mm256_log1p_ps(x);
 }
 static inline Vec4d log1p(Vec4d const x) {     // log(1+x). Avoids loss of precision if 1+x is close to 1
-    return _mm256_log1p_pd(x);
+    return simde_mm256_log1p_pd(x);
 }
 static inline Vec8f log2(Vec8f const x) {      // logarithm base 2
-    return _mm256_log2_ps(x);
+    return simde_mm256_log2_ps(x);
 }
 static inline Vec4d log2(Vec4d const x) {      // logarithm base 2
-    return _mm256_log2_pd(x);
+    return simde_mm256_log2_pd(x);
 }
 static inline Vec8f log10(Vec8f const x) {     // logarithm base 10
-    return _mm256_log10_ps(x);
+    return simde_mm256_log10_ps(x);
 }
 static inline Vec4d log10(Vec4d const x) {     // logarithm base 10
-    return _mm256_log10_pd(x);
+    return simde_mm256_log10_pd(x);
 }
 
 // trigonometric functions
 static inline Vec8f sin(Vec8f const x) {       // sine
-    return _mm256_sin_ps(x);
+    return simde_mm256_sin_ps(x);
 }
 static inline Vec4d sin(Vec4d const x) {       // sine
-    return _mm256_sin_pd(x);
+    return simde_mm256_sin_pd(x);
 }
 static inline Vec8f cos(Vec8f const x) {       // cosine
-    return _mm256_cos_ps(x);
+    return simde_mm256_cos_ps(x);
 }
 static inline Vec4d cos(Vec4d const x) {       // cosine
-    return _mm256_cos_pd(x);
+    return simde_mm256_cos_pd(x);
 }
 static inline Vec8f sincos(Vec8f * pcos, Vec8f const x) { // sine and cosine. sin(x) returned, cos(x) in pcos
-    __m256 r_sin, r_cos;
-    r_sin = _mm256_sincos_ps(&r_cos, x);
+    simde__m256 r_sin, r_cos;
+    r_sin = simde_mm256_sincos_ps(&r_cos, x);
     *pcos = r_cos;
     return r_sin;
 }
 static inline Vec4d sincos(Vec4d * pcos, Vec4d const x) {  // sine and cosine. sin(x) returned, cos(x) in pcos
-    __m256d r_sin, r_cos;
-    r_sin = _mm256_sincos_pd(&r_cos, x);
+    simde__m256d r_sin, r_cos;
+    r_sin = simde_mm256_sincos_pd(&r_cos, x);
     *pcos = r_cos;
     return r_sin;
 }
 static inline Vec8f tan(Vec8f const x) {       // tangent
-    return _mm256_tan_ps(x);
+    return simde_mm256_tan_ps(x);
 }
 static inline Vec4d tan(Vec4d const x) {       // tangent
-    return _mm256_tan_pd(x);
+    return simde_mm256_tan_pd(x);
 }
 
 #ifdef TRIGPI_FUNCTIONS
 static inline Vec8f sinpi(Vec8f const x) {     // sine
-    return _mm256_sinpi_ps(x);
+    return simde_mm256_sinpi_ps(x);
 }
 static inline Vec4d sinpi(Vec4d const x) {     // sine
-    return _mm256_sinpi_pd(x);
+    return simde_mm256_sinpi_pd(x);
 }
 static inline Vec8f cospi(Vec8f const x) {     // cosine
-    return _mm256_cospi_ps(x);
+    return simde_mm256_cospi_ps(x);
 }
 static inline Vec4d cospi(Vec4d const x) {     // cosine
-    return _mm256_cospi_pd(x);
+    return simde_mm256_cospi_pd(x);
 }
 static inline Vec8f tanpi(Vec8f const x) {     // tangent
-    return _mm256_tanpi_ps(x);
+    return simde_mm256_tanpi_ps(x);
 }
 static inline Vec4d tanpi(Vec4d const x) {     // tangent
-    return _mm256_tanpi_pd(x);
+    return simde_mm256_tanpi_pd(x);
 }
 #endif // TRIGPI_FUNCTIONS
 
 // inverse trigonometric functions
 static inline Vec8f asin(Vec8f const x) {      // inverse sine
-    return _mm256_asin_ps(x);
+    return simde_mm256_asin_ps(x);
 }
 static inline Vec4d asin(Vec4d const x) {      // inverse sine
-    return _mm256_asin_pd(x);
+    return simde_mm256_asin_pd(x);
 }
 
 static inline Vec8f acos(Vec8f const x) {      // inverse cosine
-    return _mm256_acos_ps(x);
+    return simde_mm256_acos_ps(x);
 }
 static inline Vec4d acos(Vec4d const x) {      // inverse cosine
-    return _mm256_acos_pd(x);
+    return simde_mm256_acos_pd(x);
 }
 
 static inline Vec8f atan(Vec8f const x) {      // inverse tangent
-    return _mm256_atan_ps(x);
+    return simde_mm256_atan_ps(x);
 }
 static inline Vec4d atan(Vec4d const x) {      // inverse tangent
-    return _mm256_atan_pd(x);
+    return simde_mm256_atan_pd(x);
 }
 static inline Vec8f atan2(Vec8f const a, Vec8f const b) { // inverse tangent of a/b
-    return _mm256_atan2_ps(a, b);
+    return simde_mm256_atan2_ps(a, b);
 }
 static inline Vec4d atan2(Vec4d const a, Vec4d const b) { // inverse tangent of a/b
-    return _mm256_atan2_pd(a, b);
+    return simde_mm256_atan2_pd(a, b);
 }
 
 // hyperbolic functions and inverse hyperbolic functions
 static inline Vec8f sinh(Vec8f const x) {      // hyperbolic sine
-    return _mm256_sinh_ps(x);
+    return simde_mm256_sinh_ps(x);
 }
 static inline Vec4d sinh(Vec4d const x) {      // hyperbolic sine
-    return _mm256_sinh_pd(x);
+    return simde_mm256_sinh_pd(x);
 }
 static inline Vec8f cosh(Vec8f const x) {      // hyperbolic cosine
-    return _mm256_cosh_ps(x);
+    return simde_mm256_cosh_ps(x);
 }
 static inline Vec4d cosh(Vec4d const x) {      // hyperbolic cosine
-    return _mm256_cosh_pd(x);
+    return simde_mm256_cosh_pd(x);
 }
 static inline Vec8f tanh(Vec8f const x) {      // hyperbolic tangent
-    return _mm256_tanh_ps(x);
+    return simde_mm256_tanh_ps(x);
 }
 static inline Vec4d tanh(Vec4d const x) {      // hyperbolic tangent
-    return _mm256_tanh_pd(x);
+    return simde_mm256_tanh_pd(x);
 }
 static inline Vec8f asinh(Vec8f const x) {     // inverse hyperbolic sine
-    return _mm256_asinh_ps(x);
+    return simde_mm256_asinh_ps(x);
 }
 static inline Vec4d asinh(Vec4d const x) {     // inverse hyperbolic sine
-    return _mm256_asinh_pd(x);
+    return simde_mm256_asinh_pd(x);
 }
 static inline Vec8f acosh(Vec8f const x) {     // inverse hyperbolic cosine
-    return _mm256_acosh_ps(x);
+    return simde_mm256_acosh_ps(x);
 }
 static inline Vec4d acosh(Vec4d const x) {     // inverse hyperbolic cosine
-    return _mm256_acosh_pd(x);
+    return simde_mm256_acosh_pd(x);
 }
 static inline Vec8f atanh(Vec8f const x) {     // inverse hyperbolic tangent
-    return _mm256_atanh_ps(x);
+    return simde_mm256_atanh_ps(x);
 }
 static inline Vec4d atanh(Vec4d const x) {     // inverse hyperbolic tangent
-    return _mm256_atanh_pd(x);
+    return simde_mm256_atanh_pd(x);
 }
 
 // error function
 static inline Vec8f erf(Vec8f const x) {       // error function
-    return _mm256_erf_ps(x);
+    return simde_mm256_erf_ps(x);
 }
 static inline Vec4d erf(Vec4d const x) {       // error function
-    return _mm256_erf_pd(x);
+    return simde_mm256_erf_pd(x);
 }
 static inline Vec8f erfc(Vec8f const x) {      // error function complement
-    return _mm256_erfc_ps(x);
+    return simde_mm256_erfc_ps(x);
 }
 static inline Vec4d erfc(Vec4d const x) {      // error function complement
-    return _mm256_erfc_pd(x);
+    return simde_mm256_erfc_pd(x);
 }
 static inline Vec8f erfinv(Vec8f const x) {    // inverse error function
-    return _mm256_erfinv_ps(x);
+    return simde_mm256_erfinv_ps(x);
 }
 static inline Vec4d erfinv(Vec4d const x) {    // inverse error function
-    return _mm256_erfinv_pd(x);
+    return simde_mm256_erfinv_pd(x);
 }
 
 static inline Vec8f cdfnorm(Vec8f const x) {   // cumulative normal distribution function
-    return _mm256_cdfnorm_ps(x);
+    return simde_mm256_cdfnorm_ps(x);
 }
 static inline Vec4d cdfnorm(Vec4d const x) {   // cumulative normal distribution function
-    return _mm256_cdfnorm_pd(x);
+    return simde_mm256_cdfnorm_pd(x);
 }
 static inline Vec8f cdfnorminv(Vec8f const x) {// inverse cumulative normal distribution function
-    return _mm256_cdfnorminv_ps(x);
+    return simde_mm256_cdfnorminv_ps(x);
 }
 static inline Vec4d cdfnorminv(Vec4d const x) {// inverse cumulative normal distribution function
-    return _mm256_cdfnorminv_pd(x);
+    return simde_mm256_cdfnorminv_pd(x);
 }
 
 #else    // not USE_SVML_INTRINSICS
@@ -877,74 +877,74 @@ static inline Vec4d cdfnorminv(Vec4d const x) {// inverse cumulative normal dist
 
 // External function prototypes for SVML library, 256-bit vectors
 extern "C" {
-    extern __m256  V_VECTORCALL __svml_expf8        (__m256);
-    extern __m256d V_VECTORCALL __svml_exp4         (__m256d);
-    extern __m256  V_VECTORCALL __svml_expm1f8      (__m256);
-    extern __m256d V_VECTORCALL __svml_expm14       (__m256d);
-    extern __m256  V_VECTORCALL __svml_exp2f8       (__m256);
-    extern __m256d V_VECTORCALL __svml_exp24        (__m256d);
-    extern __m256  V_VECTORCALL __svml_exp10f8      (__m256);
-    extern __m256d V_VECTORCALL __svml_exp104       (__m256d);
-    extern __m256  V_VECTORCALL2 __svml_powf8       (__m256,  __m256);
-    extern __m256d V_VECTORCALL2 __svml_pow4        (__m256d, __m256d);
-    extern __m256  V_VECTORCALL __svml_cbrtf8       (__m256);
-    extern __m256d V_VECTORCALL __svml_cbrt4        (__m256d);
-    extern __m256  V_VECTORCALL __svml_invsqrtf8    (__m256);
-    extern __m256d V_VECTORCALL __svml_invsqrt4     (__m256d);
-    extern __m256  V_VECTORCALL __svml_logf8        (__m256);
-    extern __m256d V_VECTORCALL __svml_log4         (__m256d);
-    extern __m256  V_VECTORCALL __svml_log1pf8      (__m256);
-    extern __m256d V_VECTORCALL __svml_log1p4       (__m256d);
-    extern __m256  V_VECTORCALL __svml_log2f8       (__m256);
-    extern __m256d V_VECTORCALL __svml_log24        (__m256d);
-    extern __m256  V_VECTORCALL __svml_log10f8      (__m256);
-    extern __m256d V_VECTORCALL __svml_log104       (__m256d);
-    extern __m256  V_VECTORCALL __svml_sinf8        (__m256);
-    extern __m256d V_VECTORCALL __svml_sin4         (__m256d);
-    extern __m256  V_VECTORCALL __svml_cosf8        (__m256);
-    extern __m256d V_VECTORCALL __svml_cos4         (__m256d);
-    extern __m256  V_VECTORCALL2 __svml_sincosf8    (__m256);  // cos returned in ymm1
-    extern __m256d V_VECTORCALL2 __svml_sincos4     (__m256d); // cos returned in ymm1
-    extern __m256  V_VECTORCALL __svml_tanf8        (__m256);
-    extern __m256d V_VECTORCALL __svml_tan4         (__m256d);
-    extern __m256  V_VECTORCALL __svml_sinpif8      (__m256);
-    extern __m256d V_VECTORCALL __svml_sinpi4       (__m256d);
-    extern __m256  V_VECTORCALL __svml_cospif8      (__m256);
-    extern __m256d V_VECTORCALL __svml_cospi4       (__m256d);
-    extern __m256  V_VECTORCALL __svml_tanpif8      (__m256);
-    extern __m256d V_VECTORCALL __svml_tanpi4       (__m256d);
-    extern __m256  V_VECTORCALL __svml_asinf8       (__m256);
-    extern __m256d V_VECTORCALL __svml_asin4        (__m256d);
-    extern __m256  V_VECTORCALL __svml_acosf8       (__m256);
-    extern __m256d V_VECTORCALL __svml_acos4        (__m256d);
-    extern __m256  V_VECTORCALL __svml_atanf8       (__m256);
-    extern __m256d V_VECTORCALL __svml_atan4        (__m256d);
-    extern __m256  V_VECTORCALL2 __svml_atan2f8     (__m256, __m256);
-    extern __m256d V_VECTORCALL2 __svml_atan24      (__m256d, __m256d);
-    extern __m256  V_VECTORCALL __svml_sinhf8       (__m256);
-    extern __m256d V_VECTORCALL __svml_sinh4        (__m256d);
-    extern __m256  V_VECTORCALL __svml_coshf8       (__m256);
-    extern __m256d V_VECTORCALL __svml_cosh4        (__m256d);
-    extern __m256  V_VECTORCALL __svml_tanhf8       (__m256);
-    extern __m256d V_VECTORCALL __svml_tanh4        (__m256d);
-    extern __m256  V_VECTORCALL __svml_asinhf8      (__m256);
-    extern __m256d V_VECTORCALL __svml_asinh4       (__m256d);
-    extern __m256  V_VECTORCALL __svml_acoshf8      (__m256);
-    extern __m256d V_VECTORCALL __svml_acosh4       (__m256d);
-    extern __m256  V_VECTORCALL __svml_atanhf8      (__m256);
-    extern __m256d V_VECTORCALL __svml_atanh4       (__m256d);
-    extern __m256  V_VECTORCALL __svml_erff8        (__m256);
-    extern __m256d V_VECTORCALL __svml_erf4         (__m256d);
-    extern __m256  V_VECTORCALL __svml_erfcf8       (__m256);
-    extern __m256d V_VECTORCALL __svml_erfc4        (__m256d);
-    extern __m256  V_VECTORCALL __svml_erfinvf8     (__m256);
-    extern __m256d V_VECTORCALL __svml_erfinv4      (__m256d);
-    extern __m256  V_VECTORCALL __svml_cdfnorminvf8(__m256);
-    extern __m256d V_VECTORCALL __svml_cdfnorminv4  (__m256d);
-    extern __m256  V_VECTORCALL __svml_cdfnormf8    (__m256);
-    extern __m256d V_VECTORCALL __svml_cdfnorm4     (__m256d);
-    //extern __m256  V_VECTORCALL __svml_cexpf8     (__m256);
-    //extern __m256d V_VECTORCALL __svml_cexp4      (__m256d);
+    extern simde__m256  V_VECTORCALL __svml_expf8        (simde__m256);
+    extern simde__m256d V_VECTORCALL __svml_exp4         (simde__m256d);
+    extern simde__m256  V_VECTORCALL __svml_expm1f8      (simde__m256);
+    extern simde__m256d V_VECTORCALL __svml_expm14       (simde__m256d);
+    extern simde__m256  V_VECTORCALL __svml_exp2f8       (simde__m256);
+    extern simde__m256d V_VECTORCALL __svml_exp24        (simde__m256d);
+    extern simde__m256  V_VECTORCALL __svml_exp10f8      (simde__m256);
+    extern simde__m256d V_VECTORCALL __svml_exp104       (simde__m256d);
+    extern simde__m256  V_VECTORCALL2 __svml_powf8       (simde__m256,  simde__m256);
+    extern simde__m256d V_VECTORCALL2 __svml_pow4        (simde__m256d, simde__m256d);
+    extern simde__m256  V_VECTORCALL __svml_cbrtf8       (simde__m256);
+    extern simde__m256d V_VECTORCALL __svml_cbrt4        (simde__m256d);
+    extern simde__m256  V_VECTORCALL __svml_invsqrtf8    (simde__m256);
+    extern simde__m256d V_VECTORCALL __svml_invsqrt4     (simde__m256d);
+    extern simde__m256  V_VECTORCALL __svml_logf8        (simde__m256);
+    extern simde__m256d V_VECTORCALL __svml_log4         (simde__m256d);
+    extern simde__m256  V_VECTORCALL __svml_log1pf8      (simde__m256);
+    extern simde__m256d V_VECTORCALL __svml_log1p4       (simde__m256d);
+    extern simde__m256  V_VECTORCALL __svml_log2f8       (simde__m256);
+    extern simde__m256d V_VECTORCALL __svml_log24        (simde__m256d);
+    extern simde__m256  V_VECTORCALL __svml_log10f8      (simde__m256);
+    extern simde__m256d V_VECTORCALL __svml_log104       (simde__m256d);
+    extern simde__m256  V_VECTORCALL __svml_sinf8        (simde__m256);
+    extern simde__m256d V_VECTORCALL __svml_sin4         (simde__m256d);
+    extern simde__m256  V_VECTORCALL __svml_cosf8        (simde__m256);
+    extern simde__m256d V_VECTORCALL __svml_cos4         (simde__m256d);
+    extern simde__m256  V_VECTORCALL2 __svml_sincosf8    (simde__m256);  // cos returned in ymm1
+    extern simde__m256d V_VECTORCALL2 __svml_sincos4     (simde__m256d); // cos returned in ymm1
+    extern simde__m256  V_VECTORCALL __svml_tanf8        (simde__m256);
+    extern simde__m256d V_VECTORCALL __svml_tan4         (simde__m256d);
+    extern simde__m256  V_VECTORCALL __svml_sinpif8      (simde__m256);
+    extern simde__m256d V_VECTORCALL __svml_sinpi4       (simde__m256d);
+    extern simde__m256  V_VECTORCALL __svml_cospif8      (simde__m256);
+    extern simde__m256d V_VECTORCALL __svml_cospi4       (simde__m256d);
+    extern simde__m256  V_VECTORCALL __svml_tanpif8      (simde__m256);
+    extern simde__m256d V_VECTORCALL __svml_tanpi4       (simde__m256d);
+    extern simde__m256  V_VECTORCALL __svml_asinf8       (simde__m256);
+    extern simde__m256d V_VECTORCALL __svml_asin4        (simde__m256d);
+    extern simde__m256  V_VECTORCALL __svml_acosf8       (simde__m256);
+    extern simde__m256d V_VECTORCALL __svml_acos4        (simde__m256d);
+    extern simde__m256  V_VECTORCALL __svml_atanf8       (simde__m256);
+    extern simde__m256d V_VECTORCALL __svml_atan4        (simde__m256d);
+    extern simde__m256  V_VECTORCALL2 __svml_atan2f8     (simde__m256, simde__m256);
+    extern simde__m256d V_VECTORCALL2 __svml_atan24      (simde__m256d, simde__m256d);
+    extern simde__m256  V_VECTORCALL __svml_sinhf8       (simde__m256);
+    extern simde__m256d V_VECTORCALL __svml_sinh4        (simde__m256d);
+    extern simde__m256  V_VECTORCALL __svml_coshf8       (simde__m256);
+    extern simde__m256d V_VECTORCALL __svml_cosh4        (simde__m256d);
+    extern simde__m256  V_VECTORCALL __svml_tanhf8       (simde__m256);
+    extern simde__m256d V_VECTORCALL __svml_tanh4        (simde__m256d);
+    extern simde__m256  V_VECTORCALL __svml_asinhf8      (simde__m256);
+    extern simde__m256d V_VECTORCALL __svml_asinh4       (simde__m256d);
+    extern simde__m256  V_VECTORCALL __svml_acoshf8      (simde__m256);
+    extern simde__m256d V_VECTORCALL __svml_acosh4       (simde__m256d);
+    extern simde__m256  V_VECTORCALL __svml_atanhf8      (simde__m256);
+    extern simde__m256d V_VECTORCALL __svml_atanh4       (simde__m256d);
+    extern simde__m256  V_VECTORCALL __svml_erff8        (simde__m256);
+    extern simde__m256d V_VECTORCALL __svml_erf4         (simde__m256d);
+    extern simde__m256  V_VECTORCALL __svml_erfcf8       (simde__m256);
+    extern simde__m256d V_VECTORCALL __svml_erfc4        (simde__m256d);
+    extern simde__m256  V_VECTORCALL __svml_erfinvf8     (simde__m256);
+    extern simde__m256d V_VECTORCALL __svml_erfinv4      (simde__m256d);
+    extern simde__m256  V_VECTORCALL __svml_cdfnorminvf8(simde__m256);
+    extern simde__m256d V_VECTORCALL __svml_cdfnorminv4  (simde__m256d);
+    extern simde__m256  V_VECTORCALL __svml_cdfnormf8    (simde__m256);
+    extern simde__m256d V_VECTORCALL __svml_cdfnorm4     (simde__m256d);
+    //extern simde__m256  V_VECTORCALL __svml_cexpf8     (simde__m256);
+    //extern simde__m256d V_VECTORCALL __svml_cexp4      (simde__m256d);
 }
 
 
@@ -1036,7 +1036,7 @@ static inline Vec4d cos (Vec4d const x) {      // cosine
 // no inline assembly in 64 bit MS compiler
 // sine and cosine. sin(x) returned, cos(x) in pcos
 static inline Vec8f sincos (Vec8f * pcos, Vec8f const x) {
-    __m256 r_sin, r_cos;
+    simde__m256 r_sin, r_cos;
     r_sin = __svml_sincosf8(x);
     __asm__ __volatile__ ( "vmovaps %%ymm1, %0":"=m"(r_cos));
     *pcos = r_cos;
@@ -1044,7 +1044,7 @@ static inline Vec8f sincos (Vec8f * pcos, Vec8f const x) {
 }
 // sine and cosine. sin(x) returned, cos(x) in pcos
 static inline Vec4d sincos (Vec4d * pcos, Vec4d const x) {
-    __m256d r_sin, r_cos;
+    simde__m256d r_sin, r_cos;
     r_sin = __svml_sincos4(x);
     __asm__ __volatile__ ( "vmovaps %%ymm1, %0":"=m"(r_cos));
     *pcos = r_cos;

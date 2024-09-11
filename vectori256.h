@@ -55,20 +55,20 @@ namespace VCL_NAMESPACE {
 
 // Generate a constant vector of 8 integers stored in memory.
 template <uint32_t i0, uint32_t i1, uint32_t i2, uint32_t i3, uint32_t i4, uint32_t i5, uint32_t i6, uint32_t i7 >
-    static inline constexpr __m256i constant8ui() {
+    static inline constexpr simde__m256i constant8ui() {
     /*
     const union {
         uint32_t i[8];
-        __m256i ymm;
+        simde__m256i ymm;
     } u = { {i0,i1,i2,i3,i4,i5,i6,i7} };
     return u.ymm;
     */
-    return _mm256_setr_epi32(i0,i1,i2,i3,i4,i5,i6,i7);
+    return simde_mm256_setr_epi32(i0,i1,i2,i3,i4,i5,i6,i7);
 }
 
 
 // Join two 128-bit vectors
-#define set_m128ir(lo,hi) _mm256_inserti128_si256(_mm256_castsi128_si256(lo),(hi),1)
+#define set_m128ir(lo,hi) simde_mm256_inserti128_si256(simde_mm256_castsi128_si256(lo),(hi),1)
 
 /*****************************************************************************
 *
@@ -174,67 +174,67 @@ public:
 
 class Vec256b {
 protected:
-    __m256i ymm; // Integer vector
+    simde__m256i ymm; // Integer vector
 public:
     // Default constructor:
     Vec256b() = default;
 
     // Constructor to broadcast the same value into all elements
     // Removed because of undesired implicit conversions:
-    //Vec256b(int i) {ymm = _mm256_set1_epi32(-(i & 1));}
+    //Vec256b(int i) {ymm = simde_mm256_set1_epi32(-(i & 1));}
 
     // Constructor to build from two Vec128b:
     Vec256b(Vec128b const a0, Vec128b const a1) {
         ymm = set_m128ir(a0, a1);
     }
-    // Constructor to convert from type __m256i used in intrinsics:
-    Vec256b(__m256i const x) {
+    // Constructor to convert from type simde__m256i used in intrinsics:
+    Vec256b(simde__m256i const x) {
         ymm = x;
     }
-    // Assignment operator to convert from type __m256i used in intrinsics:
-    Vec256b & operator = (__m256i const x) {
+    // Assignment operator to convert from type simde__m256i used in intrinsics:
+    Vec256b & operator = (simde__m256i const x) {
         ymm = x;
         return *this;
     }
-    // Type cast operator to convert to __m256i used in intrinsics
-    operator __m256i() const {
+    // Type cast operator to convert to simde__m256i used in intrinsics
+    operator simde__m256i() const {
         return ymm;
     }
     // Member function to load from array (unaligned)
     Vec256b & load(void const * p) {
-        ymm = _mm256_loadu_si256((__m256i const*)p);
+        ymm = simde_mm256_loadu_si256((simde__m256i const*)p);
         return *this;
     }
     // Member function to load from array, aligned by 32
     // You may use load_a instead of load if you are certain that p points to an address
     // divisible by 32, but there is hardly any speed advantage of load_a on modern processors
     Vec256b & load_a(void const * p) {
-        ymm = _mm256_load_si256((__m256i const*)p);
+        ymm = simde_mm256_load_si256((simde__m256i const*)p);
         return *this;
     }
     // Member function to store into array (unaligned)
     void store(void * p) const {
-        _mm256_storeu_si256((__m256i*)p, ymm);
+        simde_mm256_storeu_si256((simde__m256i*)p, ymm);
     }
     // Member function storing into array, aligned by 32
     // You may use store_a instead of store if you are certain that p points to an address
     // divisible by 32, but there is hardly any speed advantage of load_a on modern processors
     void store_a(void * p) const {
-        _mm256_store_si256((__m256i*)p, ymm);
+        simde_mm256_store_si256((simde__m256i*)p, ymm);
     }
     // Member function storing to aligned uncached memory (non-temporal store).
     // This may be more efficient than store_a when storing large blocks of memory if it 
     // is unlikely that the data will stay in the cache until it is read again.
     // Note: Will generate runtime error if p is not aligned by 32
     void store_nt(void * p) const {
-        _mm256_stream_si256((__m256i*)p, ymm);
+        simde_mm256_stream_si256((simde__m256i*)p, ymm);
     }
     // Member functions to split into two Vec128b:
     Vec128b get_low() const {
-        return _mm256_castsi256_si128(ymm);
+        return simde_mm256_castsi256_si128(ymm);
     }
     Vec128b get_high() const {
-        return _mm256_extractf128_si256(ymm,1);
+        return simde_mm256_extractf128_si256(ymm,1);
     }
     static constexpr int size() {
         return 256;
@@ -242,7 +242,7 @@ public:
     static constexpr int elementtype() {
         return 1;
     }
-    typedef __m256i registertype;
+    typedef simde__m256i registertype;
 };
 
 
@@ -250,7 +250,7 @@ public:
 
 // vector operator & : bitwise and
 static inline Vec256b operator & (Vec256b const a, Vec256b const b) {
-    return _mm256_and_si256(a, b);
+    return simde_mm256_and_si256(a, b);
 }
 static inline Vec256b operator && (Vec256b const a, Vec256b const b) {
     return a & b;
@@ -258,7 +258,7 @@ static inline Vec256b operator && (Vec256b const a, Vec256b const b) {
 
 // vector operator | : bitwise or
 static inline Vec256b operator | (Vec256b const a, Vec256b const b) {
-    return _mm256_or_si256(a, b);
+    return simde_mm256_or_si256(a, b);
 }
 static inline Vec256b operator || (Vec256b const a, Vec256b const b) {
     return a | b;
@@ -266,12 +266,12 @@ static inline Vec256b operator || (Vec256b const a, Vec256b const b) {
 
 // vector operator ^ : bitwise xor
 static inline Vec256b operator ^ (Vec256b const a, Vec256b const b) {
-    return _mm256_xor_si256(a, b);
+    return simde_mm256_xor_si256(a, b);
 }
 
 // vector operator ~ : bitwise not
 static inline Vec256b operator ~ (Vec256b const a) {
-    return _mm256_xor_si256(a, _mm256_set1_epi32(-1));
+    return simde_mm256_xor_si256(a, simde_mm256_set1_epi32(-1));
 }
 
 // vector operator &= : bitwise and
@@ -294,7 +294,7 @@ static inline Vec256b & operator ^= (Vec256b & a, Vec256b const b) {
 
 // function andnot: a & ~ b
 static inline Vec256b andnot (Vec256b const a, Vec256b const b) {
-    return _mm256_andnot_si256(b, a);
+    return simde_mm256_andnot_si256(b, a);
 }
 
 
@@ -308,18 +308,18 @@ static inline Vec256b andnot (Vec256b const a, Vec256b const b) {
 // for (int i = 0; i < 32; i++) result[i] = s[i] ? a[i] : b[i];
 // Each byte in s must be either 0 (false) or 0xFF (true). No other values are allowed.
 // Only bit 7 in each byte of s is checked,
-static inline __m256i selectb (__m256i const s, __m256i const a, __m256i const b) {
-    return _mm256_blendv_epi8 (b, a, s);
+static inline simde__m256i selectb (simde__m256i const s, simde__m256i const a, simde__m256i const b) {
+    return simde_mm256_blendv_epi8 (b, a, s);
 }
 
 // horizontal_and. Returns true if all bits are 1
 static inline bool horizontal_and (Vec256b const a) {
-    return _mm256_testc_si256(a,_mm256_set1_epi32(-1)) != 0;
+    return simde_mm256_testc_si256(a,simde_mm256_set1_epi32(-1)) != 0;
 }
 
 // horizontal_or. Returns true if at least one bit is 1
 static inline bool horizontal_or (Vec256b const a) {
-    return ! _mm256_testz_si256(a,a);
+    return ! simde_mm256_testz_si256(a,a);
 }
 
 
@@ -335,26 +335,26 @@ public:
     Vec32c() = default;
     // Constructor to broadcast the same value into all elements:
     Vec32c(int i) {
-        ymm = _mm256_set1_epi8((char)i);
+        ymm = simde_mm256_set1_epi8((char)i);
     }
     // Constructor to build from all elements:
     Vec32c(int8_t i0, int8_t i1, int8_t i2, int8_t i3, int8_t i4, int8_t i5, int8_t i6, int8_t i7,
         int8_t i8, int8_t i9, int8_t i10, int8_t i11, int8_t i12, int8_t i13, int8_t i14, int8_t i15,
         int8_t i16, int8_t i17, int8_t i18, int8_t i19, int8_t i20, int8_t i21, int8_t i22, int8_t i23,
         int8_t i24, int8_t i25, int8_t i26, int8_t i27, int8_t i28, int8_t i29, int8_t i30, int8_t i31) {
-        ymm = _mm256_setr_epi8(i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15,
+        ymm = simde_mm256_setr_epi8(i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15,
             i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31);
     }
     // Constructor to build from two Vec16c:
     Vec32c(Vec16c const a0, Vec16c const a1) {
         ymm = set_m128ir(a0, a1);
     }
-    // Constructor to convert from type __m256i used in intrinsics:
-    Vec32c(__m256i const x) {
+    // Constructor to convert from type simde__m256i used in intrinsics:
+    Vec32c(simde__m256i const x) {
         ymm = x;
     }
-    // Assignment operator to convert from type __m256i used in intrinsics:
-    Vec32c & operator = (__m256i const x) {
+    // Assignment operator to convert from type simde__m256i used in intrinsics:
+    Vec32c & operator = (simde__m256i const x) {
         ymm = x;
         return *this;
     }
@@ -362,24 +362,24 @@ public:
     Vec32c(Vec256b const & x) {  // gcc requires const &
         ymm = x;
     }
-    // Type cast operator to convert to __m256i used in intrinsics
-    operator __m256i() const {
+    // Type cast operator to convert to simde__m256i used in intrinsics
+    operator simde__m256i() const {
         return ymm;
     }
     // Member function to load from array (unaligned)
     Vec32c & load(void const * p) {
-        ymm = _mm256_loadu_si256((__m256i const*)p);
+        ymm = simde_mm256_loadu_si256((simde__m256i const*)p);
         return *this;
     }
     // Member function to load from array, aligned by 32
     Vec32c & load_a(void const * p) {
-        ymm = _mm256_load_si256((__m256i const*)p);
+        ymm = simde_mm256_load_si256((simde__m256i const*)p);
         return *this;
     }
     // Partial load. Load n elements and set the rest to 0
     Vec32c & load_partial(int n, void const * p) {
 #if INSTRSET >= 10  // AVX512VL
-        ymm = _mm256_maskz_loadu_epi8(__mmask32(((uint64_t)1 << n) - 1), p);
+        ymm = simde_mm256_maskz_loadu_epi8(__mmask32(((uint64_t)1 << n) - 1), p);
 #else
         if (n <= 0) {
             *this = 0;
@@ -399,7 +399,7 @@ public:
     // Partial store. Store n elements
     void store_partial(int n, void * p) const {
 #if INSTRSET >= 10  // AVX512VL + AVX512BW
-        _mm256_mask_storeu_epi8(p, __mmask32(((uint64_t)1 << n) - 1), ymm);
+        simde_mm256_mask_storeu_epi8(p, __mmask32(((uint64_t)1 << n) - 1), ymm);
 #else
         if (n <= 0) {
             return;
@@ -419,7 +419,7 @@ public:
     // cut off vector to n elements. The last 32-n elements are set to zero
     Vec32c & cutoff(int n) {
 #if INSTRSET >= 10
-        ymm = _mm256_maskz_mov_epi8(__mmask32(((uint64_t)1 << n) - 1), ymm);
+        ymm = simde_mm256_maskz_mov_epi8(__mmask32(((uint64_t)1 << n) - 1), ymm);
 #else
         if (uint32_t(n) >= 32) return *this;
         const union {
@@ -433,12 +433,12 @@ public:
     // Member function to change a single element in vector
     Vec32c const insert(int index, int8_t value) {
 #if INSTRSET >= 10
-        ymm = _mm256_mask_set1_epi8(ymm, __mmask32(1u << index), value);
+        ymm = simde_mm256_mask_set1_epi8(ymm, __mmask32(1u << index), value);
 #else
         const int8_t maskl[64] = {0,0,0,0, 0,0,0,0, 0,0,0,0 ,0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
             -1,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0 ,0,0,0,0, 0,0,0,0, 0,0,0,0};
-        __m256i broad = _mm256_set1_epi8(value);  // broadcast value into all elements
-        __m256i mask  = _mm256_loadu_si256((__m256i const*)(maskl+32-(index & 0x1F))); // mask with FF at index position
+        simde__m256i broad = simde_mm256_set1_epi8(value);  // broadcast value into all elements
+        simde__m256i mask  = simde_mm256_loadu_si256((simde__m256i const*)(maskl+32-(index & 0x1F))); // mask with FF at index position
         ymm = selectb(mask,broad,ymm);
 #endif
         return *this;
@@ -446,8 +446,8 @@ public:
     // Member function extract a single element from vector
     int8_t extract(int index) const {
 #if INSTRSET >= 10 && defined (__AVX512VBMI2__)
-        __m256i x = _mm256_maskz_compress_epi8(__mmask32(1u << index), ymm);
-        return (int8_t)_mm_cvtsi128_si32(_mm256_castsi256_si128(x));
+        simde__m256i x = simde_mm256_maskz_compress_epi8(__mmask32(1u << index), ymm);
+        return (int8_t)_mm_cvtsi128_si32(simde_mm256_castsi256_si128(x));
 #else
         int8_t x[32];
         store(x);
@@ -461,10 +461,10 @@ public:
     }
     // Member functions to split into two Vec16c:
     Vec16c get_low() const {
-        return _mm256_castsi256_si128(ymm);
+        return simde_mm256_castsi256_si128(ymm);
     }
     Vec16c get_high() const {
-        return _mm256_extracti128_si256(ymm,1);
+        return simde_mm256_extracti128_si256(ymm,1);
     }
     static constexpr int size() {
         return 32;
@@ -497,12 +497,12 @@ public:
             -int8_t(x16), -int8_t(x17), -int8_t(x18), -int8_t(x19), -int8_t(x20), -int8_t(x21), -int8_t(x22), -int8_t(x23),
             -int8_t(x24), -int8_t(x25), -int8_t(x26), -int8_t(x27), -int8_t(x28), -int8_t(x29), -int8_t(x30), -int8_t(x31))
         {} */
-    // Constructor to convert from type __m256i used in intrinsics:
-    Vec32cb(__m256i const x) {
+    // Constructor to convert from type simde__m256i used in intrinsics:
+    Vec32cb(simde__m256i const x) {
         ymm = x;
     }
-    // Assignment operator to convert from type __m256i used in intrinsics:
-    Vec32cb & operator = (__m256i const x) {
+    // Assignment operator to convert from type simde__m256i used in intrinsics:
+    Vec32cb & operator = (simde__m256i const x) {
         ymm = x;
         return *this;
     }
@@ -543,12 +543,12 @@ public:
     }
     // Member function to change a bitfield to a boolean vector
     Vec32cb & load_bits(uint32_t a) {
-        __m256i b1 = _mm256_set1_epi32((int32_t)~a);       // broadcast a. Invert because we have no compare-not-equal
-        __m256i m1 = constant8ui<0,0,0x01010101,0x01010101,0x02020202,0x02020202,0x03030303,0x03030303>();
-        __m256i c1 = _mm256_shuffle_epi8(b1, m1);          // get right byte in each position
-        __m256i m2 = constant8ui<0x08040201,0x80402010,0x08040201,0x80402010,0x08040201,0x80402010,0x08040201,0x80402010>();
-        __m256i d1 = _mm256_and_si256(c1, m2);             // isolate one bit in each byte
-        ymm = _mm256_cmpeq_epi8(d1,_mm256_setzero_si256());// compare with 0
+        simde__m256i b1 = simde_mm256_set1_epi32((int32_t)~a);       // broadcast a. Invert because we have no compare-not-equal
+        simde__m256i m1 = constant8ui<0,0,0x01010101,0x01010101,0x02020202,0x02020202,0x03030303,0x03030303>();
+        simde__m256i c1 = simde_mm256_shuffle_epi8(b1, m1);          // get right byte in each position
+        simde__m256i m2 = constant8ui<0x08040201,0x80402010,0x08040201,0x80402010,0x08040201,0x80402010,0x08040201,0x80402010>();
+        simde__m256i d1 = simde_mm256_and_si256(c1, m2);             // isolate one bit in each byte
+        ymm = simde_mm256_cmpeq_epi8(d1,simde_mm256_setzero_si256());// compare with 0
         return *this;
     }
     static constexpr int elementtype() {
@@ -668,22 +668,22 @@ static inline bool horizontal_or(Vec32b const a) {
     return __mmask32(a) != 0;
 }
 
-// fix bug in gcc version 70400 header file: _mm256_cmp_epi8_mask returns 16 bit mask, should be 32 bit
+// fix bug in gcc version 70400 header file: simde_mm256_cmp_epi8_mask returns 16 bit mask, should be 32 bit
 template <int i>
-static inline __mmask32 _mm256_cmp_epi8_mask_fix(__m256i a, __m256i b) {
+static inline __mmask32 simde_mm256_cmp_epi8_mask_fix(simde__m256i a, simde__m256i b) {
 #if defined (GCC_VERSION) && GCC_VERSION < 70900 &&  ! defined (__INTEL_COMPILER)
     return (__mmask32) __builtin_ia32_cmpb256_mask ((__v32qi)a, (__v32qi)b, i, (__mmask32)(-1));
 #else
-    return _mm256_cmp_epi8_mask(a, b, i);
+    return simde_mm256_cmp_epi8_mask(a, b, i);
 #endif
 }
 
 template <int i>
-static inline __mmask32 _mm256_cmp_epu8_mask_fix(__m256i a, __m256i b) {
+static inline __mmask32 simde_mm256_cmp_epu8_mask_fix(simde__m256i a, simde__m256i b) {
 #if defined (GCC_VERSION) && GCC_VERSION < 70900 &&  ! defined (__INTEL_COMPILER)
     return (__mmask32) __builtin_ia32_ucmpb256_mask ((__v32qi)a, (__v32qi)b, i, (__mmask32)(-1));
 #else
-    return _mm256_cmp_epu8_mask(a, b, i);
+    return simde_mm256_cmp_epu8_mask(a, b, i);
 #endif
 }
 
@@ -698,7 +698,7 @@ static inline __mmask32 _mm256_cmp_epu8_mask_fix(__m256i a, __m256i b) {
 
 // vector operator + : add element by element
 static inline Vec32c operator + (Vec32c const a, Vec32c const b) {
-    return _mm256_add_epi8(a, b);
+    return simde_mm256_add_epi8(a, b);
 }
 // vector operator += : add
 static inline Vec32c & operator += (Vec32c & a, Vec32c const b) {
@@ -720,11 +720,11 @@ static inline Vec32c & operator ++ (Vec32c & a) {
 
 // vector operator - : subtract element by element
 static inline Vec32c operator - (Vec32c const a, Vec32c const b) {
-    return _mm256_sub_epi8(a, b);
+    return simde_mm256_sub_epi8(a, b);
 }
 // vector operator - : unary minus
 static inline Vec32c operator - (Vec32c const a) {
-    return _mm256_sub_epi8(_mm256_setzero_si256(), a);
+    return simde_mm256_sub_epi8(simde_mm256_setzero_si256(), a);
 }
 // vector operator -= : add
 static inline Vec32c & operator -= (Vec32c & a, Vec32c const b) {
@@ -747,16 +747,16 @@ static inline Vec32c & operator -- (Vec32c & a) {
 // vector operator * : multiply element by element
 static inline Vec32c operator * (Vec32c const a, Vec32c const b) {
     // There is no 8-bit multiply in AVX2. Split into two 16-bit multiplications
-    __m256i aodd    = _mm256_srli_epi16(a,8);              // odd numbered elements of a
-    __m256i bodd    = _mm256_srli_epi16(b,8);              // odd numbered elements of b
-    __m256i muleven = _mm256_mullo_epi16(a,b);             // product of even numbered elements
-    __m256i mulodd  = _mm256_mullo_epi16(aodd,bodd);       // product of odd  numbered elements
-            mulodd  = _mm256_slli_epi16(mulodd,8);         // put odd numbered elements back in place
+    simde__m256i aodd    = simde_mm256_srli_epi16(a,8);              // odd numbered elements of a
+    simde__m256i bodd    = simde_mm256_srli_epi16(b,8);              // odd numbered elements of b
+    simde__m256i muleven = simde_mm256_mullo_epi16(a,b);             // product of even numbered elements
+    simde__m256i mulodd  = simde_mm256_mullo_epi16(aodd,bodd);       // product of odd  numbered elements
+            mulodd  = simde_mm256_slli_epi16(mulodd,8);         // put odd numbered elements back in place
 #if INSTRSET >= 10   // AVX512VL + AVX512BW
-    return _mm256_mask_mov_epi8(mulodd, 0x55555555, muleven);
+    return simde_mm256_mask_mov_epi8(mulodd, 0x55555555, muleven);
 #else
-    __m256i mask    = _mm256_set1_epi32(0x00FF00FF);       // mask for even positions
-    __m256i product = selectb(mask,muleven,mulodd);        // interleave even and odd
+    simde__m256i mask    = simde_mm256_set1_epi32(0x00FF00FF);       // mask for even positions
+    simde__m256i product = selectb(mask,muleven,mulodd);        // interleave even and odd
     return product;
 #endif
 }
@@ -770,8 +770,8 @@ static inline Vec32c & operator *= (Vec32c & a, Vec32c const b) {
 // vector operator << : shift left all elements
 static inline Vec32c operator << (Vec32c const a, int b) {
     uint32_t mask = (uint32_t)0xFF >> (uint32_t)b;                   // mask to remove bits that are shifted out
-    __m256i am    = _mm256_and_si256(a,_mm256_set1_epi8((char)mask));// remove bits that will overflow
-    __m256i res   = _mm256_sll_epi16(am,_mm_cvtsi32_si128(b));       // 16-bit shifts
+    simde__m256i am    = simde_mm256_and_si256(a,simde_mm256_set1_epi8((char)mask));// remove bits that will overflow
+    simde__m256i res   = simde_mm256_sll_epi16(am,_mm_cvtsi32_si128(b));       // 16-bit shifts
     return res;
 }
 
@@ -783,14 +783,14 @@ static inline Vec32c & operator <<= (Vec32c & a, int b) {
 
 // vector operator >> : shift right arithmetic all elements
 static inline Vec32c operator >> (Vec32c const a, int b) {
-    __m256i aeven = _mm256_slli_epi16(a,8);                          // even numbered elements of a. get sign bit in position
-            aeven = _mm256_sra_epi16(aeven,_mm_cvtsi32_si128(b+8));  // shift arithmetic, back to position
-    __m256i aodd  = _mm256_sra_epi16(a,_mm_cvtsi32_si128(b));        // shift odd numbered elements arithmetic
+    simde__m256i aeven = simde_mm256_slli_epi16(a,8);                          // even numbered elements of a. get sign bit in position
+            aeven = simde_mm256_sra_epi16(aeven,_mm_cvtsi32_si128(b+8));  // shift arithmetic, back to position
+    simde__m256i aodd  = simde_mm256_sra_epi16(a,_mm_cvtsi32_si128(b));        // shift odd numbered elements arithmetic
 #if INSTRSET >= 10   // AVX512VL + AVX512BW
-    return _mm256_mask_mov_epi8(aodd, 0x55555555, aeven);
+    return simde_mm256_mask_mov_epi8(aodd, 0x55555555, aeven);
 #else
-    __m256i mask  = _mm256_set1_epi32(0x00FF00FF);                   // mask for even positions
-    __m256i res   = selectb(mask,aeven,aodd);                        // interleave even and odd
+    simde__m256i mask  = simde_mm256_set1_epi32(0x00FF00FF);                   // mask for even positions
+    simde__m256i res   = selectb(mask,aeven,aodd);                        // interleave even and odd
     return res;
 #endif
 }
@@ -804,17 +804,17 @@ static inline Vec32c & operator >>= (Vec32c & a, int b) {
 // vector operator == : returns true for elements for which a == b
 static inline Vec32cb operator == (Vec32c const a, Vec32c const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    //return _mm256_cmp_epi8_mask (a, b, 0);
-    return _mm256_cmp_epi8_mask_fix<0> (a, b);
+    //return simde_mm256_cmp_epi8_mask (a, b, 0);
+    return simde_mm256_cmp_epi8_mask_fix<0> (a, b);
 #else
-    return _mm256_cmpeq_epi8(a,b);
+    return simde_mm256_cmpeq_epi8(a,b);
 #endif
 }
 
 // vector operator != : returns true for elements for which a != b
 static inline Vec32cb operator != (Vec32c const a, Vec32c const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epi8_mask_fix<4> (a, b);
+    return simde_mm256_cmp_epi8_mask_fix<4> (a, b);
 #else
     return Vec32cb(Vec32c(~(a == b)));
 #endif
@@ -823,16 +823,16 @@ static inline Vec32cb operator != (Vec32c const a, Vec32c const b) {
 // vector operator > : returns true for elements for which a > b (signed)
 static inline Vec32cb operator > (Vec32c const a, Vec32c const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epi8_mask_fix<6> (a, b);
+    return simde_mm256_cmp_epi8_mask_fix<6> (a, b);
 #else
-    return _mm256_cmpgt_epi8(a,b);
+    return simde_mm256_cmpgt_epi8(a,b);
 #endif
 }
 
 // vector operator < : returns true for elements for which a < b (signed)
 static inline Vec32cb operator < (Vec32c const a, Vec32c const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epi8_mask_fix<1> (a, b);
+    return simde_mm256_cmp_epi8_mask_fix<1> (a, b);
 #else
     return b > a;
 #endif
@@ -841,7 +841,7 @@ static inline Vec32cb operator < (Vec32c const a, Vec32c const b) {
 // vector operator >= : returns true for elements for which a >= b (signed)
 static inline Vec32cb operator >= (Vec32c const a, Vec32c const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epi8_mask_fix<5> (a, b);
+    return simde_mm256_cmp_epi8_mask_fix<5> (a, b);
 #else
     return Vec32cb(Vec32c(~(b > a)));
 #endif
@@ -850,7 +850,7 @@ static inline Vec32cb operator >= (Vec32c const a, Vec32c const b) {
 // vector operator <= : returns true for elements for which a <= b (signed)
 static inline Vec32cb operator <= (Vec32c const a, Vec32c const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epi8_mask_fix<2> (a, b);
+    return simde_mm256_cmp_epi8_mask_fix<2> (a, b);
 #else
     return b >= a;
 #endif
@@ -900,9 +900,9 @@ static inline Vec32c operator ~ (Vec32c const a) {
 // vector operator ! : logical not, returns true for elements == 0
 static inline Vec32cb operator ! (Vec32c const a) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epi8_mask_fix<0> (a, _mm256_setzero_si256());
+    return simde_mm256_cmp_epi8_mask_fix<0> (a, simde_mm256_setzero_si256());
 #else
-    return _mm256_cmpeq_epi8(a,_mm256_setzero_si256());
+    return simde_mm256_cmpeq_epi8(a,simde_mm256_setzero_si256());
 #endif
 }
 
@@ -912,7 +912,7 @@ static inline Vec32cb operator ! (Vec32c const a) {
 // for (int i = 0; i < 16; i++) result[i] = s[i] ? a[i] : b[i];
 static inline Vec32c select (Vec32cb const s, Vec32c const a, Vec32c const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_mask_mov_epi8(b, s, a);
+    return simde_mm256_mask_mov_epi8(b, s, a);
 #else
     return selectb(s,a,b);
 #endif
@@ -921,7 +921,7 @@ static inline Vec32c select (Vec32cb const s, Vec32c const a, Vec32c const b) {
 // Conditional add: For all vector elements i: result[i] = f[i] ? (a[i] + b[i]) : a[i]
 static inline Vec32c if_add (Vec32cb const f, Vec32c const a, Vec32c const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_mask_add_epi8 (a, f, a, b);
+    return simde_mm256_mask_add_epi8 (a, f, a, b);
 #else
     return a + (Vec32c(f) & b);
 #endif
@@ -930,7 +930,7 @@ static inline Vec32c if_add (Vec32cb const f, Vec32c const a, Vec32c const b) {
 // Conditional subtract
 static inline Vec32c if_sub (Vec32cb const f, Vec32c const a, Vec32c const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_mask_sub_epi8 (a, f, a, b);
+    return simde_mm256_mask_sub_epi8 (a, f, a, b);
 #else
     return a - (Vec32c(f) & b);
 #endif
@@ -943,11 +943,11 @@ static inline Vec32c if_mul (Vec32cb const f, Vec32c const a, Vec32c const b) {
 
 // Horizontal add: Calculates the sum of all vector elements. Overflow will wrap around
 static inline int8_t horizontal_add (Vec32c const a) {
-    __m256i sum1 = _mm256_sad_epu8(a,_mm256_setzero_si256());
-    __m256i sum2 = _mm256_shuffle_epi32(sum1,2);
-    __m256i sum3 = _mm256_add_epi16(sum1,sum2);
-    __m128i sum4 = _mm256_extracti128_si256(sum3,1);
-    __m128i sum5 = _mm_add_epi16(_mm256_castsi256_si128(sum3),sum4);
+    simde__m256i sum1 = simde_mm256_sad_epu8(a,simde_mm256_setzero_si256());
+    simde__m256i sum2 = simde_mm256_shuffle_epi32(sum1,2);
+    simde__m256i sum3 = simde_mm256_add_epi16(sum1,sum2);
+    __m128i sum4 = simde_mm256_extracti128_si256(sum3,1);
+    __m128i sum5 = _mm_add_epi16(simde_mm256_castsi256_si128(sum3),sum4);
     int8_t  sum6 = (int8_t)_mm_cvtsi128_si32(sum5);                  // truncate to 8 bits
     return  sum6;                                                    // sign extend to 32 bits
 }
@@ -955,11 +955,11 @@ static inline int8_t horizontal_add (Vec32c const a) {
 // Horizontal add extended: Calculates the sum of all vector elements.
 // Each element is sign-extended before addition to avoid overflow
 static inline int32_t horizontal_add_x (Vec32c const a) {
-    __m256i aeven = _mm256_slli_epi16(a,8);                          // even numbered elements of a. get sign bit in position
-            aeven = _mm256_srai_epi16(aeven,8);                      // sign extend even numbered elements
-    __m256i aodd  = _mm256_srai_epi16(a,8);                          // sign extend odd  numbered elements
-    __m256i sum1  = _mm256_add_epi16(aeven,aodd);                    // add even and odd elements
-    __m128i sum2  = _mm_add_epi16(_mm256_extracti128_si256(sum1,1),_mm256_castsi256_si128(sum1));
+    simde__m256i aeven = simde_mm256_slli_epi16(a,8);                          // even numbered elements of a. get sign bit in position
+            aeven = simde_mm256_srai_epi16(aeven,8);                      // sign extend even numbered elements
+    simde__m256i aodd  = simde_mm256_srai_epi16(a,8);                          // sign extend odd  numbered elements
+    simde__m256i sum1  = simde_mm256_add_epi16(aeven,aodd);                    // add even and odd elements
+    __m128i sum2  = _mm_add_epi16(simde_mm256_extracti128_si256(sum1,1),simde_mm256_castsi256_si128(sum1));
     // The hadd instruction is inefficient, and may be split into two instructions for faster decoding
 #if false
     __m128i sum3  = _mm_hadd_epi16(sum2,sum2);
@@ -976,37 +976,37 @@ static inline int32_t horizontal_add_x (Vec32c const a) {
 
 // function add_saturated: add element by element, signed with saturation
 static inline Vec32c add_saturated(Vec32c const a, Vec32c const b) {
-    return _mm256_adds_epi8(a, b);
+    return simde_mm256_adds_epi8(a, b);
 }
 
 // function sub_saturated: subtract element by element, signed with saturation
 static inline Vec32c sub_saturated(Vec32c const a, Vec32c const b) {
-    return _mm256_subs_epi8(a, b);
+    return simde_mm256_subs_epi8(a, b);
 }
 
 // function max: a > b ? a : b
 static inline Vec32c max(Vec32c const a, Vec32c const b) {
-    return _mm256_max_epi8(a,b);
+    return simde_mm256_max_epi8(a,b);
 }
 
 // function min: a < b ? a : b
 static inline Vec32c min(Vec32c const a, Vec32c const b) {
-    return _mm256_min_epi8(a,b);
+    return simde_mm256_min_epi8(a,b);
 }
 
 // function abs: a >= 0 ? a : -a
 static inline Vec32c abs(Vec32c const a) {
-    return _mm256_abs_epi8(a);
+    return simde_mm256_abs_epi8(a);
 }
 
 // function abs_saturated: same as abs, saturate if overflow
 static inline Vec32c abs_saturated(Vec32c const a) {
-    __m256i absa = abs(a);                                 // abs(a)
+    simde__m256i absa = abs(a);                                 // abs(a)
 #if INSTRSET >= 10
-    return _mm256_min_epu8(absa, Vec32c(0x7F));
+    return simde_mm256_min_epu8(absa, Vec32c(0x7F));
 #else
-    __m256i overfl = _mm256_cmpgt_epi8(_mm256_setzero_si256(), absa);// 0 > a
-    return           _mm256_add_epi8(absa, overfl);        // subtract 1 if 0x80
+    simde__m256i overfl = simde_mm256_cmpgt_epi8(simde_mm256_setzero_si256(), absa);// 0 > a
+    return           simde_mm256_add_epi8(absa, overfl);        // subtract 1 if 0x80
 #endif
 }
 
@@ -1014,14 +1014,14 @@ static inline Vec32c abs_saturated(Vec32c const a) {
 // Use negative count to rotate right
 static inline Vec32c rotate_left(Vec32c const a, int b) {
     int8_t  mask  = int8_t(0xFFu << b);                    // mask off overflow bits
-    __m256i m     = _mm256_set1_epi8(mask);
+    simde__m256i m     = simde_mm256_set1_epi8(mask);
     __m128i bb    = _mm_cvtsi32_si128(b & 7);              // b modulo 8
     __m128i mbb   = _mm_cvtsi32_si128((- b) & 7);          // 8-b modulo 8
-    __m256i left  = _mm256_sll_epi16(a, bb);               // a << b
-    __m256i right = _mm256_srl_epi16(a, mbb);              // a >> 8-b
-            left  = _mm256_and_si256(m, left);             // mask off overflow bits
-            right = _mm256_andnot_si256(m, right);
-    return  _mm256_or_si256(left, right);                  // combine left and right shifted bits
+    simde__m256i left  = simde_mm256_sll_epi16(a, bb);               // a << b
+    simde__m256i right = simde_mm256_srl_epi16(a, mbb);              // a >> 8-b
+            left  = simde_mm256_and_si256(m, left);             // mask off overflow bits
+            right = simde_mm256_andnot_si256(m, right);
+    return  simde_mm256_or_si256(left, right);                  // combine left and right shifted bits
 }
 
 
@@ -1037,37 +1037,37 @@ public:
     Vec32uc() = default;
     // Constructor to broadcast the same value into all elements:
     Vec32uc(uint32_t i) {
-        ymm = _mm256_set1_epi8((char)i);
+        ymm = simde_mm256_set1_epi8((char)i);
     }
     // Constructor to build from all elements:
     Vec32uc(uint8_t i0, uint8_t i1, uint8_t i2, uint8_t i3, uint8_t i4, uint8_t i5, uint8_t i6, uint8_t i7,
         uint8_t i8, uint8_t i9, uint8_t i10, uint8_t i11, uint8_t i12, uint8_t i13, uint8_t i14, uint8_t i15,
         uint8_t i16, uint8_t i17, uint8_t i18, uint8_t i19, uint8_t i20, uint8_t i21, uint8_t i22, uint8_t i23,
         uint8_t i24, uint8_t i25, uint8_t i26, uint8_t i27, uint8_t i28, uint8_t i29, uint8_t i30, uint8_t i31) {
-        ymm = _mm256_setr_epi8((int8_t)i0, (int8_t)i1, (int8_t)i2, (int8_t)i3, (int8_t)i4, (int8_t)i5, (int8_t)i6, (int8_t)i7, (int8_t)i8, (int8_t)i9, (int8_t)i10, (int8_t)i11, (int8_t)i12, (int8_t)i13, (int8_t)i14, (int8_t)i15,
+        ymm = simde_mm256_setr_epi8((int8_t)i0, (int8_t)i1, (int8_t)i2, (int8_t)i3, (int8_t)i4, (int8_t)i5, (int8_t)i6, (int8_t)i7, (int8_t)i8, (int8_t)i9, (int8_t)i10, (int8_t)i11, (int8_t)i12, (int8_t)i13, (int8_t)i14, (int8_t)i15,
             (int8_t)i16, (int8_t)i17, (int8_t)i18, (int8_t)i19, (int8_t)i20, (int8_t)i21, (int8_t)i22, (int8_t)i23, (int8_t)i24, (int8_t)i25, (int8_t)i26, (int8_t)i27, (int8_t)i28, (int8_t)i29, (int8_t)i30, (int8_t)i31);
     }
     // Constructor to build from two Vec16uc:
     Vec32uc(Vec16uc const a0, Vec16uc const a1) {
         ymm = set_m128ir(a0, a1);
     }
-    // Constructor to convert from type __m256i used in intrinsics:
-    Vec32uc(__m256i const x) {
+    // Constructor to convert from type simde__m256i used in intrinsics:
+    Vec32uc(simde__m256i const x) {
         ymm = x;
     }
-    // Assignment operator to convert from type __m256i used in intrinsics:
-    Vec32uc & operator = (__m256i const x) {
+    // Assignment operator to convert from type simde__m256i used in intrinsics:
+    Vec32uc & operator = (simde__m256i const x) {
         ymm = x;
         return *this;
     }
     // Member function to load from array (unaligned)
     Vec32uc & load(void const * p) {
-        ymm = _mm256_loadu_si256((__m256i const*)p);
+        ymm = simde_mm256_loadu_si256((simde__m256i const*)p);
         return *this;
     }
     // Member function to load from array, aligned by 32
     Vec32uc & load_a(void const * p) {
-        ymm = _mm256_load_si256((__m256i const*)p);
+        ymm = simde_mm256_load_si256((simde__m256i const*)p);
         return *this;
     }
     // Member function to change a single element in vector
@@ -1086,10 +1086,10 @@ public:
     }
     // Member functions to split into two Vec16uc:
     Vec16uc get_low() const {
-        return _mm256_castsi256_si128(ymm);
+        return simde_mm256_castsi256_si128(ymm);
     }
     Vec16uc get_high() const {
-        return _mm256_extractf128_si256(ymm,1);
+        return simde_mm256_extractf128_si256(ymm,1);
     }
     static constexpr int elementtype() {
         return 5;
@@ -1116,8 +1116,8 @@ static inline Vec32uc operator * (Vec32uc const a, Vec32uc const b) {
 // vector operator << : shift left all elements
 static inline Vec32uc operator << (Vec32uc const a, uint32_t b) {
     uint32_t mask = (uint32_t)0xFF >> (uint32_t)b;                // mask to remove bits that are shifted out
-    __m256i am    = _mm256_and_si256(a,_mm256_set1_epi8((char)mask));// remove bits that will overflow
-    __m256i res   = _mm256_sll_epi16(am,_mm_cvtsi32_si128((int)b));    // 16-bit shifts
+    simde__m256i am    = simde_mm256_and_si256(a,simde_mm256_set1_epi8((char)mask));// remove bits that will overflow
+    simde__m256i res   = simde_mm256_sll_epi16(am,_mm_cvtsi32_si128((int)b));    // 16-bit shifts
     return res;
 }
 
@@ -1129,8 +1129,8 @@ static inline Vec32uc operator << (Vec32uc const a, int32_t b) {
 // vector operator >> : shift right logical all elements
 static inline Vec32uc operator >> (Vec32uc const a, uint32_t b) {
     uint32_t mask = (uint32_t)0xFF << (uint32_t)b;                // mask to remove bits that are shifted out
-    __m256i am    = _mm256_and_si256(a,_mm256_set1_epi8((char)mask));// remove bits that will overflow
-    __m256i res   = _mm256_srl_epi16(am,_mm_cvtsi32_si128((int)b));    // 16-bit shifts
+    simde__m256i am    = simde_mm256_and_si256(a,simde_mm256_set1_epi8((char)mask));// remove bits that will overflow
+    simde__m256i res   = simde_mm256_srl_epi16(am,_mm_cvtsi32_si128((int)b));    // 16-bit shifts
     return res;
 }
 
@@ -1148,17 +1148,17 @@ static inline Vec32uc & operator >>= (Vec32uc & a, uint32_t b) {
 // vector operator >= : returns true for elements for which a >= b (unsigned)
 static inline Vec32cb operator >= (Vec32uc const a, Vec32uc const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    //return _mm256_cmp_epu8_mask (a, b, 5);
-    return _mm256_cmp_epu8_mask_fix<5> (a, b);
+    //return simde_mm256_cmp_epu8_mask (a, b, 5);
+    return simde_mm256_cmp_epu8_mask_fix<5> (a, b);
 #else
-    return _mm256_cmpeq_epi8(_mm256_max_epu8(a,b), a); // a == max(a,b)
+    return simde_mm256_cmpeq_epi8(simde_mm256_max_epu8(a,b), a); // a == max(a,b)
 #endif
 }
 
 // vector operator <= : returns true for elements for which a <= b (unsigned)
 static inline Vec32cb operator <= (Vec32uc const a, Vec32uc const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epu8_mask_fix<2> (a, b);
+    return simde_mm256_cmp_epu8_mask_fix<2> (a, b);
 #else
     return b >= a;
 #endif
@@ -1167,7 +1167,7 @@ static inline Vec32cb operator <= (Vec32uc const a, Vec32uc const b) {
 // vector operator > : returns true for elements for which a > b (unsigned)
 static inline Vec32cb operator > (Vec32uc const a, Vec32uc const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epu8_mask_fix<6> (a, b);
+    return simde_mm256_cmp_epu8_mask_fix<6> (a, b);
 #else
     return Vec32cb(Vec32c(~(b >= a)));
 #endif
@@ -1176,7 +1176,7 @@ static inline Vec32cb operator > (Vec32uc const a, Vec32uc const b) {
 // vector operator < : returns true for elements for which a < b (unsigned)
 static inline Vec32cb operator < (Vec32uc const a, Vec32uc const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epu8_mask_fix<1> (a, b);
+    return simde_mm256_cmp_epu8_mask_fix<1> (a, b);
 #else
     return b > a;
 #endif
@@ -1214,7 +1214,7 @@ static inline Vec32uc operator ~ (Vec32uc const a) {
 // for (int i = 0; i < 32; i++) result[i] = s[i] ? a[i] : b[i];
 static inline Vec32uc select (Vec32cb const s, Vec32uc const a, Vec32uc const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_mask_mov_epi8(b, s, a);
+    return simde_mm256_mask_mov_epi8(b, s, a);
 #else
     return selectb(s,a,b);
 #endif
@@ -1223,7 +1223,7 @@ static inline Vec32uc select (Vec32cb const s, Vec32uc const a, Vec32uc const b)
 // Conditional add: For all vector elements i: result[i] = f[i] ? (a[i] + b[i]) : a[i]
 static inline Vec32uc if_add (Vec32cb const f, Vec32uc const a, Vec32uc const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_mask_add_epi8 (a, f, a, b);
+    return simde_mm256_mask_add_epi8 (a, f, a, b);
 #else
     return a + (Vec32uc(f) & b);
 #endif
@@ -1232,7 +1232,7 @@ static inline Vec32uc if_add (Vec32cb const f, Vec32uc const a, Vec32uc const b)
 // Conditional subtract
 static inline Vec32uc if_sub (Vec32cb const f, Vec32uc const a, Vec32uc const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_mask_sub_epi8 (a, f, a, b);
+    return simde_mm256_mask_sub_epi8 (a, f, a, b);
 #else
     return a - (Vec32uc(f) & b);
 #endif
@@ -1246,11 +1246,11 @@ static inline Vec32uc if_mul (Vec32cb const f, Vec32uc const a, Vec32uc const b)
 // Horizontal add: Calculates the sum of all vector elements. Overflow will wrap around
 // (Note: horizontal_add_x(Vec32uc) is slightly faster)
 static inline uint8_t horizontal_add (Vec32uc const a) {
-    __m256i  sum1 = _mm256_sad_epu8(a,_mm256_setzero_si256());
-    __m256i  sum2 = _mm256_shuffle_epi32(sum1,2);
-    __m256i  sum3 = _mm256_add_epi16(sum1,sum2);
-    __m128i  sum4 = _mm256_extracti128_si256(sum3,1);
-    __m128i  sum5 = _mm_add_epi16(_mm256_castsi256_si128(sum3),sum4);
+    simde__m256i  sum1 = simde_mm256_sad_epu8(a,simde_mm256_setzero_si256());
+    simde__m256i  sum2 = simde_mm256_shuffle_epi32(sum1,2);
+    simde__m256i  sum3 = simde_mm256_add_epi16(sum1,sum2);
+    __m128i  sum4 = simde_mm256_extracti128_si256(sum3,1);
+    __m128i  sum5 = _mm_add_epi16(simde_mm256_castsi256_si128(sum3),sum4);
     uint8_t  sum6 = (uint8_t)_mm_cvtsi128_si32(sum5);      // truncate to 8 bits
     return   sum6;                                         // zero extend to 32 bits
 }
@@ -1258,32 +1258,32 @@ static inline uint8_t horizontal_add (Vec32uc const a) {
 // Horizontal add extended: Calculates the sum of all vector elements.
 // Each element is zero-extended before addition to avoid overflow
 static inline uint32_t horizontal_add_x (Vec32uc const a) {
-    __m256i sum1 = _mm256_sad_epu8(a,_mm256_setzero_si256());
-    __m256i sum2 = _mm256_shuffle_epi32(sum1,2);
-    __m256i sum3 = _mm256_add_epi16(sum1,sum2);
-    __m128i sum4 = _mm256_extracti128_si256(sum3,1);
-    __m128i sum5 = _mm_add_epi16(_mm256_castsi256_si128(sum3),sum4);
+    simde__m256i sum1 = simde_mm256_sad_epu8(a,simde_mm256_setzero_si256());
+    simde__m256i sum2 = simde_mm256_shuffle_epi32(sum1,2);
+    simde__m256i sum3 = simde_mm256_add_epi16(sum1,sum2);
+    __m128i sum4 = simde_mm256_extracti128_si256(sum3,1);
+    __m128i sum5 = _mm_add_epi16(simde_mm256_castsi256_si128(sum3),sum4);
     return         (uint32_t)_mm_cvtsi128_si32(sum5);
 }
 
 // function add_saturated: add element by element, unsigned with saturation
 static inline Vec32uc add_saturated(Vec32uc const a, Vec32uc const b) {
-    return _mm256_adds_epu8(a, b);
+    return simde_mm256_adds_epu8(a, b);
 }
 
 // function sub_saturated: subtract element by element, unsigned with saturation
 static inline Vec32uc sub_saturated(Vec32uc const a, Vec32uc const b) {
-    return _mm256_subs_epu8(a, b);
+    return simde_mm256_subs_epu8(a, b);
 }
 
 // function max: a > b ? a : b
 static inline Vec32uc max(Vec32uc const a, Vec32uc const b) {
-    return _mm256_max_epu8(a,b);
+    return simde_mm256_max_epu8(a,b);
 }
 
 // function min: a < b ? a : b
 static inline Vec32uc min(Vec32uc const a, Vec32uc const b) {
-    return _mm256_min_epu8(a,b);
+    return simde_mm256_min_epu8(a,b);
 }
 
 
@@ -1299,23 +1299,23 @@ public:
     Vec16s() = default;
     // Constructor to broadcast the same value into all elements:
     Vec16s(int i) {
-        ymm = _mm256_set1_epi16((int16_t)i);
+        ymm = simde_mm256_set1_epi16((int16_t)i);
     }
     // Constructor to build from all elements:
     Vec16s(int16_t i0, int16_t i1, int16_t i2,  int16_t i3,  int16_t i4,  int16_t i5,  int16_t i6,  int16_t i7,
            int16_t i8, int16_t i9, int16_t i10, int16_t i11, int16_t i12, int16_t i13, int16_t i14, int16_t i15) {
-        ymm = _mm256_setr_epi16(i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15 );
+        ymm = simde_mm256_setr_epi16(i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15 );
     }
     // Constructor to build from two Vec8s:
     Vec16s(Vec8s const a0, Vec8s const a1) {
         ymm = set_m128ir(a0, a1);
     }
-    // Constructor to convert from type __m256i used in intrinsics:
-    Vec16s(__m256i const x) {
+    // Constructor to convert from type simde__m256i used in intrinsics:
+    Vec16s(simde__m256i const x) {
         ymm = x;
     }
-    // Assignment operator to convert from type __m256i used in intrinsics:
-    Vec16s & operator = (__m256i const x) {
+    // Assignment operator to convert from type simde__m256i used in intrinsics:
+    Vec16s & operator = (simde__m256i const x) {
         ymm = x;
         return *this;
     }
@@ -1323,24 +1323,24 @@ public:
     Vec16s(Vec256b const & x) {
         ymm = x;
     }
-    // Type cast operator to convert to __m256i used in intrinsics
-    operator __m256i() const {
+    // Type cast operator to convert to simde__m256i used in intrinsics
+    operator simde__m256i() const {
         return ymm;
     }
     // Member function to load from array (unaligned)
     Vec16s & load(void const * p) {
-        ymm = _mm256_loadu_si256((__m256i const*)p);
+        ymm = simde_mm256_loadu_si256((simde__m256i const*)p);
         return *this;
     }
     // Member function to load from array, aligned by 32
     Vec16s & load_a(void const * p) {
-        ymm = _mm256_load_si256((__m256i const*)p);
+        ymm = simde_mm256_load_si256((simde__m256i const*)p);
         return *this;
     }
     // Partial load. Load n elements and set the rest to 0
     Vec16s & load_partial(int n, void const * p) {
 #if INSTRSET >= 10  // AVX512VL
-        ymm = _mm256_maskz_loadu_epi16(__mmask16((1u << n) - 1), p);
+        ymm = simde_mm256_maskz_loadu_epi16(__mmask16((1u << n) - 1), p);
 #else
         if (n <= 0) {
             *this = 0;
@@ -1360,7 +1360,7 @@ public:
     // Partial store. Store n elements
     void store_partial(int n, void * p) const {
 #if INSTRSET >= 10  // AVX512VL + AVX512BW
-        _mm256_mask_storeu_epi16(p, __mmask16((1u << n) - 1), ymm);
+        simde_mm256_mask_storeu_epi16(p, __mmask16((1u << n) - 1), ymm);
 #else
         if (n <= 0) {
             return;
@@ -1380,7 +1380,7 @@ public:
     // cut off vector to n elements. The last 16-n elements are set to zero
     Vec16s & cutoff(int n) {
 #if INSTRSET >= 10
-        ymm = _mm256_maskz_mov_epi16(__mmask16((1u << n) - 1), ymm);
+        ymm = simde_mm256_maskz_mov_epi16(__mmask16((1u << n) - 1), ymm);
 #else
         *this = Vec16s(Vec32c(*this).cutoff(n * 2));
 #endif
@@ -1389,11 +1389,11 @@ public:
     // Member function to change a single element in vector
     Vec16s const insert(int index, int16_t value) {
 #if INSTRSET >= 10
-        ymm = _mm256_mask_set1_epi16(ymm, __mmask16(1u << index), value);
+        ymm = simde_mm256_mask_set1_epi16(ymm, __mmask16(1u << index), value);
 #else
         const int16_t m[32] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, -1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-        __m256i mask  = Vec256b().load(m + 16 - (index & 0x0F));
-        __m256i broad = _mm256_set1_epi16(value);
+        simde__m256i mask  = Vec256b().load(m + 16 - (index & 0x0F));
+        simde__m256i broad = simde_mm256_set1_epi16(value);
         ymm = selectb(mask, broad, ymm);
 #endif
         return *this;
@@ -1401,8 +1401,8 @@ public:
     // Member function extract a single element from vector
     int16_t extract(int index) const {
 #if INSTRSET >= 10 && defined (__AVX512VBMI2__)
-        __m256i x = _mm256_maskz_compress_epi16(__mmask16(1u << index), ymm);
-        return (int16_t)_mm_cvtsi128_si32(_mm256_castsi256_si128(x));
+        simde__m256i x = simde_mm256_maskz_compress_epi16(__mmask16(1u << index), ymm);
+        return (int16_t)_mm_cvtsi128_si32(simde_mm256_castsi256_si128(x));
 #else
         int16_t x[16];  // find faster version
         store(x);
@@ -1416,10 +1416,10 @@ public:
     }
     // Member functions to split into two Vec8s:
     Vec8s get_low() const {
-        return _mm256_castsi256_si128(ymm);
+        return simde_mm256_castsi256_si128(ymm);
     }
     Vec8s get_high() const {
-        return _mm256_extractf128_si256(ymm,1);
+        return simde_mm256_extractf128_si256(ymm,1);
     }
     static constexpr int size() {
         return 16;
@@ -1449,12 +1449,12 @@ public:
         Vec16s(-int16_t(x0), -int16_t(x1), -int16_t(x2), -int16_t(x3), -int16_t(x4), -int16_t(x5), -int16_t(x6), -int16_t(x7),
             -int16_t(x8), -int16_t(x9), -int16_t(x10), -int16_t(x11), -int16_t(x12), -int16_t(x13), -int16_t(x14), -int16_t(x15))
         {} */
-    // Constructor to convert from type __m256i used in intrinsics:
-    Vec16sb(__m256i const x) {
+    // Constructor to convert from type simde__m256i used in intrinsics:
+    Vec16sb(simde__m256i const x) {
         ymm = x;
     }
-    // Assignment operator to convert from type __m256i used in intrinsics:
-    Vec16sb & operator = (__m256i const x) {
+    // Assignment operator to convert from type simde__m256i used in intrinsics:
+    Vec16sb & operator = (simde__m256i const x) {
         ymm = x;
         return *this;
     }
@@ -1493,12 +1493,12 @@ public:
     }
     // Member function to change a bitfield to a boolean vector
     Vec16sb & load_bits(uint16_t a) {
-        __m256i b1 = _mm256_set1_epi16((int16_t)a);  // broadcast a
-        __m256i m1 = constant8ui<0,0,0,0,0x00010001,0x00010001,0x00010001,0x00010001>();
-        __m256i c1 = _mm256_shuffle_epi8(b1, m1);  // get right byte in each position
-        __m256i m2 = constant8ui<0x00020001,0x00080004,0x00200010,0x00800040,0x00020001,0x00080004,0x00200010,0x00800040>();
-        __m256i d1 = _mm256_and_si256(c1, m2); // isolate one bit in each byte
-        ymm = _mm256_cmpgt_epi16(d1, _mm256_setzero_si256());  // compare with 0
+        simde__m256i b1 = simde_mm256_set1_epi16((int16_t)a);  // broadcast a
+        simde__m256i m1 = constant8ui<0,0,0,0,0x00010001,0x00010001,0x00010001,0x00010001>();
+        simde__m256i c1 = simde_mm256_shuffle_epi8(b1, m1);  // get right byte in each position
+        simde__m256i m2 = constant8ui<0x00020001,0x00080004,0x00200010,0x00800040,0x00020001,0x00080004,0x00200010,0x00800040>();
+        simde__m256i d1 = simde_mm256_and_si256(c1, m2); // isolate one bit in each byte
+        ymm = simde_mm256_cmpgt_epi16(d1, simde_mm256_setzero_si256());  // compare with 0
         return *this;
     }
     static constexpr int elementtype() {
@@ -1595,7 +1595,7 @@ static inline Vec16sb andnot (Vec16sb const a, Vec16sb const b) {
 
 // vector operator + : add element by element
 static inline Vec16s operator + (Vec16s const a, Vec16s const b) {
-    return _mm256_add_epi16(a, b);
+    return simde_mm256_add_epi16(a, b);
 }
 // vector operator += : add
 static inline Vec16s & operator += (Vec16s & a, Vec16s const b) {
@@ -1617,11 +1617,11 @@ static inline Vec16s & operator ++ (Vec16s & a) {
 
 // vector operator - : subtract element by element
 static inline Vec16s operator - (Vec16s const a, Vec16s const b) {
-    return _mm256_sub_epi16(a, b);
+    return simde_mm256_sub_epi16(a, b);
 }
 // vector operator - : unary minus
 static inline Vec16s operator - (Vec16s const a) {
-    return _mm256_sub_epi16(_mm256_setzero_si256(), a);
+    return simde_mm256_sub_epi16(simde_mm256_setzero_si256(), a);
 }
 // vector operator -= : subtract
 static inline Vec16s & operator -= (Vec16s & a, Vec16s const b) {
@@ -1643,7 +1643,7 @@ static inline Vec16s & operator -- (Vec16s & a) {
 
 // vector operator * : multiply element by element
 static inline Vec16s operator * (Vec16s const a, Vec16s const b) {
-    return _mm256_mullo_epi16(a, b);
+    return simde_mm256_mullo_epi16(a, b);
 }
 // vector operator *= : multiply
 static inline Vec16s & operator *= (Vec16s & a, Vec16s const b) {
@@ -1656,7 +1656,7 @@ static inline Vec16s & operator *= (Vec16s & a, Vec16s const b) {
 
 // vector operator << : shift left
 static inline Vec16s operator << (Vec16s const a, int b) {
-    return _mm256_sll_epi16(a,_mm_cvtsi32_si128(b));
+    return simde_mm256_sll_epi16(a,_mm_cvtsi32_si128(b));
 }
 // vector operator <<= : shift left
 static inline Vec16s & operator <<= (Vec16s & a, int b) {
@@ -1666,7 +1666,7 @@ static inline Vec16s & operator <<= (Vec16s & a, int b) {
 
 // vector operator >> : shift right arithmetic
 static inline Vec16s operator >> (Vec16s const a, int b) {
-    return _mm256_sra_epi16(a,_mm_cvtsi32_si128(b));
+    return simde_mm256_sra_epi16(a,_mm_cvtsi32_si128(b));
 }
 // vector operator >>= : shift right arithmetic
 static inline Vec16s & operator >>= (Vec16s & a, int b) {
@@ -1677,16 +1677,16 @@ static inline Vec16s & operator >>= (Vec16s & a, int b) {
 // vector operator == : returns true for elements for which a == b
 static inline Vec16sb operator == (Vec16s const a, Vec16s const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epi16_mask (a, b, 0);
+    return simde_mm256_cmp_epi16_mask (a, b, 0);
 #else
-    return _mm256_cmpeq_epi16(a, b);
+    return simde_mm256_cmpeq_epi16(a, b);
 #endif
 }
 
 // vector operator != : returns true for elements for which a != b
 static inline Vec16sb operator != (Vec16s const a, Vec16s const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epi16_mask (a, b, 4);
+    return simde_mm256_cmp_epi16_mask (a, b, 4);
 #else
     return Vec16sb(Vec16s(~(a == b)));
 #endif
@@ -1695,16 +1695,16 @@ static inline Vec16sb operator != (Vec16s const a, Vec16s const b) {
 // vector operator > : returns true for elements for which a > b
 static inline Vec16sb operator > (Vec16s const a, Vec16s const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epi16_mask (a, b, 6);
+    return simde_mm256_cmp_epi16_mask (a, b, 6);
 #else
-    return _mm256_cmpgt_epi16(a, b);
+    return simde_mm256_cmpgt_epi16(a, b);
 #endif
 }
 
 // vector operator < : returns true for elements for which a < b
 static inline Vec16sb operator < (Vec16s const a, Vec16s const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epi16_mask (a, b, 1);
+    return simde_mm256_cmp_epi16_mask (a, b, 1);
 #else
     return b > a;
 #endif
@@ -1713,7 +1713,7 @@ static inline Vec16sb operator < (Vec16s const a, Vec16s const b) {
 // vector operator >= : returns true for elements for which a >= b (signed)
 static inline Vec16sb operator >= (Vec16s const a, Vec16s const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epi16_mask (a, b, 5);
+    return simde_mm256_cmp_epi16_mask (a, b, 5);
 #else
     return Vec16sb(Vec16s(~(b > a)));
 #endif
@@ -1722,7 +1722,7 @@ static inline Vec16sb operator >= (Vec16s const a, Vec16s const b) {
 // vector operator <= : returns true for elements for which a <= b (signed)
 static inline Vec16sb operator <= (Vec16s const a, Vec16s const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epi16_mask (a, b, 2);
+    return simde_mm256_cmp_epi16_mask (a, b, 2);
 #else
     return b >= a;
 #endif
@@ -1772,9 +1772,9 @@ static inline Vec16s operator ~ (Vec16s const a) {
 // vector operator ! : logical not, returns true for elements == 0
 static inline Vec16sb operator ! (Vec16s const a) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epi16_mask (a, _mm256_setzero_si256(), 0);
+    return simde_mm256_cmp_epi16_mask (a, simde_mm256_setzero_si256(), 0);
 #else
-    return _mm256_cmpeq_epi16(a,_mm256_setzero_si256());
+    return simde_mm256_cmpeq_epi16(a,simde_mm256_setzero_si256());
 #endif
 }
 
@@ -1784,7 +1784,7 @@ static inline Vec16sb operator ! (Vec16s const a) {
 // for (int i = 0; i < 16; i++) result[i] = s[i] ? a[i] : b[i];
 static inline Vec16s select (Vec16sb const s, Vec16s const a, Vec16s const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_mask_mov_epi16(b, s, a);
+    return simde_mm256_mask_mov_epi16(b, s, a);
 #else
     return selectb(s,a,b);
 #endif
@@ -1793,7 +1793,7 @@ static inline Vec16s select (Vec16sb const s, Vec16s const a, Vec16s const b) {
 // Conditional add: For all vector elements i: result[i] = f[i] ? (a[i] + b[i]) : a[i]
 static inline Vec16s if_add (Vec16sb const f, Vec16s const a, Vec16s const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_mask_add_epi16 (a, f, a, b);
+    return simde_mm256_mask_add_epi16 (a, f, a, b);
 #else
     return a + (Vec16s(f) & b);
 #endif
@@ -1802,7 +1802,7 @@ static inline Vec16s if_add (Vec16sb const f, Vec16s const a, Vec16s const b) {
 // Conditional subtract
 static inline Vec16s if_sub (Vec16sb const f, Vec16s const a, Vec16s const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_mask_sub_epi16 (a, f, a, b);
+    return simde_mm256_mask_sub_epi16 (a, f, a, b);
 #else
     return a - (Vec16s(f) & b);
 #endif
@@ -1811,7 +1811,7 @@ static inline Vec16s if_sub (Vec16sb const f, Vec16s const a, Vec16s const b) {
 // Conditional multiply
 static inline Vec16s if_mul (Vec16sb const f, Vec16s const a, Vec16s const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_mask_mullo_epi16 (a, f, a, b);
+    return simde_mm256_mask_mullo_epi16 (a, f, a, b);
 #else
     return select(f, a*b, a);
 #endif
@@ -1820,7 +1820,7 @@ static inline Vec16s if_mul (Vec16sb const f, Vec16s const a, Vec16s const b) {
 // Horizontal add: Calculates the sum of all vector elements. Overflow will wrap around
 static inline int16_t horizontal_add (Vec16s const a) {
     // The hadd instruction is inefficient, and may be split into two instructions for faster decoding
-    __m128i sum1  = _mm_add_epi16(_mm256_extracti128_si256(a,1),_mm256_castsi256_si128(a));
+    __m128i sum1  = _mm_add_epi16(simde_mm256_extracti128_si256(a,1),simde_mm256_castsi256_si128(a));
     __m128i sum2  = _mm_add_epi16(sum1,_mm_unpackhi_epi64(sum1,sum1));
     __m128i sum3  = _mm_add_epi16(sum2,_mm_shuffle_epi32(sum2,1));
     __m128i sum4  = _mm_add_epi16(sum3,_mm_shufflelo_epi16(sum3,1));
@@ -1830,11 +1830,11 @@ static inline int16_t horizontal_add (Vec16s const a) {
 // Horizontal add extended: Calculates the sum of all vector elements.
 // Elements are sign extended before adding to avoid overflow
 static inline int32_t horizontal_add_x (Vec16s const a) {
-    __m256i aeven = _mm256_slli_epi32(a,16);               // even numbered elements of a. get sign bit in position
-            aeven = _mm256_srai_epi32(aeven,16);           // sign extend even numbered elements
-    __m256i aodd  = _mm256_srai_epi32(a,16);               // sign extend odd  numbered elements
-    __m256i sum1  = _mm256_add_epi32(aeven,aodd);          // add even and odd elements
-    __m128i sum2  = _mm_add_epi32(_mm256_extracti128_si256(sum1,1),_mm256_castsi256_si128(sum1));
+    simde__m256i aeven = simde_mm256_slli_epi32(a,16);               // even numbered elements of a. get sign bit in position
+            aeven = simde_mm256_srai_epi32(aeven,16);           // sign extend even numbered elements
+    simde__m256i aodd  = simde_mm256_srai_epi32(a,16);               // sign extend odd  numbered elements
+    simde__m256i sum1  = simde_mm256_add_epi32(aeven,aodd);          // add even and odd elements
+    __m128i sum2  = _mm_add_epi32(simde_mm256_extracti128_si256(sum1,1),simde_mm256_castsi256_si128(sum1));
     __m128i sum3  = _mm_add_epi32(sum2,_mm_unpackhi_epi64(sum2,sum2));
     __m128i sum4  = _mm_add_epi32(sum3,_mm_shuffle_epi32(sum3,1));
     return (int16_t)_mm_cvtsi128_si32(sum4);               // truncate to 16 bits
@@ -1842,46 +1842,46 @@ static inline int32_t horizontal_add_x (Vec16s const a) {
 
 // function add_saturated: add element by element, signed with saturation
 static inline Vec16s add_saturated(Vec16s const a, Vec16s const b) {
-    return _mm256_adds_epi16(a, b);
+    return simde_mm256_adds_epi16(a, b);
 }
 
 // function sub_saturated: subtract element by element, signed with saturation
 static inline Vec16s sub_saturated(Vec16s const a, Vec16s const b) {
-    return _mm256_subs_epi16(a, b);
+    return simde_mm256_subs_epi16(a, b);
 }
 
 // function max: a > b ? a : b
 static inline Vec16s max(Vec16s const a, Vec16s const b) {
-    return _mm256_max_epi16(a,b);
+    return simde_mm256_max_epi16(a,b);
 }
 
 // function min: a < b ? a : b
 static inline Vec16s min(Vec16s const a, Vec16s const b) {
-    return _mm256_min_epi16(a,b);
+    return simde_mm256_min_epi16(a,b);
 }
 
 // function abs: a >= 0 ? a : -a
 static inline Vec16s abs(Vec16s const a) {
-    return _mm256_abs_epi16(a);
+    return simde_mm256_abs_epi16(a);
 }
 
 // function abs_saturated: same as abs, saturate if overflow
 static inline Vec16s abs_saturated(Vec16s const a) {
 #if INSTRSET >= 10
-    return _mm256_min_epu16(abs(a), Vec16s(0x7FFF));
+    return simde_mm256_min_epu16(abs(a), Vec16s(0x7FFF));
 #else
-    __m256i absa   = abs(a);                               // abs(a)
-    __m256i overfl = _mm256_srai_epi16(absa,15);           // sign
-    return           _mm256_add_epi16(absa,overfl);        // subtract 1 if 0x8000
+    simde__m256i absa   = abs(a);                               // abs(a)
+    simde__m256i overfl = simde_mm256_srai_epi16(absa,15);           // sign
+    return           simde_mm256_add_epi16(absa,overfl);        // subtract 1 if 0x8000
 #endif
 }
 
 // function rotate_left all elements
 // Use negative count to rotate right
 static inline Vec16s rotate_left(Vec16s const a, int b) {
-    __m256i left  = _mm256_sll_epi16(a,_mm_cvtsi32_si128(b & 0x0F));    // a << b
-    __m256i right = _mm256_srl_epi16(a,_mm_cvtsi32_si128((-b) & 0x0F)); // a >> (16 - b)
-    return          _mm256_or_si256(left,right);                        // or
+    simde__m256i left  = simde_mm256_sll_epi16(a,_mm_cvtsi32_si128(b & 0x0F));    // a << b
+    simde__m256i right = simde_mm256_srl_epi16(a,_mm_cvtsi32_si128((-b) & 0x0F)); // a >> (16 - b)
+    return          simde_mm256_or_si256(left,right);                        // or
 }
 
 
@@ -1897,35 +1897,35 @@ public:
     Vec16us() = default;
     // Constructor to broadcast the same value into all elements:
     Vec16us(uint32_t i) {
-        ymm = _mm256_set1_epi16((int16_t)i);
+        ymm = simde_mm256_set1_epi16((int16_t)i);
     }
     // Constructor to build from all elements:
     Vec16us(uint16_t i0, uint16_t i1, uint16_t i2,  uint16_t i3,  uint16_t i4,  uint16_t i5,  uint16_t i6,  uint16_t i7,
             uint16_t i8, uint16_t i9, uint16_t i10, uint16_t i11, uint16_t i12, uint16_t i13, uint16_t i14, uint16_t i15) {
-        ymm = _mm256_setr_epi16((int16_t)i0, (int16_t)i1, (int16_t)i2, (int16_t)i3, (int16_t)i4, (int16_t)i5, (int16_t)i6, (int16_t)i7,
+        ymm = simde_mm256_setr_epi16((int16_t)i0, (int16_t)i1, (int16_t)i2, (int16_t)i3, (int16_t)i4, (int16_t)i5, (int16_t)i6, (int16_t)i7,
             (int16_t)i8, (int16_t)i9, (int16_t)i10, (int16_t)i11, (int16_t)i12, (int16_t)i13, (int16_t)i14, (int16_t)i15);
     }
     // Constructor to build from two Vec8us:
     Vec16us(Vec8us const a0, Vec8us const a1) {
         ymm = set_m128ir(a0, a1);
     }
-    // Constructor to convert from type __m256i used in intrinsics:
-    Vec16us(__m256i const x) {
+    // Constructor to convert from type simde__m256i used in intrinsics:
+    Vec16us(simde__m256i const x) {
         ymm = x;
     }
-    // Assignment operator to convert from type __m256i used in intrinsics:
-    Vec16us & operator = (__m256i const x) {
+    // Assignment operator to convert from type simde__m256i used in intrinsics:
+    Vec16us & operator = (simde__m256i const x) {
         ymm = x;
         return *this;
     }
     // Member function to load from array (unaligned)
     Vec16us & load(void const * p) {
-        ymm = _mm256_loadu_si256((__m256i const*)p);
+        ymm = simde_mm256_loadu_si256((simde__m256i const*)p);
         return *this;
     }
     // Member function to load from array, aligned by 32
     Vec16us & load_a(void const * p) {
-        ymm = _mm256_load_si256((__m256i const*)p);
+        ymm = simde_mm256_load_si256((simde__m256i const*)p);
         return *this;
     }
     // Member function to change a single element in vector
@@ -1944,10 +1944,10 @@ public:
     }
     // Member functions to split into two Vec8us:
     Vec8us get_low() const {
-        return _mm256_castsi256_si128(ymm);
+        return simde_mm256_castsi256_si128(ymm);
     }
     Vec8us get_high() const {
-        return _mm256_extractf128_si256(ymm,1);
+        return simde_mm256_extractf128_si256(ymm,1);
     }
     static constexpr int elementtype() {
         return 7;
@@ -1976,7 +1976,7 @@ static inline Vec16us operator * (Vec16us const a, Vec16us const b) {
 
 // vector operator >> : shift right logical all elements
 static inline Vec16us operator >> (Vec16us const a, uint32_t b) {
-    return _mm256_srl_epi16(a,_mm_cvtsi32_si128((int)b));
+    return simde_mm256_srl_epi16(a,_mm_cvtsi32_si128((int)b));
 }
 
 // vector operator >> : shift right logical all elements
@@ -1992,7 +1992,7 @@ static inline Vec16us & operator >>= (Vec16us & a, uint32_t b) {
 
 // vector operator << : shift left all elements
 static inline Vec16us operator << (Vec16us const a, uint32_t b) {
-    return _mm256_sll_epi16(a,_mm_cvtsi32_si128((int)b));
+    return simde_mm256_sll_epi16(a,_mm_cvtsi32_si128((int)b));
 }
 
 // vector operator << : shift left all elements
@@ -2003,17 +2003,17 @@ static inline Vec16us operator << (Vec16us const a, int32_t b) {
 // vector operator >= : returns true for elements for which a >= b (unsigned)
 static inline Vec16sb operator >= (Vec16us const a, Vec16us const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epu16_mask (a, b, 5);
+    return simde_mm256_cmp_epu16_mask (a, b, 5);
 #else
-    __m256i max_ab = _mm256_max_epu16(a,b);                // max(a,b), unsigned
-    return _mm256_cmpeq_epi16(a,max_ab);                   // a == max(a,b)
+    simde__m256i max_ab = simde_mm256_max_epu16(a,b);                // max(a,b), unsigned
+    return simde_mm256_cmpeq_epi16(a,max_ab);                   // a == max(a,b)
 #endif
 }
 
 // vector operator <= : returns true for elements for which a <= b (unsigned)
 static inline Vec16sb operator <= (Vec16us const a, Vec16us const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epu16_mask (a, b, 2);
+    return simde_mm256_cmp_epu16_mask (a, b, 2);
 #else
     return b >= a;
 #endif
@@ -2022,7 +2022,7 @@ static inline Vec16sb operator <= (Vec16us const a, Vec16us const b) {
 // vector operator > : returns true for elements for which a > b (unsigned)
 static inline Vec16sb operator > (Vec16us const a, Vec16us const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epu16_mask (a, b, 6);
+    return simde_mm256_cmp_epu16_mask (a, b, 6);
 #else
     return Vec16sb(Vec16s(~(b >= a)));
 #endif
@@ -2031,7 +2031,7 @@ static inline Vec16sb operator > (Vec16us const a, Vec16us const b) {
 // vector operator < : returns true for elements for which a < b (unsigned)
 static inline Vec16sb operator < (Vec16us const a, Vec16us const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epu16_mask (a, b, 1);
+    return simde_mm256_cmp_epu16_mask (a, b, 1);
 #else
     return b > a;
 #endif
@@ -2069,7 +2069,7 @@ static inline Vec16us operator ~ (Vec16us const a) {
 // for (int i = 0; i < 8; i++) result[i] = s[i] ? a[i] : b[i];
 static inline Vec16us select (Vec16sb const s, Vec16us const a, Vec16us const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_mask_mov_epi16(b, s, a);
+    return simde_mm256_mask_mov_epi16(b, s, a);
 #else
     return selectb(s,a,b);
 #endif
@@ -2078,7 +2078,7 @@ static inline Vec16us select (Vec16sb const s, Vec16us const a, Vec16us const b)
 // Conditional add: For all vector elements i: result[i] = f[i] ? (a[i] + b[i]) : a[i]
 static inline Vec16us if_add (Vec16sb const f, Vec16us const a, Vec16us const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_mask_add_epi16 (a, f, a, b);
+    return simde_mm256_mask_add_epi16 (a, f, a, b);
 #else
     return a + (Vec16us(f) & b);
 #endif
@@ -2087,7 +2087,7 @@ static inline Vec16us if_add (Vec16sb const f, Vec16us const a, Vec16us const b)
 // Conditional subtract
 static inline Vec16us if_sub (Vec16sb const f, Vec16us const a, Vec16us const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_mask_sub_epi16 (a, f, a, b);
+    return simde_mm256_mask_sub_epi16 (a, f, a, b);
 #else
     return a - (Vec16us(f) & b);
 #endif
@@ -2096,7 +2096,7 @@ static inline Vec16us if_sub (Vec16sb const f, Vec16us const a, Vec16us const b)
 // Conditional multiply
 static inline Vec16us if_mul (Vec16sb const f, Vec16us const a, Vec16us const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_mask_mullo_epi16 (a, f, a, b);
+    return simde_mm256_mask_mullo_epi16 (a, f, a, b);
 #else
     return select(f, a*b, a);
 #endif
@@ -2111,14 +2111,14 @@ static inline uint16_t horizontal_add (Vec16us const a) {
 // Each element is zero-extended before addition to avoid overflow
 static inline uint32_t horizontal_add_x (Vec16us const a) {
 #if INSTRSET >= 10
-    __m256i aeven = _mm256_maskz_mov_epi16 (__mmask16(0x5555), a);
+    simde__m256i aeven = simde_mm256_maskz_mov_epi16 (__mmask16(0x5555), a);
 #else
-    __m256i mask  = _mm256_set1_epi32(0x0000FFFF);         // mask for even positions
-    __m256i aeven = _mm256_and_si256(a,mask);              // even numbered elements of a
+    simde__m256i mask  = simde_mm256_set1_epi32(0x0000FFFF);         // mask for even positions
+    simde__m256i aeven = simde_mm256_and_si256(a,mask);              // even numbered elements of a
 #endif
-    __m256i aodd  = _mm256_srli_epi32(a,16);               // zero extend odd numbered elements
-    __m256i sum1  = _mm256_add_epi32(aeven,aodd);          // add even and odd elements
-    __m128i sum2  = _mm_add_epi32(_mm256_extracti128_si256(sum1,1),_mm256_castsi256_si128(sum1));
+    simde__m256i aodd  = simde_mm256_srli_epi32(a,16);               // zero extend odd numbered elements
+    simde__m256i sum1  = simde_mm256_add_epi32(aeven,aodd);          // add even and odd elements
+    __m128i sum2  = _mm_add_epi32(simde_mm256_extracti128_si256(sum1,1),simde_mm256_castsi256_si128(sum1));
     __m128i sum3  = _mm_add_epi32(sum2,_mm_unpackhi_epi64(sum2,sum2));
     __m128i sum4  = _mm_add_epi32(sum3,_mm_shuffle_epi32(sum3,1));
     return (uint32_t)(uint16_t)_mm_cvtsi128_si32(sum4);    // truncate to 16 bits
@@ -2126,22 +2126,22 @@ static inline uint32_t horizontal_add_x (Vec16us const a) {
 
 // function add_saturated: add element by element, unsigned with saturation
 static inline Vec16us add_saturated(Vec16us const a, Vec16us const b) {
-    return _mm256_adds_epu16(a, b);
+    return simde_mm256_adds_epu16(a, b);
 }
 
 // function sub_saturated: subtract element by element, unsigned with saturation
 static inline Vec16us sub_saturated(Vec16us const a, Vec16us const b) {
-    return _mm256_subs_epu16(a, b);
+    return simde_mm256_subs_epu16(a, b);
 }
 
 // function max: a > b ? a : b
 static inline Vec16us max(Vec16us const a, Vec16us const b) {
-    return _mm256_max_epu16(a,b);
+    return simde_mm256_max_epu16(a,b);
 }
 
 // function min: a < b ? a : b
 static inline Vec16us min(Vec16us const a, Vec16us const b) {
-    return _mm256_min_epu16(a,b);
+    return simde_mm256_min_epu16(a,b);
 }
 
 
@@ -2157,43 +2157,43 @@ public:
     Vec8i() = default;
     // Constructor to broadcast the same value into all elements:
     Vec8i(int i) {
-        ymm = _mm256_set1_epi32(i);
+        ymm = simde_mm256_set1_epi32(i);
     }
     // Constructor to build from all elements:
     Vec8i(int32_t i0, int32_t i1, int32_t i2, int32_t i3, int32_t i4, int32_t i5, int32_t i6, int32_t i7) {
-        ymm = _mm256_setr_epi32(i0, i1, i2, i3, i4, i5, i6, i7);
+        ymm = simde_mm256_setr_epi32(i0, i1, i2, i3, i4, i5, i6, i7);
     }
     // Constructor to build from two Vec4i:
     Vec8i(Vec4i const a0, Vec4i const a1) {
         ymm = set_m128ir(a0, a1);
     }
-    // Constructor to convert from type __m256i used in intrinsics:
-    Vec8i(__m256i const x) {
+    // Constructor to convert from type simde__m256i used in intrinsics:
+    Vec8i(simde__m256i const x) {
         ymm = x;
     }
-    // Assignment operator to convert from type __m256i used in intrinsics:
-    Vec8i & operator = (__m256i const x) {
+    // Assignment operator to convert from type simde__m256i used in intrinsics:
+    Vec8i & operator = (simde__m256i const x) {
         ymm = x;
         return *this;
     }
-    // Type cast operator to convert to __m256i used in intrinsics
-    operator __m256i() const {
+    // Type cast operator to convert to simde__m256i used in intrinsics
+    operator simde__m256i() const {
         return ymm;
     }
     // Member function to load from array (unaligned)
     Vec8i & load(void const * p) {
-        ymm = _mm256_loadu_si256((__m256i const*)p);
+        ymm = simde_mm256_loadu_si256((simde__m256i const*)p);
         return *this;
     }
     // Member function to load from array, aligned by 32
     Vec8i & load_a(void const * p) {
-        ymm = _mm256_load_si256((__m256i const*)p);
+        ymm = simde_mm256_load_si256((simde__m256i const*)p);
         return *this;
     }
     // Partial load. Load n elements and set the rest to 0
     Vec8i & load_partial(int n, void const * p) {
 #if INSTRSET >= 10  // AVX512VL
-        ymm = _mm256_maskz_loadu_epi32(__mmask8((1u << n) - 1), p);
+        ymm = simde_mm256_maskz_loadu_epi32(__mmask8((1u << n) - 1), p);
 #else
         if (n <= 0) {
             *this = 0;
@@ -2213,7 +2213,7 @@ public:
     // Partial store. Store n elements
     void store_partial(int n, void * p) const {
 #if INSTRSET >= 10  // AVX512VL
-        _mm256_mask_storeu_epi32(p, __mmask8((1u << n) - 1), ymm);
+        simde_mm256_mask_storeu_epi32(p, __mmask8((1u << n) - 1), ymm);
 #else
         if (n <= 0) {
             return;
@@ -2233,7 +2233,7 @@ public:
     // cut off vector to n elements. The last 8-n elements are set to zero
     Vec8i & cutoff(int n) {
 #if INSTRSET >= 10
-        ymm = _mm256_maskz_mov_epi32(__mmask8((1u << n) - 1), ymm);
+        ymm = simde_mm256_maskz_mov_epi32(__mmask8((1u << n) - 1), ymm);
 #else
         *this = Vec32c(*this).cutoff(n * 4);
 #endif
@@ -2242,11 +2242,11 @@ public:
     // Member function to change a single element in vector
     Vec8i const insert(int index, int32_t value) {
 #if INSTRSET >= 10
-        ymm = _mm256_mask_set1_epi32(ymm, __mmask8(1u << index), value);
+        ymm = simde_mm256_mask_set1_epi32(ymm, __mmask8(1u << index), value);
 #else
-        __m256i broad = _mm256_set1_epi32(value);  // broadcast value into all elements
+        simde__m256i broad = simde_mm256_set1_epi32(value);  // broadcast value into all elements
         const int32_t maskl[16] = {0,0,0,0,0,0,0,0, -1,0,0,0,0,0,0,0};
-        __m256i mask  = Vec256b().load(maskl + 8 - (index & 7)); // mask with FFFFFFFF at index position
+        simde__m256i mask  = Vec256b().load(maskl + 8 - (index & 7)); // mask with FFFFFFFF at index position
         ymm = selectb (mask, broad, ymm);
 #endif
         return *this;
@@ -2254,8 +2254,8 @@ public:
     // Member function extract a single element from vector
     int32_t extract(int index) const {
 #if INSTRSET >= 10
-        __m256i x = _mm256_maskz_compress_epi32(__mmask8(1u << index), ymm);
-        return _mm_cvtsi128_si32(_mm256_castsi256_si128(x));
+        simde__m256i x = simde_mm256_maskz_compress_epi32(__mmask8(1u << index), ymm);
+        return _mm_cvtsi128_si32(simde_mm256_castsi256_si128(x));
 #else
         int32_t x[8];
         store(x);
@@ -2269,10 +2269,10 @@ public:
     }
     // Member functions to split into two Vec4i:
     Vec4i get_low() const {
-        return _mm256_castsi256_si128(ymm);
+        return simde_mm256_castsi256_si128(ymm);
     }
     Vec4i get_high() const {
-        return _mm256_extractf128_si256(ymm,1);
+        return simde_mm256_extractf128_si256(ymm,1);
     }
     static constexpr int size() {
         return 8;
@@ -2299,12 +2299,12 @@ public:
     Vec8ib(bool x0, bool x1, bool x2, bool x3, bool x4, bool x5, bool x6, bool x7) :
         Vec8i(-int32_t(x0), -int32_t(x1), -int32_t(x2), -int32_t(x3), -int32_t(x4), -int32_t(x5), -int32_t(x6), -int32_t(x7))
         {}
-    // Constructor to convert from type __m256i used in intrinsics:
-    Vec8ib(__m256i const x) {
+    // Constructor to convert from type simde__m256i used in intrinsics:
+    Vec8ib(simde__m256i const x) {
         ymm = x;
     }
-    // Assignment operator to convert from type __m256i used in intrinsics:
-    Vec8ib & operator = (__m256i const x) {
+    // Assignment operator to convert from type simde__m256i used in intrinsics:
+    Vec8ib & operator = (simde__m256i const x) {
         ymm = x;
         return *this;
     }
@@ -2340,10 +2340,10 @@ public:
     }
     // Member function to change a bitfield to a boolean vector
     Vec8ib & load_bits(uint8_t a) {
-        __m256i b1 = _mm256_set1_epi32((int32_t)a);  // broadcast a
-        __m256i m2 = constant8ui<1,2,4,8,0x10,0x20,0x40,0x80>();
-        __m256i d1 = _mm256_and_si256(b1, m2); // isolate one bit in each dword
-        ymm = _mm256_cmpgt_epi32(d1, _mm256_setzero_si256());  // compare with 0
+        simde__m256i b1 = simde_mm256_set1_epi32((int32_t)a);  // broadcast a
+        simde__m256i m2 = constant8ui<1,2,4,8,0x10,0x20,0x40,0x80>();
+        simde__m256i d1 = simde_mm256_and_si256(b1, m2); // isolate one bit in each dword
+        ymm = simde_mm256_cmpgt_epi32(d1, simde_mm256_setzero_si256());  // compare with 0
         return *this;
     }
     static constexpr int elementtype() {
@@ -2440,7 +2440,7 @@ static inline Vec8ib andnot (Vec8ib const a, Vec8ib const b) {
 
 // vector operator + : add element by element
 static inline Vec8i operator + (Vec8i const a, Vec8i const b) {
-    return _mm256_add_epi32(a, b);
+    return simde_mm256_add_epi32(a, b);
 }
 // vector operator += : add
 static inline Vec8i & operator += (Vec8i & a, Vec8i const b) {
@@ -2462,11 +2462,11 @@ static inline Vec8i & operator ++ (Vec8i & a) {
 
 // vector operator - : subtract element by element
 static inline Vec8i operator - (Vec8i const a, Vec8i const b) {
-    return _mm256_sub_epi32(a, b);
+    return simde_mm256_sub_epi32(a, b);
 }
 // vector operator - : unary minus
 static inline Vec8i operator - (Vec8i const a) {
-    return _mm256_sub_epi32(_mm256_setzero_si256(), a);
+    return simde_mm256_sub_epi32(simde_mm256_setzero_si256(), a);
 }
 // vector operator -= : subtract
 static inline Vec8i & operator -= (Vec8i & a, Vec8i const b) {
@@ -2488,7 +2488,7 @@ static inline Vec8i & operator -- (Vec8i & a) {
 
 // vector operator * : multiply element by element
 static inline Vec8i operator * (Vec8i const a, Vec8i const b) {
-    return _mm256_mullo_epi32(a, b);
+    return simde_mm256_mullo_epi32(a, b);
 }
 // vector operator *= : multiply
 static inline Vec8i & operator *= (Vec8i & a, Vec8i const b) {
@@ -2500,7 +2500,7 @@ static inline Vec8i & operator *= (Vec8i & a, Vec8i const b) {
 
 // vector operator << : shift left
 static inline Vec8i operator << (Vec8i const a, int32_t b) {
-    return _mm256_sll_epi32(a, _mm_cvtsi32_si128(b));
+    return simde_mm256_sll_epi32(a, _mm_cvtsi32_si128(b));
 }
 // vector operator <<= : shift left
 static inline Vec8i & operator <<= (Vec8i & a, int32_t b) {
@@ -2510,7 +2510,7 @@ static inline Vec8i & operator <<= (Vec8i & a, int32_t b) {
 
 // vector operator >> : shift right arithmetic
 static inline Vec8i operator >> (Vec8i const a, int32_t b) {
-    return _mm256_sra_epi32(a, _mm_cvtsi32_si128(b));
+    return simde_mm256_sra_epi32(a, _mm_cvtsi32_si128(b));
 }
 // vector operator >>= : shift right arithmetic
 static inline Vec8i & operator >>= (Vec8i & a, int32_t b) {
@@ -2521,16 +2521,16 @@ static inline Vec8i & operator >>= (Vec8i & a, int32_t b) {
 // vector operator == : returns true for elements for which a == b
 static inline Vec8ib operator == (Vec8i const a, Vec8i const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epi32_mask (a, b, 0);
+    return simde_mm256_cmp_epi32_mask (a, b, 0);
 #else
-    return _mm256_cmpeq_epi32(a, b);
+    return simde_mm256_cmpeq_epi32(a, b);
 #endif
 }
 
 // vector operator != : returns true for elements for which a != b
 static inline Vec8ib operator != (Vec8i const a, Vec8i const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epi32_mask (a, b, 4);
+    return simde_mm256_cmp_epi32_mask (a, b, 4);
 #else
     return Vec8ib(Vec8i(~(a == b)));
 #endif
@@ -2539,16 +2539,16 @@ static inline Vec8ib operator != (Vec8i const a, Vec8i const b) {
 // vector operator > : returns true for elements for which a > b
 static inline Vec8ib operator > (Vec8i const a, Vec8i const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epi32_mask (a, b, 6);
+    return simde_mm256_cmp_epi32_mask (a, b, 6);
 #else
-    return _mm256_cmpgt_epi32(a, b);
+    return simde_mm256_cmpgt_epi32(a, b);
 #endif
 }
 
 // vector operator < : returns true for elements for which a < b
 static inline Vec8ib operator < (Vec8i const a, Vec8i const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epi32_mask (a, b, 1);
+    return simde_mm256_cmp_epi32_mask (a, b, 1);
 #else
     return b > a;
 #endif
@@ -2557,7 +2557,7 @@ static inline Vec8ib operator < (Vec8i const a, Vec8i const b) {
 // vector operator >= : returns true for elements for which a >= b (signed)
 static inline Vec8ib operator >= (Vec8i const a, Vec8i const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epi32_mask (a, b, 5);
+    return simde_mm256_cmp_epi32_mask (a, b, 5);
 #else
     return Vec8ib(Vec8i(~(b > a)));
 #endif
@@ -2566,7 +2566,7 @@ static inline Vec8ib operator >= (Vec8i const a, Vec8i const b) {
 // vector operator <= : returns true for elements for which a <= b (signed)
 static inline Vec8ib operator <= (Vec8i const a, Vec8i const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epi32_mask (a, b, 2);
+    return simde_mm256_cmp_epi32_mask (a, b, 2);
 #else
     return b >= a;
 #endif
@@ -2616,9 +2616,9 @@ static inline Vec8i operator ~ (Vec8i const a) {
 // vector operator ! : returns true for elements == 0
 static inline Vec8ib operator ! (Vec8i const a) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epi32_mask (a, _mm256_setzero_si256(), 0);
+    return simde_mm256_cmp_epi32_mask (a, simde_mm256_setzero_si256(), 0);
 #else
-    return _mm256_cmpeq_epi32(a, _mm256_setzero_si256());
+    return simde_mm256_cmpeq_epi32(a, simde_mm256_setzero_si256());
 #endif
 }
 
@@ -2628,7 +2628,7 @@ static inline Vec8ib operator ! (Vec8i const a) {
 // for (int i = 0; i < 8; i++) result[i] = s[i] ? a[i] : b[i];
 static inline Vec8i select (Vec8ib const s, Vec8i const a, Vec8i const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_mask_mov_epi32(b, s, a);
+    return simde_mm256_mask_mov_epi32(b, s, a);
 #else
     return selectb(s,a,b);
 #endif
@@ -2637,7 +2637,7 @@ static inline Vec8i select (Vec8ib const s, Vec8i const a, Vec8i const b) {
 // Conditional add: For all vector elements i: result[i] = f[i] ? (a[i] + b[i]) : a[i]
 static inline Vec8i if_add (Vec8ib const f, Vec8i const a, Vec8i const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_mask_add_epi32 (a, f, a, b);
+    return simde_mm256_mask_add_epi32 (a, f, a, b);
 #else
     return a + (Vec8i(f) & b);
 #endif
@@ -2646,7 +2646,7 @@ static inline Vec8i if_add (Vec8ib const f, Vec8i const a, Vec8i const b) {
 // Conditional subtract
 static inline Vec8i if_sub (Vec8ib const f, Vec8i const a, Vec8i const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_mask_sub_epi32 (a, f, a, b);
+    return simde_mm256_mask_sub_epi32 (a, f, a, b);
 #else
     return a - (Vec8i(f) & b);
 #endif
@@ -2655,7 +2655,7 @@ static inline Vec8i if_sub (Vec8ib const f, Vec8i const a, Vec8i const b) {
 // Conditional multiply
 static inline Vec8i if_mul (Vec8ib const f, Vec8i const a, Vec8i const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_mask_mullo_epi32 (a, f, a, b);
+    return simde_mm256_mask_mullo_epi32 (a, f, a, b);
 #else
     return select(f, a*b, a);
 #endif
@@ -2664,7 +2664,7 @@ static inline Vec8i if_mul (Vec8ib const f, Vec8i const a, Vec8i const b) {
 // Horizontal add: Calculates the sum of all vector elements. Overflow will wrap around
 static inline int32_t horizontal_add (Vec8i const a) {
     // The hadd instruction is inefficient, and may be split into two instructions for faster decoding
-    __m128i sum1  = _mm_add_epi32(_mm256_extracti128_si256(a,1),_mm256_castsi256_si128(a));
+    __m128i sum1  = _mm_add_epi32(simde_mm256_extracti128_si256(a,1),simde_mm256_castsi256_si128(a));
     __m128i sum2  = _mm_add_epi32(sum1,_mm_unpackhi_epi64(sum1,sum1));
     __m128i sum3  = _mm_add_epi32(sum2,_mm_shuffle_epi32(sum2,1));
     return (int32_t)_mm_cvtsi128_si32(sum3);
@@ -2676,53 +2676,53 @@ static inline int32_t horizontal_add (Vec8i const a) {
 
 // function add_saturated: add element by element, signed with saturation
 static inline Vec8i add_saturated(Vec8i const a, Vec8i const b) {
-    __m256i sum    = _mm256_add_epi32(a, b);               // a + b
-    __m256i axb    = _mm256_xor_si256(a, b);               // check if a and b have different sign
-    __m256i axs    = _mm256_xor_si256(a, sum);             // check if a and sum have different sign
-    __m256i overf1 = _mm256_andnot_si256(axb,axs);         // check if sum has wrong sign
-    __m256i overf2 = _mm256_srai_epi32(overf1,31);         // -1 if overflow
-    __m256i asign  = _mm256_srli_epi32(a,31);              // 1  if a < 0
-    __m256i sat1   = _mm256_srli_epi32(overf2,1);          // 7FFFFFFF if overflow
-    __m256i sat2   = _mm256_add_epi32(sat1,asign);         // 7FFFFFFF if positive overflow 80000000 if negative overflow
+    simde__m256i sum    = simde_mm256_add_epi32(a, b);               // a + b
+    simde__m256i axb    = simde_mm256_xor_si256(a, b);               // check if a and b have different sign
+    simde__m256i axs    = simde_mm256_xor_si256(a, sum);             // check if a and sum have different sign
+    simde__m256i overf1 = simde_mm256_andnot_si256(axb,axs);         // check if sum has wrong sign
+    simde__m256i overf2 = simde_mm256_srai_epi32(overf1,31);         // -1 if overflow
+    simde__m256i asign  = simde_mm256_srli_epi32(a,31);              // 1  if a < 0
+    simde__m256i sat1   = simde_mm256_srli_epi32(overf2,1);          // 7FFFFFFF if overflow
+    simde__m256i sat2   = simde_mm256_add_epi32(sat1,asign);         // 7FFFFFFF if positive overflow 80000000 if negative overflow
     return  selectb(overf2,sat2,sum);                      // sum if not overflow, else sat2
 }
 
 // function sub_saturated: subtract element by element, signed with saturation
 static inline Vec8i sub_saturated(Vec8i const a, Vec8i const b) {
-    __m256i diff   = _mm256_sub_epi32(a, b);               // a + b
-    __m256i axb    = _mm256_xor_si256(a, b);               // check if a and b have different sign
-    __m256i axs    = _mm256_xor_si256(a, diff);            // check if a and sum have different sign
-    __m256i overf1 = _mm256_and_si256(axb,axs);            // check if sum has wrong sign
-    __m256i overf2 = _mm256_srai_epi32(overf1,31);         // -1 if overflow
-    __m256i asign  = _mm256_srli_epi32(a,31);              // 1  if a < 0
-    __m256i sat1   = _mm256_srli_epi32(overf2,1);          // 7FFFFFFF if overflow
-    __m256i sat2   = _mm256_add_epi32(sat1,asign);         // 7FFFFFFF if positive overflow 80000000 if negative overflow
+    simde__m256i diff   = simde_mm256_sub_epi32(a, b);               // a + b
+    simde__m256i axb    = simde_mm256_xor_si256(a, b);               // check if a and b have different sign
+    simde__m256i axs    = simde_mm256_xor_si256(a, diff);            // check if a and sum have different sign
+    simde__m256i overf1 = simde_mm256_and_si256(axb,axs);            // check if sum has wrong sign
+    simde__m256i overf2 = simde_mm256_srai_epi32(overf1,31);         // -1 if overflow
+    simde__m256i asign  = simde_mm256_srli_epi32(a,31);              // 1  if a < 0
+    simde__m256i sat1   = simde_mm256_srli_epi32(overf2,1);          // 7FFFFFFF if overflow
+    simde__m256i sat2   = simde_mm256_add_epi32(sat1,asign);         // 7FFFFFFF if positive overflow 80000000 if negative overflow
     return  selectb(overf2,sat2,diff);                     // diff if not overflow, else sat2
 }
 
 // function max: a > b ? a : b
 static inline Vec8i max(Vec8i const a, Vec8i const b) {
-    return _mm256_max_epi32(a,b);
+    return simde_mm256_max_epi32(a,b);
 }
 
 // function min: a < b ? a : b
 static inline Vec8i min(Vec8i const a, Vec8i const b) {
-    return _mm256_min_epi32(a,b);
+    return simde_mm256_min_epi32(a,b);
 }
 
 // function abs: a >= 0 ? a : -a
 static inline Vec8i abs(Vec8i const a) {
-    return _mm256_abs_epi32(a);
+    return simde_mm256_abs_epi32(a);
 }
 
 // function abs_saturated: same as abs, saturate if overflow
 static inline Vec8i abs_saturated(Vec8i const a) {
 #if INSTRSET >= 10
-    return _mm256_min_epu32(abs(a), Vec8i(0x7FFFFFFF));
+    return simde_mm256_min_epu32(abs(a), Vec8i(0x7FFFFFFF));
 #else
-    __m256i absa   = abs(a);                               // abs(a)
-    __m256i overfl = _mm256_srai_epi32(absa,31);           // sign
-    return           _mm256_add_epi32(absa,overfl);        // subtract 1 if 0x80000000
+    simde__m256i absa   = abs(a);                               // abs(a)
+    simde__m256i overfl = simde_mm256_srai_epi32(absa,31);           // sign
+    return           simde_mm256_add_epi32(absa,overfl);        // subtract 1 if 0x80000000
 #endif
 }
 
@@ -2730,11 +2730,11 @@ static inline Vec8i abs_saturated(Vec8i const a) {
 // Use negative count to rotate right
 static inline Vec8i rotate_left(Vec8i const a, int b) {
 #if INSTRSET >= 10  // __AVX512VL__
-    return _mm256_rolv_epi32(a, _mm256_set1_epi32(b));
+    return simde_mm256_rolv_epi32(a, simde_mm256_set1_epi32(b));
 #else
-    __m256i left  = _mm256_sll_epi32(a,_mm_cvtsi32_si128(b & 0x1F));   // a << b
-    __m256i right = _mm256_srl_epi32(a,_mm_cvtsi32_si128((-b) & 0x1F));// a >> (32 - b)
-    __m256i rot   = _mm256_or_si256(left,right);                       // or
+    simde__m256i left  = simde_mm256_sll_epi32(a,_mm_cvtsi32_si128(b & 0x1F));   // a << b
+    simde__m256i right = simde_mm256_srl_epi32(a,_mm_cvtsi32_si128((-b) & 0x1F));// a >> (32 - b)
+    simde__m256i rot   = simde_mm256_or_si256(left,right);                       // or
     return  rot;
 #endif
 }
@@ -2752,33 +2752,33 @@ public:
     Vec8ui() = default;
     // Constructor to broadcast the same value into all elements:
     Vec8ui(uint32_t i) {
-        ymm = _mm256_set1_epi32((int32_t)i);
+        ymm = simde_mm256_set1_epi32((int32_t)i);
     }
     // Constructor to build from all elements:
     Vec8ui(uint32_t i0, uint32_t i1, uint32_t i2, uint32_t i3, uint32_t i4, uint32_t i5, uint32_t i6, uint32_t i7) {
-        ymm = _mm256_setr_epi32((int32_t)i0, (int32_t)i1, (int32_t)i2, (int32_t)i3, (int32_t)i4, (int32_t)i5, (int32_t)i6, (int32_t)i7);
+        ymm = simde_mm256_setr_epi32((int32_t)i0, (int32_t)i1, (int32_t)i2, (int32_t)i3, (int32_t)i4, (int32_t)i5, (int32_t)i6, (int32_t)i7);
     }
     // Constructor to build from two Vec4ui:
     Vec8ui(Vec4ui const a0, Vec4ui const a1) {
         ymm = set_m128ir(a0, a1);
     }
-    // Constructor to convert from type __m256i used in intrinsics:
-    Vec8ui(__m256i const x) {
+    // Constructor to convert from type simde__m256i used in intrinsics:
+    Vec8ui(simde__m256i const x) {
         ymm = x;
     }
-    // Assignment operator to convert from type __m256i used in intrinsics:
-    Vec8ui & operator = (__m256i const x) {
+    // Assignment operator to convert from type simde__m256i used in intrinsics:
+    Vec8ui & operator = (simde__m256i const x) {
         ymm = x;
         return *this;
     }
     // Member function to load from array (unaligned)
     Vec8ui & load(void const * p) {
-        ymm = _mm256_loadu_si256((__m256i const*)p);
+        ymm = simde_mm256_loadu_si256((simde__m256i const*)p);
         return *this;
     }
     // Member function to load from array, aligned by 32
     Vec8ui & load_a(void const * p) {
-        ymm = _mm256_load_si256((__m256i const*)p);
+        ymm = simde_mm256_load_si256((simde__m256i const*)p);
         return *this;
     }
     // Member function to change a single element in vector
@@ -2797,10 +2797,10 @@ public:
     }
     // Member functions to split into two Vec4ui:
     Vec4ui get_low() const {
-        return _mm256_castsi256_si128(ymm);
+        return simde_mm256_castsi256_si128(ymm);
     }
     Vec4ui get_high() const {
-        return _mm256_extractf128_si256(ymm,1);
+        return simde_mm256_extractf128_si256(ymm,1);
     }
     static constexpr int elementtype() {
         return 9;
@@ -2829,7 +2829,7 @@ static inline Vec8ui operator * (Vec8ui const a, Vec8ui const b) {
 
 // vector operator >> : shift right logical all elements
 static inline Vec8ui operator >> (Vec8ui const a, uint32_t b) {
-    return _mm256_srl_epi32(a,_mm_cvtsi32_si128((int)b));
+    return simde_mm256_srl_epi32(a,_mm_cvtsi32_si128((int)b));
 }
 
 // vector operator >> : shift right logical all elements
@@ -2854,19 +2854,19 @@ static inline Vec8ui operator << (Vec8ui const a, int32_t b) {
 // vector operator > : returns true for elements for which a > b (unsigned)
 static inline Vec8ib operator > (Vec8ui const a, Vec8ui const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epu32_mask (a, b, 6);
+    return simde_mm256_cmp_epu32_mask (a, b, 6);
 #else
-    __m256i signbit = _mm256_set1_epi32(0x80000000);
-    __m256i a1      = _mm256_xor_si256(a,signbit);
-    __m256i b1      = _mm256_xor_si256(b,signbit);
-    return _mm256_cmpgt_epi32(a1,b1);                      // signed compare
+    simde__m256i signbit = simde_mm256_set1_epi32(0x80000000);
+    simde__m256i a1      = simde_mm256_xor_si256(a,signbit);
+    simde__m256i b1      = simde_mm256_xor_si256(b,signbit);
+    return simde_mm256_cmpgt_epi32(a1,b1);                      // signed compare
 #endif
 }
 
 // vector operator < : returns true for elements for which a < b (unsigned)
 static inline Vec8ib operator < (Vec8ui const a, Vec8ui const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epu32_mask (a, b, 1);
+    return simde_mm256_cmp_epu32_mask (a, b, 1);
 #else
     return b > a;
 #endif
@@ -2875,17 +2875,17 @@ static inline Vec8ib operator < (Vec8ui const a, Vec8ui const b) {
 // vector operator >= : returns true for elements for which a >= b (unsigned)
 static inline Vec8ib operator >= (Vec8ui const a, Vec8ui const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epu32_mask (a, b, 5);
+    return simde_mm256_cmp_epu32_mask (a, b, 5);
 #else
-    __m256i max_ab = _mm256_max_epu32(a,b);                // max(a,b), unsigned
-    return _mm256_cmpeq_epi32(a,max_ab);                   // a == max(a,b)
+    simde__m256i max_ab = simde_mm256_max_epu32(a,b);                // max(a,b), unsigned
+    return simde_mm256_cmpeq_epi32(a,max_ab);                   // a == max(a,b)
 #endif
 }
 
 // vector operator <= : returns true for elements for which a <= b (unsigned)
 static inline Vec8ib operator <= (Vec8ui const a, Vec8ui const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epu32_mask (a, b, 2);
+    return simde_mm256_cmp_epu32_mask (a, b, 2);
 #else
     return b >= a;
 #endif
@@ -2923,7 +2923,7 @@ static inline Vec8ui operator ~ (Vec8ui const a) {
 // for (int i = 0; i < 16; i++) result[i] = s[i] ? a[i] : b[i];
 static inline Vec8ui select (Vec8ib const s, Vec8ui const a, Vec8ui const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_mask_mov_epi32(b, s, a);
+    return simde_mm256_mask_mov_epi32(b, s, a);
 #else
     return selectb(s,a,b);
 #endif
@@ -2932,7 +2932,7 @@ static inline Vec8ui select (Vec8ib const s, Vec8ui const a, Vec8ui const b) {
 // Conditional add: For all vector elements i: result[i] = f[i] ? (a[i] + b[i]) : a[i]
 static inline Vec8ui if_add (Vec8ib const f, Vec8ui const a, Vec8ui const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_mask_add_epi32 (a, f, a, b);
+    return simde_mm256_mask_add_epi32 (a, f, a, b);
 #else
     return a + (Vec8ui(f) & b);
 #endif
@@ -2941,7 +2941,7 @@ static inline Vec8ui if_add (Vec8ib const f, Vec8ui const a, Vec8ui const b) {
 // Conditional subtract
 static inline Vec8ui if_sub (Vec8ib const f, Vec8ui const a, Vec8ui const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_mask_sub_epi32 (a, f, a, b);
+    return simde_mm256_mask_sub_epi32 (a, f, a, b);
 #else
     return a - (Vec8ui(f) & b);
 #endif
@@ -2950,7 +2950,7 @@ static inline Vec8ui if_sub (Vec8ib const f, Vec8ui const a, Vec8ui const b) {
 // Conditional multiply
 static inline Vec8ui if_mul (Vec8ib const f, Vec8ui const a, Vec8ui const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_mask_mullo_epi32 (a, f, a, b);
+    return simde_mm256_mask_mullo_epi32 (a, f, a, b);
 #else
     return select(f, a*b, a);
 #endif
@@ -2970,8 +2970,8 @@ static inline Vec8ui add_saturated(Vec8ui const a, Vec8ui const b) {
     Vec8ui sum = a + b;
     Vec8ui aorb = Vec8ui(a | b);
 #if INSTRSET >= 10
-    Vec8b  overflow = _mm256_cmp_epu32_mask(sum, aorb, 1);
-    return _mm256_mask_set1_epi32(sum, overflow, -1);
+    Vec8b  overflow = simde_mm256_cmp_epu32_mask(sum, aorb, 1);
+    return simde_mm256_mask_set1_epi32(sum, overflow, -1);
 #else
     Vec8ui overflow = Vec8ui(sum < aorb);                  // overflow if a + b < (a | b)
     return Vec8ui(sum | overflow);                         // return 0xFFFFFFFF if overflow
@@ -2982,22 +2982,22 @@ static inline Vec8ui add_saturated(Vec8ui const a, Vec8ui const b) {
 static inline Vec8ui sub_saturated(Vec8ui const a, Vec8ui const b) {
     Vec8ui diff = a - b;
 #if INSTRSET >= 10
-    Vec8b  nunderflow = _mm256_cmp_epu32_mask(diff, a, 2); // not underflow if a - b <= a
-    return _mm256_maskz_mov_epi32(nunderflow, diff);       // zero if underflow
+    Vec8b  nunderflow = simde_mm256_cmp_epu32_mask(diff, a, 2); // not underflow if a - b <= a
+    return simde_mm256_maskz_mov_epi32(nunderflow, diff);       // zero if underflow
 #else
     Vec8ui underflow = Vec8ui(diff > a);                   // underflow if a - b > a
-    return _mm256_andnot_si256(underflow, diff);           // return 0 if underflow
+    return simde_mm256_andnot_si256(underflow, diff);           // return 0 if underflow
 #endif
 }
 
 // function max: a > b ? a : b
 static inline Vec8ui max(Vec8ui const a, Vec8ui const b) {
-    return _mm256_max_epu32(a,b);
+    return simde_mm256_max_epu32(a,b);
 }
 
 // function min: a < b ? a : b
 static inline Vec8ui min(Vec8ui const a, Vec8ui const b) {
-    return _mm256_min_epu32(a,b);
+    return simde_mm256_min_epu32(a,b);
 }
 
 
@@ -3013,43 +3013,43 @@ public:
     Vec4q() = default;
     // Constructor to broadcast the same value into all elements:
     Vec4q(int64_t i) {
-        ymm = _mm256_set1_epi64x(i);
+        ymm = simde_mm256_set1_epi64x(i);
     }
     // Constructor to build from all elements:
     Vec4q(int64_t i0, int64_t i1, int64_t i2, int64_t i3) {
-        ymm = _mm256_setr_epi64x(i0, i1, i2, i3);
+        ymm = simde_mm256_setr_epi64x(i0, i1, i2, i3);
     }
     // Constructor to build from two Vec2q:
     Vec4q(Vec2q const a0, Vec2q const a1) {
         ymm = set_m128ir(a0, a1);
     }
-    // Constructor to convert from type __m256i used in intrinsics:
-    Vec4q(__m256i const x) {
+    // Constructor to convert from type simde__m256i used in intrinsics:
+    Vec4q(simde__m256i const x) {
         ymm = x;
     }
-    // Assignment operator to convert from type __m256i used in intrinsics:
-    Vec4q & operator = (__m256i const x) {
+    // Assignment operator to convert from type simde__m256i used in intrinsics:
+    Vec4q & operator = (simde__m256i const x) {
         ymm = x;
         return *this;
     }
-    // Type cast operator to convert to __m256i used in intrinsics
-    operator __m256i() const {
+    // Type cast operator to convert to simde__m256i used in intrinsics
+    operator simde__m256i() const {
         return ymm;
     }
     // Member function to load from array (unaligned)
     Vec4q & load(void const * p) {
-        ymm = _mm256_loadu_si256((__m256i const*)p);
+        ymm = simde_mm256_loadu_si256((simde__m256i const*)p);
         return *this;
     }
     // Member function to load from array, aligned by 32
     Vec4q & load_a(void const * p) {
-        ymm = _mm256_load_si256((__m256i const*)p);
+        ymm = simde_mm256_load_si256((simde__m256i const*)p);
         return *this;
     }
     // Partial load. Load n elements and set the rest to 0
     Vec4q & load_partial(int n, void const * p) {
 #if INSTRSET >= 10  // AVX512VL
-        ymm = _mm256_maskz_loadu_epi64(__mmask8((1u << n) - 1), p);
+        ymm = simde_mm256_maskz_loadu_epi64(__mmask8((1u << n) - 1), p);
 #else
         if (n <= 0) {
             *this = 0;
@@ -3069,7 +3069,7 @@ public:
     // Partial store. Store n elements
     void store_partial(int n, void * p) const {
 #if INSTRSET >= 10  // AVX512VL
-        _mm256_mask_storeu_epi64(p, __mmask8((1u << n) - 1), ymm);
+        simde_mm256_mask_storeu_epi64(p, __mmask8((1u << n) - 1), ymm);
 #else
         if (n <= 0) {
             return;
@@ -3089,7 +3089,7 @@ public:
     // cut off vector to n elements. The last 8-n elements are set to zero
     Vec4q & cutoff(int n) {
 #if INSTRSET >= 10
-        ymm = _mm256_maskz_mov_epi64(__mmask8((1u << n) - 1), ymm);
+        ymm = simde_mm256_maskz_mov_epi64(__mmask8((1u << n) - 1), ymm);
 #else
         *this = Vec32c(*this).cutoff(n * 8);
 #endif
@@ -3098,18 +3098,18 @@ public:
     // Member function to change a single element in vector
     Vec4q const insert(int index, int64_t value) {
 #if INSTRSET >= 10
-        ymm = _mm256_mask_set1_epi64(ymm, __mmask8(1u << index), value);
+        ymm = simde_mm256_mask_set1_epi64(ymm, __mmask8(1u << index), value);
 #else
         Vec4q x(value);
         switch (index) {
         case 0:
-            ymm = _mm256_blend_epi32(ymm,x,0x03);  break;
+            ymm = simde_mm256_blend_epi32(ymm,x,0x03);  break;
         case 1:
-            ymm = _mm256_blend_epi32(ymm,x,0x0C);  break;
+            ymm = simde_mm256_blend_epi32(ymm,x,0x0C);  break;
         case 2:
-            ymm = _mm256_blend_epi32(ymm,x,0x30);  break;
+            ymm = simde_mm256_blend_epi32(ymm,x,0x30);  break;
         case 3:
-            ymm = _mm256_blend_epi32(ymm,x,0xC0);  break;
+            ymm = simde_mm256_blend_epi32(ymm,x,0xC0);  break;
         }
 #endif
         return *this;
@@ -3117,8 +3117,8 @@ public:
     // Member function extract a single element from vector
     int64_t extract(int index) const {
 #if INSTRSET >= 10
-        __m256i x = _mm256_maskz_compress_epi64(__mmask8(1u << index), ymm);
-        return _emulate_movq(_mm256_castsi256_si128(x));
+        simde__m256i x = simde_mm256_maskz_compress_epi64(__mmask8(1u << index), ymm);
+        return _emulate_movq(simde_mm256_castsi256_si128(x));
 #else
         int64_t x[4];
         store(x);
@@ -3132,10 +3132,10 @@ public:
     }
     // Member functions to split into two Vec2q:
     Vec2q get_low() const {
-        return _mm256_castsi256_si128(ymm);
+        return simde_mm256_castsi256_si128(ymm);
     }
     Vec2q get_high() const {
-        return _mm256_extractf128_si256(ymm,1);
+        return simde_mm256_extractf128_si256(ymm,1);
     }
     static constexpr int size() {
         return 4;
@@ -3161,12 +3161,12 @@ public:
     Vec4qb(bool x0, bool x1, bool x2, bool x3) :
         Vec4q(-int64_t(x0), -int64_t(x1), -int64_t(x2), -int64_t(x3)) {
     }
-    // Constructor to convert from type __m256i used in intrinsics:
-    Vec4qb(__m256i const x) {
+    // Constructor to convert from type simde__m256i used in intrinsics:
+    Vec4qb(simde__m256i const x) {
         ymm = x;
     }
-    // Assignment operator to convert from type __m256i used in intrinsics:
-    Vec4qb & operator = (__m256i const x) {
+    // Assignment operator to convert from type simde__m256i used in intrinsics:
+    Vec4qb & operator = (simde__m256i const x) {
         ymm = x;
         return *this;
     }
@@ -3203,10 +3203,10 @@ public:
     }
     // Member function to change a bitfield to a boolean vector
     Vec4qb & load_bits(uint8_t a) {
-        __m256i b1 = _mm256_set1_epi32((int32_t)a);  // broadcast a
-        __m256i m2 = constant8ui<1,0,2,0,4,0,8,0>();
-        __m256i d1 = _mm256_and_si256(b1, m2); // isolate one bit in each dword
-        ymm = _mm256_cmpgt_epi64(d1, _mm256_setzero_si256());  // we can use signed compare here because no value is negative
+        simde__m256i b1 = simde_mm256_set1_epi32((int32_t)a);  // broadcast a
+        simde__m256i m2 = constant8ui<1,0,2,0,4,0,8,0>();
+        simde__m256i d1 = simde_mm256_and_si256(b1, m2); // isolate one bit in each dword
+        ymm = simde_mm256_cmpgt_epi64(d1, simde_mm256_setzero_si256());  // we can use signed compare here because no value is negative
         return *this;
     }
     static constexpr int elementtype() {
@@ -3303,7 +3303,7 @@ static inline Vec4qb andnot (Vec4qb const a, Vec4qb const b) {
 
 // vector operator + : add element by element
 static inline Vec4q operator + (Vec4q const a, Vec4q const b) {
-    return _mm256_add_epi64(a, b);
+    return simde_mm256_add_epi64(a, b);
 }
 // vector operator += : add
 static inline Vec4q & operator += (Vec4q & a, Vec4q const b) {
@@ -3325,11 +3325,11 @@ static inline Vec4q & operator ++ (Vec4q & a) {
 
 // vector operator - : subtract element by element
 static inline Vec4q operator - (Vec4q const a, Vec4q const b) {
-    return _mm256_sub_epi64(a, b);
+    return simde_mm256_sub_epi64(a, b);
 }
 // vector operator - : unary minus
 static inline Vec4q operator - (Vec4q const a) {
-    return _mm256_sub_epi64(_mm256_setzero_si256(), a);
+    return simde_mm256_sub_epi64(simde_mm256_setzero_si256(), a);
 }
 // vector operator -= : subtract
 static inline Vec4q & operator -= (Vec4q & a, Vec4q const b) {
@@ -3352,16 +3352,16 @@ static inline Vec4q & operator -- (Vec4q & a) {
 // vector operator * : multiply element by element
 static inline Vec4q operator * (Vec4q const a, Vec4q const b) {
 #if INSTRSET >= 10 // __AVX512DQ__ __AVX512VL__
-    return _mm256_mullo_epi64(a, b);
+    return simde_mm256_mullo_epi64(a, b);
 #else
     // Split into 32-bit multiplies
-    __m256i bswap   = _mm256_shuffle_epi32(b,0xB1);        // swap H<->L
-    __m256i prodlh  = _mm256_mullo_epi32(a,bswap);         // 32 bit L*H products
-    __m256i zero    = _mm256_setzero_si256();              // 0
-    __m256i prodlh2 = _mm256_hadd_epi32(prodlh,zero);      // a0Lb0H+a0Hb0L,a1Lb1H+a1Hb1L,0,0
-    __m256i prodlh3 = _mm256_shuffle_epi32(prodlh2,0x73);  // 0, a0Lb0H+a0Hb0L, 0, a1Lb1H+a1Hb1L
-    __m256i prodll  = _mm256_mul_epu32(a,b);               // a0Lb0L,a1Lb1L, 64 bit unsigned products
-    __m256i prod    = _mm256_add_epi64(prodll,prodlh3);    // a0Lb0L+(a0Lb0H+a0Hb0L)<<32, a1Lb1L+(a1Lb1H+a1Hb1L)<<32
+    simde__m256i bswap   = simde_mm256_shuffle_epi32(b,0xB1);        // swap H<->L
+    simde__m256i prodlh  = simde_mm256_mullo_epi32(a,bswap);         // 32 bit L*H products
+    simde__m256i zero    = simde_mm256_setzero_si256();              // 0
+    simde__m256i prodlh2 = simde_mm256_hadd_epi32(prodlh,zero);      // a0Lb0H+a0Hb0L,a1Lb1H+a1Hb1L,0,0
+    simde__m256i prodlh3 = simde_mm256_shuffle_epi32(prodlh2,0x73);  // 0, a0Lb0H+a0Hb0L, 0, a1Lb1H+a1Hb1L
+    simde__m256i prodll  = simde_mm256_mul_epu32(a,b);               // a0Lb0L,a1Lb1L, 64 bit unsigned products
+    simde__m256i prod    = simde_mm256_add_epi64(prodll,prodlh3);    // a0Lb0L+(a0Lb0H+a0Hb0L)<<32, a1Lb1L+(a1Lb1H+a1Hb1L)<<32
     return  prod;
 #endif
 }
@@ -3374,7 +3374,7 @@ static inline Vec4q & operator *= (Vec4q & a, Vec4q const b) {
 
 // vector operator << : shift left
 static inline Vec4q operator << (Vec4q const a, int32_t b) {
-    return _mm256_sll_epi64(a, _mm_cvtsi32_si128(b));
+    return simde_mm256_sll_epi64(a, _mm_cvtsi32_si128(b));
 }
 // vector operator <<= : shift left
 static inline Vec4q & operator <<= (Vec4q & a, int32_t b) {
@@ -3385,22 +3385,22 @@ static inline Vec4q & operator <<= (Vec4q & a, int32_t b) {
 // vector operator >> : shift right arithmetic
 static inline Vec4q operator >> (Vec4q const a, int32_t b) {
 #if INSTRSET >= 10   // AVX512VL
-    return _mm256_sra_epi64(a, _mm_cvtsi32_si128(b));
+    return simde_mm256_sra_epi64(a, _mm_cvtsi32_si128(b));
 #else
     __m128i bb;
-    __m256i shi, slo, sra2;
+    simde__m256i shi, slo, sra2;
     if (b <= 32) {
         bb   = _mm_cvtsi32_si128(b);             // b
-        shi  = _mm256_sra_epi32(a,bb);           // a >> b signed dwords
-        slo  = _mm256_srl_epi64(a,bb);           // a >> b unsigned qwords
+        shi  = simde_mm256_sra_epi32(a,bb);           // a >> b signed dwords
+        slo  = simde_mm256_srl_epi64(a,bb);           // a >> b unsigned qwords
     }
     else {  // b > 32
         bb   = _mm_cvtsi32_si128(b-32);          // b - 32
-        shi  = _mm256_srai_epi32(a,31);          // sign of a
-        sra2 = _mm256_sra_epi32(a,bb);           // a >> (b-32) signed dwords
-        slo  = _mm256_srli_epi64(sra2,32);       // a >> (b-32) >> 32 (second shift unsigned qword)
+        shi  = simde_mm256_srai_epi32(a,31);          // sign of a
+        sra2 = simde_mm256_sra_epi32(a,bb);           // a >> (b-32) signed dwords
+        slo  = simde_mm256_srli_epi64(sra2,32);       // a >> (b-32) >> 32 (second shift unsigned qword)
     }
-    return _mm256_blend_epi32(slo,shi,0xAA);
+    return simde_mm256_blend_epi32(slo,shi,0xAA);
 #endif
 }
 // vector operator >>= : shift right arithmetic
@@ -3412,16 +3412,16 @@ static inline Vec4q & operator >>= (Vec4q & a, int32_t b) {
 // vector operator == : returns true for elements for which a == b
 static inline Vec4qb operator == (Vec4q const a, Vec4q const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epi64_mask (a, b, 0);
+    return simde_mm256_cmp_epi64_mask (a, b, 0);
 #else
-    return _mm256_cmpeq_epi64(a, b);
+    return simde_mm256_cmpeq_epi64(a, b);
 #endif
 }
 
 // vector operator != : returns true for elements for which a != b
 static inline Vec4qb operator != (Vec4q const a, Vec4q const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epi64_mask (a, b, 4);
+    return simde_mm256_cmp_epi64_mask (a, b, 4);
 #else
     return Vec4qb(Vec4q(~(a == b)));
 #endif
@@ -3430,16 +3430,16 @@ static inline Vec4qb operator != (Vec4q const a, Vec4q const b) {
 // vector operator < : returns true for elements for which a < b
 static inline Vec4qb operator < (Vec4q const a, Vec4q const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epi64_mask (a, b, 1);
+    return simde_mm256_cmp_epi64_mask (a, b, 1);
 #else
-    return _mm256_cmpgt_epi64(b, a);
+    return simde_mm256_cmpgt_epi64(b, a);
 #endif
 }
 
 // vector operator > : returns true for elements for which a > b
 static inline Vec4qb operator > (Vec4q const a, Vec4q const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epi64_mask (a, b, 6);
+    return simde_mm256_cmp_epi64_mask (a, b, 6);
 #else
     return b < a;
 #endif
@@ -3448,7 +3448,7 @@ static inline Vec4qb operator > (Vec4q const a, Vec4q const b) {
 // vector operator >= : returns true for elements for which a >= b (signed)
 static inline Vec4qb operator >= (Vec4q const a, Vec4q const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epi64_mask (a, b, 5);
+    return simde_mm256_cmp_epi64_mask (a, b, 5);
 #else
     return Vec4qb(Vec4q(~(a < b)));
 #endif
@@ -3457,7 +3457,7 @@ static inline Vec4qb operator >= (Vec4q const a, Vec4q const b) {
 // vector operator <= : returns true for elements for which a <= b (signed)
 static inline Vec4qb operator <= (Vec4q const a, Vec4q const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epi64_mask (a, b, 2);
+    return simde_mm256_cmp_epi64_mask (a, b, 2);
 #else
     return b >= a;
 #endif
@@ -3507,9 +3507,9 @@ static inline Vec4q operator ~ (Vec4q const a) {
 // vector operator ! : logical not, returns true for elements == 0
 static inline Vec4qb operator ! (Vec4q const a) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epi64_mask (a, _mm256_setzero_si256(), 0);
+    return simde_mm256_cmp_epi64_mask (a, simde_mm256_setzero_si256(), 0);
 #else
-    return a == Vec4q(_mm256_setzero_si256());
+    return a == Vec4q(simde_mm256_setzero_si256());
 #endif
 }
 
@@ -3519,7 +3519,7 @@ static inline Vec4qb operator ! (Vec4q const a) {
 // for (int i = 0; i < 4; i++) result[i] = s[i] ? a[i] : b[i];
 static inline Vec4q select (Vec4qb const s, Vec4q const a, Vec4q const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_mask_mov_epi64(b, s, a);
+    return simde_mm256_mask_mov_epi64(b, s, a);
 #else
     return selectb(s,a,b);
 #endif
@@ -3528,7 +3528,7 @@ static inline Vec4q select (Vec4qb const s, Vec4q const a, Vec4q const b) {
 // Conditional add: For all vector elements i: result[i] = f[i] ? (a[i] + b[i]) : a[i]
 static inline Vec4q if_add (Vec4qb const f, Vec4q const a, Vec4q const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_mask_add_epi64 (a, f, a, b);
+    return simde_mm256_mask_add_epi64 (a, f, a, b);
 #else
     return a + (Vec4q(f) & b);
 #endif
@@ -3537,7 +3537,7 @@ static inline Vec4q if_add (Vec4qb const f, Vec4q const a, Vec4q const b) {
 // Conditional subtract
 static inline Vec4q if_sub (Vec4qb const f, Vec4q const a, Vec4q const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_mask_sub_epi64 (a, f, a, b);
+    return simde_mm256_mask_sub_epi64 (a, f, a, b);
 #else
     return a - (Vec4q(f) & b);
 #endif
@@ -3546,7 +3546,7 @@ static inline Vec4q if_sub (Vec4qb const f, Vec4q const a, Vec4q const b) {
 // Conditional multiply
 static inline Vec4q if_mul (Vec4qb const f, Vec4q const a, Vec4q const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_mask_mullo_epi64 (a, f, a, b);
+    return simde_mm256_mask_mullo_epi64 (a, f, a, b);
 #else
     return select(f, a*b, a);
 #endif
@@ -3554,10 +3554,10 @@ static inline Vec4q if_mul (Vec4qb const f, Vec4q const a, Vec4q const b) {
 
 // Horizontal add: Calculates the sum of all vector elements. Overflow will wrap around
 static inline int64_t horizontal_add (Vec4q const a) {
-    __m256i sum1  = _mm256_shuffle_epi32(a,0x0E);                     // high element
-    __m256i sum2  = _mm256_add_epi64(a,sum1);                         // sum
-    __m128i sum3  = _mm256_extracti128_si256(sum2, 1);                // get high part
-    __m128i sum4  = _mm_add_epi64(_mm256_castsi256_si128(sum2),sum3); // add low and high parts
+    simde__m256i sum1  = simde_mm256_shuffle_epi32(a,0x0E);                     // high element
+    simde__m256i sum2  = simde_mm256_add_epi64(a,sum1);                         // sum
+    __m128i sum3  = simde_mm256_extracti128_si256(sum2, 1);                // get high part
+    __m128i sum4  = _mm_add_epi64(simde_mm256_castsi256_si128(sum2),sum3); // add low and high parts
     return _emulate_movq(sum4);
 }
 
@@ -3574,22 +3574,22 @@ static inline Vec4q min(Vec4q const a, Vec4q const b) {
 // function abs: a >= 0 ? a : -a
 static inline Vec4q abs(Vec4q const a) {
 #if INSTRSET >= 10     // AVX512VL
-    return _mm256_abs_epi64(a);
+    return simde_mm256_abs_epi64(a);
 #else
-    __m256i sign  = _mm256_cmpgt_epi64(_mm256_setzero_si256(), a);// 0 > a
-    __m256i inv   = _mm256_xor_si256(a, sign);             // invert bits if negative
-    return          _mm256_sub_epi64(inv, sign);           // add 1
+    simde__m256i sign  = simde_mm256_cmpgt_epi64(simde_mm256_setzero_si256(), a);// 0 > a
+    simde__m256i inv   = simde_mm256_xor_si256(a, sign);             // invert bits if negative
+    return          simde_mm256_sub_epi64(inv, sign);           // add 1
 #endif
 }
 
 // function abs_saturated: same as abs, saturate if overflow
 static inline Vec4q abs_saturated(Vec4q const a) {
 #if INSTRSET >= 10
-    return _mm256_min_epu64(abs(a), Vec4q(0x7FFFFFFFFFFFFFFF));
+    return simde_mm256_min_epu64(abs(a), Vec4q(0x7FFFFFFFFFFFFFFF));
 #else
-    __m256i absa   = abs(a);                               // abs(a)
-    __m256i overfl = _mm256_cmpgt_epi64(_mm256_setzero_si256(), absa); // 0 > a
-    return           _mm256_add_epi64(absa, overfl);       // subtract 1 if 0x8000000000000000
+    simde__m256i absa   = abs(a);                               // abs(a)
+    simde__m256i overfl = simde_mm256_cmpgt_epi64(simde_mm256_setzero_si256(), absa); // 0 > a
+    return           simde_mm256_add_epi64(absa, overfl);       // subtract 1 if 0x8000000000000000
 #endif
 }
 
@@ -3597,11 +3597,11 @@ static inline Vec4q abs_saturated(Vec4q const a) {
 // Use negative count to rotate right
 static inline Vec4q rotate_left(Vec4q const a, int b) {
 #if INSTRSET >= 10  // __AVX512VL__
-    return _mm256_rolv_epi64(a, _mm256_set1_epi64x(int64_t(b)));
+    return simde_mm256_rolv_epi64(a, simde_mm256_set1_epi64x(int64_t(b)));
 #else
-    __m256i left  = _mm256_sll_epi64(a,_mm_cvtsi32_si128(b & 0x3F));    // a << b
-    __m256i right = _mm256_srl_epi64(a,_mm_cvtsi32_si128((-b) & 0x3F)); // a >> (64 - b)
-    __m256i rot   = _mm256_or_si256(left, right);                       // or
+    simde__m256i left  = simde_mm256_sll_epi64(a,_mm_cvtsi32_si128(b & 0x3F));    // a << b
+    simde__m256i right = simde_mm256_srl_epi64(a,_mm_cvtsi32_si128((-b) & 0x3F)); // a >> (64 - b)
+    simde__m256i rot   = simde_mm256_or_si256(left, right);                       // or
     return  rot;
 #endif
 }
@@ -3629,23 +3629,23 @@ public:
     Vec4uq(Vec2uq const a0, Vec2uq const a1) {
         ymm = set_m128ir(a0, a1);
     }
-    // Constructor to convert from type __m256i used in intrinsics:
-    Vec4uq(__m256i const x) {
+    // Constructor to convert from type simde__m256i used in intrinsics:
+    Vec4uq(simde__m256i const x) {
         ymm = x;
     }
-    // Assignment operator to convert from type __m256i used in intrinsics:
-    Vec4uq & operator = (__m256i const x) {
+    // Assignment operator to convert from type simde__m256i used in intrinsics:
+    Vec4uq & operator = (simde__m256i const x) {
         ymm = x;
         return *this;
     }
     // Member function to load from array (unaligned)
     Vec4uq & load(void const * p) {
-        ymm = _mm256_loadu_si256((__m256i const*)p);
+        ymm = simde_mm256_loadu_si256((simde__m256i const*)p);
         return *this;
     }
     // Member function to load from array, aligned by 32
     Vec4uq & load_a(void const * p) {
-        ymm = _mm256_load_si256((__m256i const*)p);
+        ymm = simde_mm256_load_si256((simde__m256i const*)p);
         return *this;
     }
     // Member function to change a single element in vector
@@ -3664,10 +3664,10 @@ public:
     }
     // Member functions to split into two Vec2uq:
     Vec2uq get_low() const {
-        return _mm256_castsi256_si128(ymm);
+        return simde_mm256_castsi256_si128(ymm);
     }
     Vec2uq get_high() const {
-        return _mm256_extractf128_si256(ymm,1);
+        return simde_mm256_extractf128_si256(ymm,1);
     }
     static constexpr int elementtype() {
         return 11;
@@ -3693,7 +3693,7 @@ static inline Vec4uq operator * (Vec4uq const a, Vec4uq const b) {
 
 // vector operator >> : shift right logical all elements
 static inline Vec4uq operator >> (Vec4uq const a, uint32_t b) {
-    return _mm256_srl_epi64(a,_mm_cvtsi32_si128((int)b));
+    return simde_mm256_srl_epi64(a,_mm_cvtsi32_si128((int)b));
 }
 
 // vector operator >> : shift right logical all elements
@@ -3718,12 +3718,12 @@ static inline Vec4uq operator << (Vec4uq const a, int32_t b) {
 // vector operator > : returns true for elements for which a > b (unsigned)
 static inline Vec4qb operator > (Vec4uq const a, Vec4uq const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epu64_mask (a, b, 6);
+    return simde_mm256_cmp_epu64_mask (a, b, 6);
 #else
-    __m256i sign64 = Vec4uq(0x8000000000000000);
-    __m256i aflip  = _mm256_xor_si256(a, sign64);
-    __m256i bflip  = _mm256_xor_si256(b, sign64);
-    Vec4q   cmp    = _mm256_cmpgt_epi64(aflip,bflip);
+    simde__m256i sign64 = Vec4uq(0x8000000000000000);
+    simde__m256i aflip  = simde_mm256_xor_si256(a, sign64);
+    simde__m256i bflip  = simde_mm256_xor_si256(b, sign64);
+    Vec4q   cmp    = simde_mm256_cmpgt_epi64(aflip,bflip);
     return Vec4qb(cmp);
 #endif
 }
@@ -3731,7 +3731,7 @@ static inline Vec4qb operator > (Vec4uq const a, Vec4uq const b) {
 // vector operator < : returns true for elements for which a < b (unsigned)
 static inline Vec4qb operator < (Vec4uq const a, Vec4uq const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epu64_mask (a, b, 1);
+    return simde_mm256_cmp_epu64_mask (a, b, 1);
 #else
     return b > a;
 #endif
@@ -3740,7 +3740,7 @@ static inline Vec4qb operator < (Vec4uq const a, Vec4uq const b) {
 // vector operator >= : returns true for elements for which a >= b (unsigned)
 static inline Vec4qb operator >= (Vec4uq const a, Vec4uq const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epu64_mask (a, b, 5);
+    return simde_mm256_cmp_epu64_mask (a, b, 5);
 #else
     return  Vec4qb(Vec4q(~(b > a)));
 #endif
@@ -3749,7 +3749,7 @@ static inline Vec4qb operator >= (Vec4uq const a, Vec4uq const b) {
 // vector operator <= : returns true for elements for which a <= b (unsigned)
 static inline Vec4qb operator <= (Vec4uq const a, Vec4uq const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_cmp_epu64_mask (a, b, 2);
+    return simde_mm256_cmp_epu64_mask (a, b, 2);
 #else
     return b >= a;
 #endif
@@ -3782,7 +3782,7 @@ static inline Vec4uq operator ^ (Vec4uq const a, Vec4uq const b) {
 // for (int i = 0; i < 4; i++) result[i] = s[i] ? a[i] : b[i];
 static inline Vec4uq select (Vec4qb const s, Vec4uq const a, Vec4uq const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_mask_mov_epi64(b, s, a);
+    return simde_mm256_mask_mov_epi64(b, s, a);
 #else
     return selectb(s,a,b);
 #endif
@@ -3791,7 +3791,7 @@ static inline Vec4uq select (Vec4qb const s, Vec4uq const a, Vec4uq const b) {
 // Conditional add: For all vector elements i: result[i] = f[i] ? (a[i] + b[i]) : a[i]
 static inline Vec4uq if_add (Vec4qb const f, Vec4uq const a, Vec4uq const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_mask_add_epi64 (a, f, a, b);
+    return simde_mm256_mask_add_epi64 (a, f, a, b);
 #else
     return a + (Vec4uq(f) & b);
 #endif
@@ -3800,7 +3800,7 @@ static inline Vec4uq if_add (Vec4qb const f, Vec4uq const a, Vec4uq const b) {
 // Conditional subtract
 static inline Vec4uq if_sub (Vec4qb const f, Vec4uq const a, Vec4uq const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_mask_sub_epi64 (a, f, a, b);
+    return simde_mm256_mask_sub_epi64 (a, f, a, b);
 #else
     return a - (Vec4uq(f) & b);
 #endif
@@ -3809,7 +3809,7 @@ static inline Vec4uq if_sub (Vec4qb const f, Vec4uq const a, Vec4uq const b) {
 // Conditional multiply
 static inline Vec4uq if_mul (Vec4qb const f, Vec4uq const a, Vec4uq const b) {
 #if INSTRSET >= 10  // compact boolean vectors
-    return _mm256_mask_mullo_epi64 (a, f, a, b);
+    return simde_mm256_mask_mullo_epi64 (a, f, a, b);
 #else
     return select(f, a*b, a);
 #endif
@@ -3823,23 +3823,23 @@ static inline uint64_t horizontal_add (Vec4uq const a) {
 // Horizontal add extended: Calculates the sum of all vector elements.
 // Elements are sign/zero extended before adding to avoid overflow
 static inline int64_t horizontal_add_x (Vec8i const a) {
-    __m256i signs = _mm256_srai_epi32(a,31);               // sign of all elements
-    Vec4q   a01   = _mm256_unpacklo_epi32(a,signs);        // sign-extended a0, a1, a4, a5
-    Vec4q   a23   = _mm256_unpackhi_epi32(a,signs);        // sign-extended a2, a3, a6, a7
+    simde__m256i signs = simde_mm256_srai_epi32(a,31);               // sign of all elements
+    Vec4q   a01   = simde_mm256_unpacklo_epi32(a,signs);        // sign-extended a0, a1, a4, a5
+    Vec4q   a23   = simde_mm256_unpackhi_epi32(a,signs);        // sign-extended a2, a3, a6, a7
     return  horizontal_add(a01 + a23);
 }
 
 static inline uint64_t horizontal_add_x (Vec8ui const a) {
-    __m256i zero  = _mm256_setzero_si256();                // 0
-    __m256i a01   = _mm256_unpacklo_epi32(a,zero);         // zero-extended a0, a1
-    __m256i a23   = _mm256_unpackhi_epi32(a,zero);         // zero-extended a2, a3
+    simde__m256i zero  = simde_mm256_setzero_si256();                // 0
+    simde__m256i a01   = simde_mm256_unpacklo_epi32(a,zero);         // zero-extended a0, a1
+    simde__m256i a23   = simde_mm256_unpackhi_epi32(a,zero);         // zero-extended a2, a3
     return (uint64_t)horizontal_add(Vec4q(a01) + Vec4q(a23));
 }
 
 // function max: a > b ? a : b
 static inline Vec4uq max(Vec4uq const a, Vec4uq const b) {
 #if INSTRSET >= 10  // AVX512VL
-    return _mm256_max_epu64 (a, b);
+    return simde_mm256_max_epu64 (a, b);
 #else
     return Vec4uq(select(a > b, a, b));
 #endif
@@ -3848,7 +3848,7 @@ static inline Vec4uq max(Vec4uq const a, Vec4uq const b) {
 // function min: a < b ? a : b
 static inline Vec4uq min(Vec4uq const a, Vec4uq const b) {
 #if INSTRSET >= 10  // AVX512VL
-    return _mm256_min_epu64 (a, b);
+    return simde_mm256_min_epu64 (a, b);
 #else
     return Vec4uq(select(a > b, b, a));
 #endif
@@ -3870,13 +3870,13 @@ static inline Vec4uq min(Vec4uq const a, Vec4uq const b) {
 template <int i0, int i1, int i2, int i3 >
 static inline Vec4q permute4(Vec4q const a) {
     int constexpr indexs[4] = { i0, i1, i2, i3 };          // indexes as array
-    __m256i y = a;                                         // result
+    simde__m256i y = a;                                         // result
     // get flags for possibilities that fit the permutation pattern
     constexpr uint64_t flags = perm_flags<Vec4q>(indexs);
 
     static_assert((flags & perm_outofrange) == 0, "Index out of range in permute function");
 
-    if constexpr ((flags & perm_allzero) != 0) return _mm256_setzero_si256();  // just return zero
+    if constexpr ((flags & perm_allzero) != 0) return simde_mm256_setzero_si256();  // just return zero
 
     if constexpr ((flags & perm_largeblock) != 0) {        // permute 128-bit blocks
         constexpr EList<int, 2> L = largeblock_perm<4>(indexs); // get 128-bit permute pattern
@@ -3884,57 +3884,57 @@ static inline Vec4q permute4(Vec4q const a) {
         constexpr int j1 = L.a[1];
 #ifndef ZEXT_MISSING
         if constexpr (j0 == 0 && j1 == -1 && !(flags & perm_addz)) { // zero extend
-            return _mm256_zextsi128_si256(_mm256_castsi256_si128(y));
+            return simde_mm256_zextsi128_si256(simde_mm256_castsi256_si128(y));
         }
         if constexpr (j0 == 1 && j1 < 0 && !(flags & perm_addz)) {   // extract upper part, zero extend
-            return _mm256_zextsi128_si256(_mm256_extracti128_si256(y, 1));
+            return simde_mm256_zextsi128_si256(simde_mm256_extracti128_si256(y, 1));
         }
 #endif
         if constexpr ((flags & perm_perm) != 0  && !(flags & perm_zeroing)) {
-            return _mm256_permute2x128_si256(y, y, (j0 & 1) | (j1 & 1) << 4);
+            return simde_mm256_permute2x128_si256(y, y, (j0 & 1) | (j1 & 1) << 4);
         }
     }
     if constexpr ((flags & perm_perm) != 0) {              // permutation needed
         if constexpr ((flags & perm_same_pattern) != 0) {  // same pattern in both lanes
             // try to fit various instructions
             if constexpr ((flags & perm_punpckh) != 0) {   // fits punpckhi
-                y = _mm256_unpackhi_epi64(y, y);
+                y = simde_mm256_unpackhi_epi64(y, y);
             }
             else if constexpr ((flags & perm_punpckl)!=0){ // fits punpcklo
-                y = _mm256_unpacklo_epi64(y, y);
+                y = simde_mm256_unpacklo_epi64(y, y);
             }
             else { // general permute
-                y = _mm256_shuffle_epi32(a, uint8_t(flags >> perm_ipattern));
+                y = simde_mm256_shuffle_epi32(a, uint8_t(flags >> perm_ipattern));
             }
         }
         else if constexpr ((flags & perm_broadcast) != 0 && (flags >> perm_rot_count) == 0) {
-            y = _mm256_broadcastq_epi64(_mm256_castsi256_si128(y)); // broadcast first element
+            y = simde_mm256_broadcastq_epi64(simde_mm256_castsi256_si128(y)); // broadcast first element
         }
         else {  // different patterns in two lanes
 #if INSTRSET >= 10  // AVX512VL
             if constexpr ((flags & perm_rotate_big) != 0) { // fits big rotate
                 constexpr uint8_t rot = uint8_t(flags >> perm_rot_count); // rotation count
-                return _mm256_maskz_alignr_epi64 (zero_mask<4>(indexs), y, y, rot);
+                return simde_mm256_maskz_alignr_epi64 (zero_mask<4>(indexs), y, y, rot);
             }
             else { // full permute
                 constexpr uint8_t mms = (i0 & 3) | (i1 & 3) << 2 | (i2 & 3) << 4 | (i3 & 3) << 6;
                 constexpr __mmask8 mmz = zero_mask<4>(indexs);//(i0 >= 0) | (i1 >= 0) << 1 | (i2 >= 0) << 2 | (i3 >= 0) << 3;
-                return _mm256_maskz_permutex_epi64(mmz, a, mms);
+                return simde_mm256_maskz_permutex_epi64(mmz, a, mms);
             }
 #else
             // full permute
             constexpr int ms = (i0 & 3) | (i1 & 3) << 2 | (i2 & 3) << 4 | (i3 & 3) << 6;
-            y = _mm256_permute4x64_epi64(a, ms);
+            y = simde_mm256_permute4x64_epi64(a, ms);
 #endif
         }
     }
     if constexpr ((flags & perm_zeroing) != 0) {
         // additional zeroing needed
 #if INSTRSET >= 10  // use compact mask
-        y = _mm256_maskz_mov_epi64(zero_mask<4>(indexs), y);
+        y = simde_mm256_maskz_mov_epi64(zero_mask<4>(indexs), y);
 #else  // use broad mask
         constexpr EList <int64_t, 4> bm = zero_mask_broad<Vec4q>(indexs);
-        y = _mm256_and_si256(Vec4q().load(bm.a), y);
+        y = simde_mm256_and_si256(Vec4q().load(bm.a), y);
 #endif
     }
     return y;
@@ -3950,13 +3950,13 @@ static inline Vec4uq permute4(Vec4uq const a) {
 template <int i0, int i1, int i2, int i3, int i4, int i5, int i6, int i7 >
 static inline Vec8i permute8(Vec8i const a) {
     int constexpr indexs[8] = { i0, i1, i2, i3, i4, i5, i6, i7 }; // indexes as array
-    __m256i y = a;                                         // result
+    simde__m256i y = a;                                         // result
     // get flags for possibilities that fit the permutation pattern
     constexpr uint64_t flags = perm_flags<Vec8i>(indexs);
 
     static_assert((flags & perm_outofrange) == 0, "Index out of range in permute function");
 
-    if constexpr ((flags & perm_allzero) != 0) return _mm256_setzero_si256();  // just return zero
+    if constexpr ((flags & perm_allzero) != 0) return simde_mm256_setzero_si256();  // just return zero
 
     if constexpr ((flags & perm_perm) != 0) {              // permutation needed
 
@@ -3968,38 +3968,38 @@ static inline Vec8i permute8(Vec8i const a) {
         else if constexpr ((flags & perm_same_pattern) != 0) {  // same pattern in both lanes
             // try to fit various instructions
             if constexpr ((flags & perm_punpckh) != 0) {   // fits punpckhi
-                y = _mm256_unpackhi_epi32(y, y);
+                y = simde_mm256_unpackhi_epi32(y, y);
             }
             else if constexpr ((flags & perm_punpckl)!=0){ // fits punpcklo
-                y = _mm256_unpacklo_epi32(y, y);
+                y = simde_mm256_unpacklo_epi32(y, y);
             }
             else { // general permute
-                y = _mm256_shuffle_epi32(a, uint8_t(flags >> perm_ipattern));
+                y = simde_mm256_shuffle_epi32(a, uint8_t(flags >> perm_ipattern));
             }
         }
 #if INSTRSET >= 10
         else if constexpr ((flags & perm_broadcast) != 0 && (flags & perm_zeroing) == 0) {
             constexpr uint8_t e = flags >> perm_rot_count & 0xF; // broadcast one element
             if constexpr (e > 0) {
-                y = _mm256_alignr_epi32(y, y, e);
+                y = simde_mm256_alignr_epi32(y, y, e);
             }
-            return _mm256_broadcastd_epi32(_mm256_castsi256_si128(y));
+            return simde_mm256_broadcastd_epi32(simde_mm256_castsi256_si128(y));
 #else
         else if constexpr ((flags & perm_broadcast) != 0 && (flags & perm_zeroing) == 0 && (flags >> perm_rot_count == 0)) {
-            return _mm256_broadcastd_epi32(_mm256_castsi256_si128(y)); // broadcast first element
+            return simde_mm256_broadcastd_epi32(simde_mm256_castsi256_si128(y)); // broadcast first element
 #endif
         }
         else if constexpr ((flags & perm_zext) != 0) {
-            y = _mm256_cvtepu32_epi64(_mm256_castsi256_si128(y));  // zero extension
+            y = simde_mm256_cvtepu32_epi64(simde_mm256_castsi256_si128(y));  // zero extension
             if constexpr ((flags & perm_addz2) == 0) return y;
         }
 #if INSTRSET >= 10  // AVX512VL
         else if constexpr ((flags & perm_compress) != 0) {
-            y = _mm256_maskz_compress_epi32(__mmask8(compress_mask(indexs)), y); // compress
+            y = simde_mm256_maskz_compress_epi32(__mmask8(compress_mask(indexs)), y); // compress
             if constexpr ((flags & perm_addz2) == 0) return y;
         }
         else if constexpr ((flags & perm_expand) != 0) {
-            y = _mm256_maskz_expand_epi32(__mmask8(expand_mask(indexs)), y); // expand
+            y = simde_mm256_maskz_expand_epi32(__mmask8(expand_mask(indexs)), y); // expand
             if constexpr ((flags & perm_addz2) == 0) return y;
         }
 #endif
@@ -4007,31 +4007,31 @@ static inline Vec8i permute8(Vec8i const a) {
 #if INSTRSET >= 10  // AVX512VL
             if constexpr ((flags & perm_rotate_big) != 0) { // fits big rotate
                 constexpr uint8_t rot = uint8_t(flags >> perm_rot_count); // rotation count
-                return _mm256_maskz_alignr_epi32(zero_mask<8>(indexs), y, y, rot);
+                return simde_mm256_maskz_alignr_epi32(zero_mask<8>(indexs), y, y, rot);
             }
             else
 #endif
             if constexpr ((flags & perm_cross_lane) == 0) {  // no lane crossing. Use pshufb
                 constexpr EList <int8_t, 32> bm = pshufb_mask<Vec8i>(indexs);
-                return _mm256_shuffle_epi8(a, Vec8i().load(bm.a));
+                return simde_mm256_shuffle_epi8(a, Vec8i().load(bm.a));
             }
             // full permute needed
-            __m256i permmask = constant8ui <
+            simde__m256i permmask = constant8ui <
                 i0 & 7, i1 & 7, i2 & 7, i3 & 7, i4 & 7, i5 & 7, i6 & 7, i7 & 7 > ();
 #if INSTRSET >= 10  // AVX512VL
-            return _mm256_maskz_permutexvar_epi32 (zero_mask<8>(indexs), permmask, y);
+            return simde_mm256_maskz_permutexvar_epi32 (zero_mask<8>(indexs), permmask, y);
 #else
-            y =_mm256_permutevar8x32_epi32(y, permmask);
+            y =simde_mm256_permutevar8x32_epi32(y, permmask);
 #endif
         }
     }
     if constexpr ((flags & perm_zeroing) != 0) {
         // additional zeroing needed
 #if INSTRSET >= 10  // use compact mask
-        y = _mm256_maskz_mov_epi32(zero_mask<8>(indexs), y);
+        y = simde_mm256_maskz_mov_epi32(zero_mask<8>(indexs), y);
 #else  // use broad mask
         constexpr EList <int32_t, 8> bm = zero_mask_broad<Vec8i>(indexs);
-        y = _mm256_and_si256(Vec8i().load(bm.a), y);
+        y = simde_mm256_and_si256(Vec8i().load(bm.a), y);
 #endif
     }
     return y;
@@ -4050,13 +4050,13 @@ template <int i0, int i1, int i2, int i3, int i4, int i5, int i6, int i7,
 static inline Vec16s permute16(Vec16s const a) {
     int constexpr indexs[16] = {  // indexes as array
         i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15 };
-    __m256i y = a;  // result
+    simde__m256i y = a;  // result
     // get flags for possibilities that fit the permutation pattern
     constexpr uint64_t flags = perm_flags<Vec16s>(indexs);
 
     static_assert((flags & perm_outofrange) == 0, "Index out of range in permute function");
 
-    if constexpr ((flags & perm_allzero) != 0) return _mm256_setzero_si256();  // just return zero
+    if constexpr ((flags & perm_allzero) != 0) return simde_mm256_setzero_si256();  // just return zero
 
     if constexpr ((flags & perm_perm) != 0) {                   // permutation needed
 
@@ -4068,17 +4068,17 @@ static inline Vec16s permute16(Vec16s const a) {
         else if constexpr ((flags & perm_same_pattern) != 0) {  // same pattern in both lanes
             // try to fit various instructions
             if constexpr ((flags & perm_punpckh) != 0) {        // fits punpckhi
-                y = _mm256_unpackhi_epi16(y, y);
+                y = simde_mm256_unpackhi_epi16(y, y);
             }
             else if constexpr ((flags & perm_punpckl)!=0){      // fits punpcklo
-                y = _mm256_unpacklo_epi16(y, y);
+                y = simde_mm256_unpacklo_epi16(y, y);
             }
             else if constexpr ((flags & perm_rotate) != 0) {    // fits palignr. rotate within lanes
-                y = _mm256_alignr_epi8(a, a, (flags >> perm_rot_count) & 0xF);
+                y = simde_mm256_alignr_epi8(a, a, (flags >> perm_rot_count) & 0xF);
             }
 #if INSTRSET >= 10  // use rotate
             else if constexpr ((flags & perm_swap) != 0) {      // swap adjacent elements. rotate 32 bits
-                y = _mm256_rol_epi32(a, 16);
+                y = simde_mm256_rol_epi32(a, 16);
             }
 #endif
             else {
@@ -4093,71 +4093,71 @@ static inline Vec16s permute16(Vec16s const a) {
                 constexpr uint8_t noperm = 0xE4;                // pattern for no permute
                 if constexpr (!H2L && !L2H) {                   // simple case. no crossing of 64-bit boundary
                     if constexpr (L2L && pL2L != noperm) {
-                        y = _mm256_shufflelo_epi16(y, pL2L);    // permute low 64-bits
+                        y = simde_mm256_shufflelo_epi16(y, pL2L);    // permute low 64-bits
                     }
                     if constexpr (H2H && pH2H != noperm) {
-                        y = _mm256_shufflehi_epi16(y, pH2H);    // permute high 64-bits
+                        y = simde_mm256_shufflehi_epi16(y, pH2H);    // permute high 64-bits
                     }
                 }
                 else {  // use pshufb
                     constexpr EList <int8_t, 32> bm = pshufb_mask<Vec16s>(indexs);
-                    return _mm256_shuffle_epi8(a, Vec16s().load(bm.a));
+                    return simde_mm256_shuffle_epi8(a, Vec16s().load(bm.a));
                 }
             }
         }
         else {  // different patterns in two lanes
             if constexpr ((flags & perm_zext) != 0) {     // fits zero extension
-                y = _mm256_cvtepu16_epi32(_mm256_castsi256_si128(y));  // zero extension
+                y = simde_mm256_cvtepu16_epi32(simde_mm256_castsi256_si128(y));  // zero extension
                 if constexpr ((flags & perm_addz2) == 0) return y;
             }
 #if INSTRSET >= 10 && defined (__AVX512VBMI2__)
             else if constexpr ((flags & perm_compress) != 0) {
-                y = _mm256_maskz_compress_epi16(__mmask16(compress_mask(indexs)), y); // compress
+                y = simde_mm256_maskz_compress_epi16(__mmask16(compress_mask(indexs)), y); // compress
                 if constexpr ((flags & perm_addz2) == 0) return y;
             }
             else if constexpr ((flags & perm_expand) != 0) {
-                y = _mm256_maskz_expand_epi16(__mmask16(expand_mask(indexs)), y); // expand
+                y = simde_mm256_maskz_expand_epi16(__mmask16(expand_mask(indexs)), y); // expand
                 if constexpr ((flags & perm_addz2) == 0) return y;
             }
 #endif  // AVX512VBMI2
             else if constexpr ((flags & perm_cross_lane) == 0) {     // no lane crossing. Use pshufb
                 constexpr EList <int8_t, 32> bm = pshufb_mask<Vec16s>(indexs);
-                return _mm256_shuffle_epi8(a, Vec16s().load(bm.a));
+                return simde_mm256_shuffle_epi8(a, Vec16s().load(bm.a));
             }
             else if constexpr ((flags & perm_rotate_big) != 0) {// fits full rotate
                 constexpr uint8_t rot = uint8_t(flags >> perm_rot_count) * 2; // rotate count
-                __m256i swap = _mm256_permute4x64_epi64(a,0x4E);// swap 128-bit halves
+                simde__m256i swap = simde_mm256_permute4x64_epi64(a,0x4E);// swap 128-bit halves
                 if (rot <= 16) {
-                    y = _mm256_alignr_epi8(swap, y, rot);
+                    y = simde_mm256_alignr_epi8(swap, y, rot);
                 }
                 else {
-                    y = _mm256_alignr_epi8(y, swap, rot & 15);
+                    y = simde_mm256_alignr_epi8(y, swap, rot & 15);
                 }
             }
             else if constexpr ((flags & perm_broadcast) != 0 && (flags >> perm_rot_count) == 0) {
-                y = _mm256_broadcastw_epi16(_mm256_castsi256_si128(y)); // broadcast first element
+                y = simde_mm256_broadcastw_epi16(simde_mm256_castsi256_si128(y)); // broadcast first element
             }
             else {  // full permute needed
 #if INSTRSET >= 10  // AVX512VL
                 constexpr EList <int16_t, 16> bm = perm_mask_broad<Vec16s>(indexs);
-                y = _mm256_permutexvar_epi16(Vec16s().load(bm.a), y);
+                y = simde_mm256_permutexvar_epi16(Vec16s().load(bm.a), y);
 #else           // no full permute instruction available
-                __m256i swap = _mm256_permute4x64_epi64(y,0x4E);// swap high and low 128-bit lane
+                simde__m256i swap = simde_mm256_permute4x64_epi64(y,0x4E);// swap high and low 128-bit lane
                 constexpr EList <int8_t, 32> bm1 = pshufb_mask<Vec16s, 1>(indexs);
                 constexpr EList <int8_t, 32> bm2 = pshufb_mask<Vec16s, 0>(indexs);
-                __m256i r1 = _mm256_shuffle_epi8(swap, Vec16s().load(bm1.a));
-                __m256i r2 = _mm256_shuffle_epi8(y,    Vec16s().load(bm2.a));
-                return       _mm256_or_si256(r1, r2);
+                simde__m256i r1 = simde_mm256_shuffle_epi8(swap, Vec16s().load(bm1.a));
+                simde__m256i r2 = simde_mm256_shuffle_epi8(y,    Vec16s().load(bm2.a));
+                return       simde_mm256_or_si256(r1, r2);
 #endif
             }
         }
     }
     if constexpr ((flags & perm_zeroing) != 0) {           // additional zeroing needed
 #if INSTRSET >= 10  // use compact mask
-        y = _mm256_maskz_mov_epi16(zero_mask<16>(indexs), y);
+        y = simde_mm256_maskz_mov_epi16(zero_mask<16>(indexs), y);
 #else               // use broad mask
         constexpr EList <int16_t, 16> bm = zero_mask_broad<Vec16s>(indexs);
-        y = _mm256_and_si256(Vec16s().load(bm.a), y);
+        y = simde_mm256_and_si256(Vec16s().load(bm.a), y);
 #endif
     }
     return y;
@@ -4179,13 +4179,13 @@ static inline Vec32c permute32(Vec32c const a) {
         i0,  i1,  i2,  i3,  i4,  i5,  i6,  i7,  i8,  i9,  i10, i11, i12, i13, i14, i15,
         i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31 };
 
-    __m256i y = a;  // result
+    simde__m256i y = a;  // result
     // get flags for possibilities that fit the permutation pattern
     constexpr uint64_t flags = perm_flags<Vec32c>(indexs);
 
     static_assert((flags & perm_outofrange) == 0, "Index out of range in permute function");
 
-    if constexpr ((flags & perm_allzero) != 0) return _mm256_setzero_si256();  // just return zero
+    if constexpr ((flags & perm_allzero) != 0) return simde_mm256_setzero_si256();  // just return zero
 
     if constexpr ((flags & perm_perm) != 0) {                   // permutation needed
 
@@ -4197,73 +4197,73 @@ static inline Vec32c permute32(Vec32c const a) {
         }
         else if constexpr ((flags & perm_same_pattern) != 0) {  // same pattern in both lanes
             if constexpr ((flags & perm_punpckh) != 0) {        // fits punpckhi
-                y = _mm256_unpackhi_epi8(y, y);
+                y = simde_mm256_unpackhi_epi8(y, y);
             }
             else if constexpr ((flags & perm_punpckl)!=0){      // fits punpcklo
-                y = _mm256_unpacklo_epi8(y, y);
+                y = simde_mm256_unpacklo_epi8(y, y);
             }
             else if constexpr ((flags & perm_rotate) != 0) {    // fits palignr. rotate within lanes
-                y = _mm256_alignr_epi8(a, a, (flags >> perm_rot_count) & 0xF);
+                y = simde_mm256_alignr_epi8(a, a, (flags >> perm_rot_count) & 0xF);
             }
             else { // use pshufb
                 constexpr EList <int8_t, 32> bm = pshufb_mask<Vec32c>(indexs);
-                return _mm256_shuffle_epi8(a, Vec32c().load(bm.a));
+                return simde_mm256_shuffle_epi8(a, Vec32c().load(bm.a));
             }
         }
         else {  // different patterns in two lanes
             if constexpr ((flags & perm_zext) != 0) {     // fits zero extension
-                y = _mm256_cvtepu8_epi16(_mm256_castsi256_si128(y));  // zero extension
+                y = simde_mm256_cvtepu8_epi16(simde_mm256_castsi256_si128(y));  // zero extension
                 if constexpr ((flags & perm_addz2) == 0) return y;
             }
 #if INSTRSET >= 10 && defined (__AVX512VBMI2__)
             else if constexpr ((flags & perm_compress) != 0) {
-                y = _mm256_maskz_compress_epi8(__mmask32(compress_mask(indexs)), y); // compress
+                y = simde_mm256_maskz_compress_epi8(__mmask32(compress_mask(indexs)), y); // compress
                 if constexpr ((flags & perm_addz2) == 0) return y;
             }
             else if constexpr ((flags & perm_expand) != 0) {
-                y = _mm256_maskz_expand_epi8(__mmask32(expand_mask(indexs)), y); // expand
+                y = simde_mm256_maskz_expand_epi8(__mmask32(expand_mask(indexs)), y); // expand
                 if constexpr ((flags & perm_addz2) == 0) return y;
             }
 #endif  // AVX512VBMI2
             else if constexpr ((flags & perm_cross_lane) == 0) {     // no lane crossing. Use pshufb
                 constexpr EList <int8_t, 32> bm = pshufb_mask<Vec32c>(indexs);
-                return _mm256_shuffle_epi8(a, Vec32c().load(bm.a));
+                return simde_mm256_shuffle_epi8(a, Vec32c().load(bm.a));
             }
             else if constexpr ((flags & perm_rotate_big) != 0) {// fits full rotate
                 constexpr uint8_t rot = uint8_t(flags >> perm_rot_count); // rotate count
-                __m256i swap = _mm256_permute4x64_epi64(a,0x4E);// swap 128-bit halves
+                simde__m256i swap = simde_mm256_permute4x64_epi64(a,0x4E);// swap 128-bit halves
                 if (rot <= 16) {
-                    y = _mm256_alignr_epi8(swap, y, rot);
+                    y = simde_mm256_alignr_epi8(swap, y, rot);
                 }
                 else {
-                    y = _mm256_alignr_epi8(y, swap, rot & 15);
+                    y = simde_mm256_alignr_epi8(y, swap, rot & 15);
                 }
             }
             else if constexpr ((flags & perm_broadcast) != 0 && (flags >> perm_rot_count) == 0) {
-                y = _mm256_broadcastb_epi8(_mm256_castsi256_si128(y)); // broadcast first element
+                y = simde_mm256_broadcastb_epi8(simde_mm256_castsi256_si128(y)); // broadcast first element
             }
             else {  // full permute needed
 #if INSTRSET >= 10 && defined ( __AVX512VBMI__ ) // AVX512VBMI
                 constexpr EList <int8_t, 32> bm = perm_mask_broad<Vec32c>(indexs);
-                y = _mm256_permutexvar_epi8(Vec32c().load(bm.a), y);
+                y = simde_mm256_permutexvar_epi8(Vec32c().load(bm.a), y);
 #else
                 // no full permute instruction available
-                __m256i swap = _mm256_permute4x64_epi64(y, 0x4E);  // swap high and low 128-bit lane
+                simde__m256i swap = simde_mm256_permute4x64_epi64(y, 0x4E);  // swap high and low 128-bit lane
                 constexpr EList <int8_t, 32> bm1 = pshufb_mask<Vec32c, 1>(indexs);
                 constexpr EList <int8_t, 32> bm2 = pshufb_mask<Vec32c, 0>(indexs);
-                __m256i r1 = _mm256_shuffle_epi8(swap, Vec32c().load(bm1.a));
-                __m256i r2 = _mm256_shuffle_epi8(y,    Vec32c().load(bm2.a));
-                return       _mm256_or_si256(r1, r2);
+                simde__m256i r1 = simde_mm256_shuffle_epi8(swap, Vec32c().load(bm1.a));
+                simde__m256i r2 = simde_mm256_shuffle_epi8(y,    Vec32c().load(bm2.a));
+                return       simde_mm256_or_si256(r1, r2);
 #endif
             }
         }
     }
     if constexpr ((flags & perm_zeroing) != 0) { // additional zeroing needed
 #if INSTRSET >= 10  // use compact mask
-        y = _mm256_maskz_mov_epi8(zero_mask<32>(indexs), y);
+        y = simde_mm256_maskz_mov_epi8(zero_mask<32>(indexs), y);
 #else  // use broad mask
         constexpr EList <int8_t, 32> bm = zero_mask_broad<Vec32c>(indexs);
-        y = _mm256_and_si256(Vec32c().load(bm.a), y);
+        y = simde_mm256_and_si256(Vec32c().load(bm.a), y);
 #endif
     }
     return y;
@@ -4290,12 +4290,12 @@ template <
 template <int i0, int i1, int i2, int i3>
 static inline Vec4q blend4(Vec4q const a, Vec4q const b) {
     int constexpr indexs[4] = { i0, i1, i2, i3 };          // indexes as array
-    __m256i y = a;                                         // result
+    simde__m256i y = a;                                         // result
     constexpr uint64_t flags = blend_flags<Vec4q>(indexs); // get flags for possibilities that fit the index pattern
 
     static_assert((flags & blend_outofrange) == 0, "Index out of range in blend function");
 
-    if constexpr ((flags & blend_allzero) != 0) return _mm256_setzero_si256();  // just return zero
+    if constexpr ((flags & blend_allzero) != 0) return simde_mm256_setzero_si256();  // just return zero
 
     if constexpr ((flags & blend_b) == 0) {                // nothing from b. just permute a
         return permute4 <i0, i1, i2, i3> (a);
@@ -4306,61 +4306,61 @@ static inline Vec4q blend4(Vec4q const a, Vec4q const b) {
     if constexpr ((flags & (blend_perma | blend_permb)) == 0) { // no permutation, only blending
         constexpr uint8_t mb = (uint8_t)make_bit_mask<4, 0x302>(indexs);  // blend mask
 #if INSTRSET >= 10 // AVX512VL
-        y = _mm256_mask_mov_epi64 (a, mb, b);
+        y = simde_mm256_mask_mov_epi64 (a, mb, b);
 #else  // AVX2
-        y = _mm256_blend_epi32(a, b, ((mb & 1) | (mb & 2) << 1 | (mb & 4) << 2 | (mb & 8) << 3) * 3); // duplicate each bit
+        y = simde_mm256_blend_epi32(a, b, ((mb & 1) | (mb & 2) << 1 | (mb & 4) << 2 | (mb & 8) << 3) * 3); // duplicate each bit
 #endif
     }
     else if constexpr ((flags & blend_largeblock) != 0) {  // blend and permute 128-bit blocks
         constexpr EList<int, 2> L = largeblock_perm<4>(indexs); // get 128-bit blend pattern
         constexpr uint8_t pp = (L.a[0] & 0xF) | uint8_t(L.a[1] & 0xF) << 4;
-        y = _mm256_permute2x128_si256(a, b, pp);
+        y = simde_mm256_permute2x128_si256(a, b, pp);
     }
     // check if pattern fits special cases
     else if constexpr ((flags & blend_punpcklab) != 0) {
-        y = _mm256_unpacklo_epi64 (a, b);
+        y = simde_mm256_unpacklo_epi64 (a, b);
     }
     else if constexpr ((flags & blend_punpcklba) != 0) {
-        y = _mm256_unpacklo_epi64 (b, a);
+        y = simde_mm256_unpacklo_epi64 (b, a);
     }
     else if constexpr ((flags & blend_punpckhab) != 0) {
-        y = _mm256_unpackhi_epi64 (a, b);
+        y = simde_mm256_unpackhi_epi64 (a, b);
     }
     else if constexpr ((flags & blend_punpckhba) != 0) {
-        y = _mm256_unpackhi_epi64 (b, a);
+        y = simde_mm256_unpackhi_epi64 (b, a);
     }
     else if constexpr ((flags & blend_rotateab) != 0) {
-        y = _mm256_alignr_epi8(a, b, flags >> blend_rotpattern);
+        y = simde_mm256_alignr_epi8(a, b, flags >> blend_rotpattern);
     }
     else if constexpr ((flags & blend_rotateba) != 0) {
-        y = _mm256_alignr_epi8(b, a, flags >> blend_rotpattern);
+        y = simde_mm256_alignr_epi8(b, a, flags >> blend_rotpattern);
     }
 #if ALLOW_FP_PERMUTE  // allow floating point permute instructions on integer vectors
     else if constexpr ((flags & blend_shufab) != 0) {      // use floating point instruction shufpd
-        y = _mm256_castpd_si256(_mm256_shuffle_pd(_mm256_castsi256_pd(a), _mm256_castsi256_pd(b), (flags >> blend_shufpattern) & 0xF));
+        y = simde_mm256_castpd_si256(simde_mm256_shuffle_pd(simde_mm256_castsi256_pd(a), simde_mm256_castsi256_pd(b), (flags >> blend_shufpattern) & 0xF));
     }
     else if constexpr ((flags & blend_shufba) != 0) {      // use floating point instruction shufpd
-        y = _mm256_castpd_si256(_mm256_shuffle_pd(_mm256_castsi256_pd(b), _mm256_castsi256_pd(a), (flags >> blend_shufpattern) & 0xF));
+        y = simde_mm256_castpd_si256(simde_mm256_shuffle_pd(simde_mm256_castsi256_pd(b), simde_mm256_castsi256_pd(a), (flags >> blend_shufpattern) & 0xF));
     }
 #endif
     else { // No special cases
 #if INSTRSET >= 10  // AVX512VL. use vpermi2q
-        __m256i const maskp = constant8ui<i0 & 15, 0, i1 & 15, 0, i2 & 15, 0, i3 & 15, 0>();
-        return _mm256_maskz_permutex2var_epi64 (zero_mask<4>(indexs), a, maskp, b);
+        simde__m256i const maskp = constant8ui<i0 & 15, 0, i1 & 15, 0, i2 & 15, 0, i3 & 15, 0>();
+        return simde_mm256_maskz_permutex2var_epi64 (zero_mask<4>(indexs), a, maskp, b);
 #else   // permute a and b separately, then blend.
         constexpr EList<int, 8> L = blend_perm_indexes<4, 0>(indexs); // get permutation indexes
-        __m256i ya = permute4<L.a[0], L.a[1], L.a[2], L.a[3]>(a);
-        __m256i yb = permute4<L.a[4], L.a[5], L.a[6], L.a[7]>(b);
+        simde__m256i ya = permute4<L.a[0], L.a[1], L.a[2], L.a[3]>(a);
+        simde__m256i yb = permute4<L.a[4], L.a[5], L.a[6], L.a[7]>(b);
         constexpr uint8_t mb = (uint8_t)make_bit_mask<4, 0x302>(indexs);  // blend mask
-        y = _mm256_blend_epi32(ya, yb, ((mb & 1) | (mb & 2) << 1 | (mb & 4) << 2 | (mb & 8) << 3) * 3); // duplicate each bit
+        y = simde_mm256_blend_epi32(ya, yb, ((mb & 1) | (mb & 2) << 1 | (mb & 4) << 2 | (mb & 8) << 3) * 3); // duplicate each bit
 #endif
     }
     if constexpr ((flags & blend_zeroing) != 0) {          // additional zeroing needed
 #if INSTRSET >= 10  // use compact mask
-        y = _mm256_maskz_mov_epi64(zero_mask<4>(indexs), y);
+        y = simde_mm256_maskz_mov_epi64(zero_mask<4>(indexs), y);
 #else  // use broad mask
         constexpr EList <int64_t, 4> bm = zero_mask_broad<Vec4q>(indexs);
-        y = _mm256_and_si256(Vec4q().load(bm.a), y);
+        y = simde_mm256_and_si256(Vec4q().load(bm.a), y);
 #endif
     }
     return y;
@@ -4376,12 +4376,12 @@ static inline Vec4uq blend4(Vec4uq const a, Vec4uq const b) {
 template <int i0, int i1, int i2, int i3, int i4, int i5, int i6, int i7>
 static inline Vec8i blend8(Vec8i const a, Vec8i const b) {
     int constexpr indexs[8] = { i0, i1, i2, i3, i4, i5, i6, i7 }; // indexes as array
-    __m256i y = a;                                         // result
+    simde__m256i y = a;                                         // result
     constexpr uint64_t flags = blend_flags<Vec8i>(indexs); // get flags for possibilities that fit the index pattern
 
     static_assert((flags & blend_outofrange) == 0, "Index out of range in blend function");
 
-    if constexpr ((flags & blend_allzero) != 0) return _mm256_setzero_si256();  // just return zero
+    if constexpr ((flags & blend_allzero) != 0) return simde_mm256_setzero_si256();  // just return zero
 
     if constexpr ((flags & blend_largeblock) != 0) {       // blend and permute 32-bit blocks
         constexpr EList<int, 4> L = largeblock_perm<8>(indexs); // get 32-bit blend pattern
@@ -4398,56 +4398,56 @@ static inline Vec8i blend8(Vec8i const a, Vec8i const b) {
     else if constexpr ((flags & (blend_perma | blend_permb)) == 0) { // no permutation, only blending
         constexpr uint8_t mb = (uint8_t)make_bit_mask<8, 0x303>(indexs);  // blend mask
 #if INSTRSET >= 10 // AVX512VL
-        y = _mm256_mask_mov_epi32 (a, mb, b);
+        y = simde_mm256_mask_mov_epi32 (a, mb, b);
 #else  // AVX2
-        y = _mm256_blend_epi32(a, b, mb);
+        y = simde_mm256_blend_epi32(a, b, mb);
 #endif
     }
     // check if pattern fits special cases
     else if constexpr ((flags & blend_punpcklab) != 0) {
-        y = _mm256_unpacklo_epi32 (a, b);
+        y = simde_mm256_unpacklo_epi32 (a, b);
     }
     else if constexpr ((flags & blend_punpcklba) != 0) {
-        y = _mm256_unpacklo_epi32 (b, a);
+        y = simde_mm256_unpacklo_epi32 (b, a);
     }
     else if constexpr ((flags & blend_punpckhab) != 0) {
-        y = _mm256_unpackhi_epi32 (a, b);
+        y = simde_mm256_unpackhi_epi32 (a, b);
     }
     else if constexpr ((flags & blend_punpckhba) != 0) {
-        y = _mm256_unpackhi_epi32 (b, a);
+        y = simde_mm256_unpackhi_epi32 (b, a);
     }
     else if constexpr ((flags & blend_rotateab) != 0) {
-        y = _mm256_alignr_epi8(a, b, flags >> blend_rotpattern);
+        y = simde_mm256_alignr_epi8(a, b, flags >> blend_rotpattern);
     }
     else if constexpr ((flags & blend_rotateba) != 0) {
-        y = _mm256_alignr_epi8(b, a, flags >> blend_rotpattern);
+        y = simde_mm256_alignr_epi8(b, a, flags >> blend_rotpattern);
     }
 #if ALLOW_FP_PERMUTE  // allow floating point permute instructions on integer vectors
     else if constexpr ((flags & blend_shufab) != 0) {      // use floating point instruction shufpd
-        y = _mm256_castps_si256(_mm256_shuffle_ps(_mm256_castsi256_ps(a), _mm256_castsi256_ps(b), uint8_t(flags >> blend_shufpattern)));
+        y = simde_mm256_castps_si256(simde_mm256_shuffle_ps(simde_mm256_castsi256_ps(a), simde_mm256_castsi256_ps(b), uint8_t(flags >> blend_shufpattern)));
     }
     else if constexpr ((flags & blend_shufba) != 0) {      // use floating point instruction shufpd
-        y = _mm256_castps_si256(_mm256_shuffle_ps(_mm256_castsi256_ps(b), _mm256_castsi256_ps(a), uint8_t(flags >> blend_shufpattern)));
+        y = simde_mm256_castps_si256(simde_mm256_shuffle_ps(simde_mm256_castsi256_ps(b), simde_mm256_castsi256_ps(a), uint8_t(flags >> blend_shufpattern)));
     }
 #endif
     else { // No special cases
 #if INSTRSET >= 10  // AVX512VL. use vpermi2d
-        __m256i const maskp = constant8ui<i0 & 15, i1 & 15, i2 & 15, i3 & 15, i4 & 15, i5 & 15, i6 & 15, i7 & 15> ();
-        return _mm256_maskz_permutex2var_epi32 (zero_mask<8>(indexs), a, maskp, b);
+        simde__m256i const maskp = constant8ui<i0 & 15, i1 & 15, i2 & 15, i3 & 15, i4 & 15, i5 & 15, i6 & 15, i7 & 15> ();
+        return simde_mm256_maskz_permutex2var_epi32 (zero_mask<8>(indexs), a, maskp, b);
 #else   // permute a and b separately, then blend.
         constexpr EList<int, 16> L = blend_perm_indexes<8, 0>(indexs); // get permutation indexes
-        __m256i ya = permute8<L.a[0], L.a[1], L.a[2], L.a[3], L.a[4], L.a[5], L.a[6], L.a[7]>(a);
-        __m256i yb = permute8<L.a[8], L.a[9], L.a[10], L.a[11], L.a[12], L.a[13], L.a[14], L.a[15]>(b);
+        simde__m256i ya = permute8<L.a[0], L.a[1], L.a[2], L.a[3], L.a[4], L.a[5], L.a[6], L.a[7]>(a);
+        simde__m256i yb = permute8<L.a[8], L.a[9], L.a[10], L.a[11], L.a[12], L.a[13], L.a[14], L.a[15]>(b);
         constexpr uint8_t mb = (uint8_t)make_bit_mask<8, 0x303>(indexs);  // blend mask
-        y = _mm256_blend_epi32(ya, yb, mb);
+        y = simde_mm256_blend_epi32(ya, yb, mb);
 #endif
     }
     if constexpr ((flags & blend_zeroing) != 0) {          // additional zeroing needed
 #if INSTRSET >= 10  // use compact mask
-        y = _mm256_maskz_mov_epi32(zero_mask<8>(indexs), y);
+        y = simde_mm256_maskz_mov_epi32(zero_mask<8>(indexs), y);
 #else  // use broad mask
         constexpr EList <int32_t, 8> bm = zero_mask_broad<Vec8i>(indexs);
-        y = _mm256_and_si256(Vec8i().load(bm.a), y);
+        y = simde_mm256_and_si256(Vec8i().load(bm.a), y);
 #endif
     }
     return y;
@@ -4465,12 +4465,12 @@ template <int i0,  int i1,  int i2,  int i3,  int i4,  int i5,  int i6,  int i7,
     static inline Vec16s blend16(Vec16s const a, Vec16s const b) {
     int constexpr indexs[16] = {
         i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15 };// indexes as array
-    __m256i y = a;                                         // result
+    simde__m256i y = a;                                         // result
     constexpr uint64_t flags = blend_flags<Vec16s>(indexs);// get flags for possibilities that fit the index pattern
 
     static_assert((flags & blend_outofrange) == 0, "Index out of range in blend function");
 
-    if constexpr ((flags & blend_allzero) != 0) return _mm256_setzero_si256();  // just return zero
+    if constexpr ((flags & blend_allzero) != 0) return simde_mm256_setzero_si256();  // just return zero
 
     if constexpr ((flags & blend_largeblock) != 0) {       // blend and permute 32-bit blocks
         constexpr EList<int, 8> L = largeblock_perm<16>(indexs); // get 32-bit blend pattern
@@ -4488,28 +4488,28 @@ template <int i0,  int i1,  int i2,  int i3,  int i4,  int i5,  int i6,  int i7,
     }
     // check if pattern fits special cases
     else if constexpr ((flags & blend_punpcklab) != 0) {
-        y = _mm256_unpacklo_epi16 (a, b);
+        y = simde_mm256_unpacklo_epi16 (a, b);
     }
     else if constexpr ((flags & blend_punpcklba) != 0) {
-        y = _mm256_unpacklo_epi16 (b, a);
+        y = simde_mm256_unpacklo_epi16 (b, a);
     }
     else if constexpr ((flags & blend_punpckhab) != 0) {
-        y = _mm256_unpackhi_epi16 (a, b);
+        y = simde_mm256_unpackhi_epi16 (a, b);
     }
     else if constexpr ((flags & blend_punpckhba) != 0) {
-        y = _mm256_unpackhi_epi16 (b, a);
+        y = simde_mm256_unpackhi_epi16 (b, a);
     }
     else if constexpr ((flags & blend_rotateab) != 0) {
-        y = _mm256_alignr_epi8(a, b, flags >> blend_rotpattern);
+        y = simde_mm256_alignr_epi8(a, b, flags >> blend_rotpattern);
     }
     else if constexpr ((flags & blend_rotateba) != 0) {
-        y = _mm256_alignr_epi8(b, a, flags >> blend_rotpattern);
+        y = simde_mm256_alignr_epi8(b, a, flags >> blend_rotpattern);
     }
     else { // No special cases
 #if INSTRSET >= 10  // AVX512VL. use vpermi2w
         if constexpr ((flags & (blend_perma | blend_permb)) != 0) {
             constexpr EList <int16_t, 16> bm = perm_mask_broad<Vec16s>(indexs);
-            return _mm256_maskz_permutex2var_epi16(zero_mask<16>(indexs), a, Vec16s().load(bm.a), b);
+            return simde_mm256_maskz_permutex2var_epi16(zero_mask<16>(indexs), a, Vec16s().load(bm.a), b);
         }
 #endif
         // permute a and b separately, then blend.
@@ -4527,23 +4527,23 @@ template <int i0,  int i1,  int i2,  int i3,  int i4,  int i5,  int i6,  int i7,
         }
         constexpr uint16_t mb = (uint16_t)make_bit_mask<16, 0x304>(indexs);  // blend mask
 #if INSTRSET >= 10 // AVX512VL
-        y = _mm256_mask_mov_epi16 (ya, mb, yb);
+        y = simde_mm256_mask_mov_epi16 (ya, mb, yb);
 #else  // AVX2
         if ((flags & blend_same_pattern) != 0) {           // same blend pattern in both 128-bit lanes
-            y = _mm256_blend_epi16(ya, yb, (uint8_t)mb);
+            y = simde_mm256_blend_epi16(ya, yb, (uint8_t)mb);
         }
         else {
             constexpr EList <int16_t, 16> bm = make_broad_mask<Vec16s>(mb);
-            y = _mm256_blendv_epi8 (ya, yb, Vec16s().load(bm.a));
+            y = simde_mm256_blendv_epi8 (ya, yb, Vec16s().load(bm.a));
         }
 #endif
     }
     if constexpr ((flags & blend_zeroing) != 0) {          // additional zeroing needed
 #if INSTRSET >= 10  // use compact mask
-        y = _mm256_maskz_mov_epi16(zero_mask<16>(indexs), y);
+        y = simde_mm256_maskz_mov_epi16(zero_mask<16>(indexs), y);
 #else  // use broad mask
         constexpr EList <int16_t, 16> bm = zero_mask_broad<Vec16s>(indexs);
-        y = _mm256_and_si256(Vec16s().load(bm.a), y);
+        y = simde_mm256_and_si256(Vec16s().load(bm.a), y);
 #endif
     }
     return y;
@@ -4565,12 +4565,12 @@ static inline Vec32c blend32(Vec32c const a, Vec32c const b) {
     int constexpr indexs[32] = {
         i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15,
         i16, i17, i18, i19, i20, i21, i22, i23,i24, i25, i26, i27, i28, i29, i30, i31 };                  // indexes as array
-    __m256i y = a;                                         // result
+    simde__m256i y = a;                                         // result
     constexpr uint64_t flags = blend_flags<Vec32c>(indexs);// get flags for possibilities that fit the index pattern
 
     static_assert((flags & blend_outofrange) == 0, "Index out of range in blend function");
 
-    if constexpr ((flags & blend_allzero) != 0) return _mm256_setzero_si256();  // just return zero
+    if constexpr ((flags & blend_allzero) != 0) return simde_mm256_setzero_si256();  // just return zero
 
     if constexpr ((flags & blend_largeblock) != 0) {       // blend and permute 16-bit blocks
         constexpr EList<int, 16> L = largeblock_perm<32>(indexs); // get 16-bit blend pattern
@@ -4595,7 +4595,7 @@ static inline Vec32c blend32(Vec32c const a, Vec32c const b) {
 #if INSTRSET >= 10 && defined (__AVX512VBMI__) // AVX512VL + AVX512VBMI. use vpermi2b
         if constexpr ((flags & (blend_perma | blend_permb)) != 0) {
             constexpr EList <int8_t, 32> bm = perm_mask_broad<Vec32c>(indexs);
-            return _mm256_maskz_permutex2var_epi8(zero_mask<32>(indexs), a, Vec32c().load(bm.a), b);
+            return simde_mm256_maskz_permutex2var_epi8(zero_mask<32>(indexs), a, Vec32c().load(bm.a), b);
         }
 #endif
         // permute a and b separately, then blend.
@@ -4617,18 +4617,18 @@ static inline Vec32c blend32(Vec32c const a, Vec32c const b) {
         }
         constexpr uint32_t mb = (uint32_t)make_bit_mask<32, 0x305>(indexs);// blend mask
 #if INSTRSET >= 10 // AVX512VL
-        y = _mm256_mask_mov_epi8 (ya, mb, yb);
+        y = simde_mm256_mask_mov_epi8 (ya, mb, yb);
 #else  // AVX2
         constexpr EList <int8_t, 32> bm = make_broad_mask<Vec32c>(mb);
-        y = _mm256_blendv_epi8 (ya, yb, Vec32c().load(bm.a));
+        y = simde_mm256_blendv_epi8 (ya, yb, Vec32c().load(bm.a));
 #endif
     }
     if constexpr ((flags & blend_zeroing) != 0) {          // additional zeroing needed
 #if INSTRSET >= 10  // use compact mask
-        y = _mm256_maskz_mov_epi8(zero_mask<32>(indexs), y);
+        y = simde_mm256_maskz_mov_epi8(zero_mask<32>(indexs), y);
 #else  // use broad mask
         constexpr EList <int8_t, 32> bm = zero_mask_broad<Vec32c>(indexs);
-        y = _mm256_and_si256(Vec32c().load(bm.a), y);
+        y = simde_mm256_and_si256(Vec32c().load(bm.a), y);
 #endif
     }
     return y;
@@ -4659,9 +4659,9 @@ static inline Vec32c lookup32(Vec32c const index, Vec32c const table) {
 #else
     Vec32c f0 = constant8ui<0,0,0,0,0x10101010,0x10101010,0x10101010,0x10101010>();
     Vec32c f1 = constant8ui<0x10101010,0x10101010,0x10101010,0x10101010,0,0,0,0>();
-    Vec32c tablef = _mm256_permute4x64_epi64(table, 0x4E);   // low and high parts swapped
-    Vec32c r0 = _mm256_shuffle_epi8(table,  (index ^ f0) + 0x70);
-    Vec32c r1 = _mm256_shuffle_epi8(tablef, (index ^ f1) + 0x70);
+    Vec32c tablef = simde_mm256_permute4x64_epi64(table, 0x4E);   // low and high parts swapped
+    Vec32c r0 = simde_mm256_shuffle_epi8(table,  (index ^ f0) + 0x70);
+    Vec32c r1 = simde_mm256_shuffle_epi8(tablef, (index ^ f1) + 0x70);
     return r0 | r1;
 #endif
 }
@@ -4690,14 +4690,14 @@ static inline Vec32c lookup(Vec32uc const index, void const * table) {
         index1 = min(Vec32uc(index), uint8_t(n-1));
     }
     Vec8ui mask0 = Vec8ui(0x000000FF);  // mask 8 bits
-    Vec32c t0 = _mm256_i32gather_epi32((const int *)table, __m256i(mask0 & Vec8ui(index1)),      1); // positions 0, 4, 8,  ...
-    Vec32c t1 = _mm256_i32gather_epi32((const int *)table, __m256i(mask0 & _mm256_srli_epi32(index1, 8)), 1); // positions 1, 5, 9,  ...
-    Vec32c t2 = _mm256_i32gather_epi32((const int *)table, __m256i(mask0 & _mm256_srli_epi32(index1,16)), 1); // positions 2, 6, 10, ...
-    Vec32c t3 = _mm256_i32gather_epi32((const int *)table, _mm256_srli_epi32(index1,24), 1); // positions 3, 7, 11, ...
+    Vec32c t0 = simde_mm256_i32gather_epi32((const int *)table, simde__m256i(mask0 & Vec8ui(index1)),      1); // positions 0, 4, 8,  ...
+    Vec32c t1 = simde_mm256_i32gather_epi32((const int *)table, simde__m256i(mask0 & simde_mm256_srli_epi32(index1, 8)), 1); // positions 1, 5, 9,  ...
+    Vec32c t2 = simde_mm256_i32gather_epi32((const int *)table, simde__m256i(mask0 & simde_mm256_srli_epi32(index1,16)), 1); // positions 2, 6, 10, ...
+    Vec32c t3 = simde_mm256_i32gather_epi32((const int *)table, simde_mm256_srli_epi32(index1,24), 1); // positions 3, 7, 11, ...
     t0 = t0 & Vec32c(mask0);
-    t1 = _mm256_slli_epi32(t1 & Vec32c(mask0),  8);
-    t2 = _mm256_slli_epi32(t2 & Vec32c(mask0), 16);
-    t3 = _mm256_slli_epi32(t3,         24);
+    t1 = simde_mm256_slli_epi32(t1 & Vec32c(mask0),  8);
+    t2 = simde_mm256_slli_epi32(t2 & Vec32c(mask0), 16);
+    t3 = simde_mm256_slli_epi32(t3,         24);
     return (t0 | t3) | (t1 | t2);
 }
 
@@ -4734,13 +4734,13 @@ static inline Vec16s lookup(Vec16s const index, void const * table) {
         // n is not a power of 2, limit to n-1
         index1 = min(Vec16us(index), n-1);
     }
-    Vec16s t1 = _mm256_i32gather_epi32((const int *)table, __m256i(Vec8ui(index1) & 0x0000FFFF), 2);  // even positions
-    Vec16s t2 = _mm256_i32gather_epi32((const int *)table, _mm256_srli_epi32(index1, 16) , 2);        // odd  positions
+    Vec16s t1 = simde_mm256_i32gather_epi32((const int *)table, simde__m256i(Vec8ui(index1) & 0x0000FFFF), 2);  // even positions
+    Vec16s t2 = simde_mm256_i32gather_epi32((const int *)table, simde_mm256_srli_epi32(index1, 16) , 2);        // odd  positions
     return blend16<0,16,2,18,4,20,6,22,8,24,10,26,12,28,14,30>(t1, t2);
 }
 
 static inline Vec8i lookup8(Vec8i const index, Vec8i const table) {
-    return _mm256_permutevar8x32_epi32(table, index);
+    return simde_mm256_permutevar8x32_epi32(table, index);
 }
 
 template <int n>
@@ -4771,7 +4771,7 @@ static inline Vec8i lookup(Vec8i const index, void const * table) {
         // n is not a power of 2, limit to n-1
         index1 = min(Vec8ui(index), n-1);
     }
-    return _mm256_i32gather_epi32((const int *)table, index1, 4);
+    return simde_mm256_i32gather_epi32((const int *)table, index1, 4);
 }
 
 static inline Vec4q lookup4(Vec4q const index, Vec4q const table) {
@@ -4799,14 +4799,14 @@ static inline Vec4q lookup(Vec4q const index, int64_t const * table) {
 /* old compilers can't agree how to define a 64 bit integer. Intel and MS use __int64, gcc use long long
 #if defined (__clang__) && CLANG_VERSION < 30400
 // clang 3.3 uses const int * in accordance with official Intel doc., which is wrong. will be fixed
-    return _mm256_i64gather_epi64((const int *)table, index1, 8);
+    return simde_mm256_i64gather_epi64((const int *)table, index1, 8);
 #elif defined (_MSC_VER) && _MSC_VER < 1700 && ! defined(__INTEL_COMPILER)
 // Old MS and Intel use non-standard type __int64
-    return _mm256_i64gather_epi64((const int64_t *)table, index1, 8);
+    return simde_mm256_i64gather_epi64((const int64_t *)table, index1, 8);
 #else
 // Gnu, Clang 3.4, MS 11.0
 */
-    return _mm256_i64gather_epi64((const long long *)table, index1, 8);
+    return simde_mm256_i64gather_epi64((const long long *)table, index1, 8);
 //#endif
 }
 
@@ -4820,26 +4820,26 @@ static inline Vec4q lookup(Vec4q const index, int64_t const * table) {
 // Function shift_bytes_up: shift whole vector left by b bytes.
 template <unsigned int b>
 static inline Vec32c shift_bytes_up(Vec32c const a) {
-    __m256i ahi, alo;
+    simde__m256i ahi, alo;
     if constexpr (b == 0) return a;
 #if INSTRSET >= 10  // AVX512VL
     else if constexpr ((b & 3) == 0) {  // b is divisible by 4
-        return _mm256_alignr_epi32(a, _mm256_setzero_si256(), (8 - (b >> 2)) & 7);
+        return simde_mm256_alignr_epi32(a, simde_mm256_setzero_si256(), (8 - (b >> 2)) & 7);
     }
 #endif
     else if constexpr (b < 16) {
         alo = a;
-        ahi = _mm256_inserti128_si256 (_mm256_setzero_si256(), _mm256_castsi256_si128(a), 1);// shift a 16 bytes up, zero lower part
+        ahi = simde_mm256_inserti128_si256 (simde_mm256_setzero_si256(), simde_mm256_castsi256_si128(a), 1);// shift a 16 bytes up, zero lower part
     }
     else if constexpr (b < 32) {
-        alo = _mm256_inserti128_si256 (_mm256_setzero_si256(), _mm256_castsi256_si128(a), 1);// shift a 16 bytes up, zero lower part
-        ahi = _mm256_setzero_si256();
+        alo = simde_mm256_inserti128_si256 (simde_mm256_setzero_si256(), simde_mm256_castsi256_si128(a), 1);// shift a 16 bytes up, zero lower part
+        ahi = simde_mm256_setzero_si256();
     }
     else {
-        return _mm256_setzero_si256();                     // zero
+        return simde_mm256_setzero_si256();                     // zero
     }
     if constexpr ((b & 0xF) == 0) return alo;              // modulo 16. no more shift needeed
-    return _mm256_alignr_epi8(alo, ahi, 16-(b & 0xF));     // shift within 16-bytes lane
+    return simde_mm256_alignr_epi8(alo, ahi, 16-(b & 0xF));     // shift within 16-bytes lane
 }
 
 // Function shift_bytes_down: shift whole vector right by b bytes
@@ -4847,24 +4847,24 @@ template <unsigned int b>
 static inline Vec32c shift_bytes_down(Vec32c const a) {
 #if INSTRSET >= 10  // AVX512VL
     if constexpr ((b & 3) == 0) {  // b is divisible by 4
-        return _mm256_alignr_epi32(_mm256_setzero_si256(), a, (b >> 2) & 7);
+        return simde_mm256_alignr_epi32(simde_mm256_setzero_si256(), a, (b >> 2) & 7);
     }
 #endif
-    __m256i ahi, alo;
+    simde__m256i ahi, alo;
     if constexpr (b < 16) {
         // shift a 16 bytes down, zero upper part
-        alo = _mm256_inserti128_si256(_mm256_setzero_si256(), _mm256_extracti128_si256(a, 1), 0);// make sure the upper part is zero (otherwise, an optimizing compiler can mess it up)
+        alo = simde_mm256_inserti128_si256(simde_mm256_setzero_si256(), simde_mm256_extracti128_si256(a, 1), 0);// make sure the upper part is zero (otherwise, an optimizing compiler can mess it up)
         ahi = a;
     }
     else if constexpr (b < 32) {
-        alo = _mm256_setzero_si256();                      // zero
-        ahi = _mm256_inserti128_si256(_mm256_setzero_si256(), _mm256_extracti128_si256(a, 1), 0);// shift a 16 bytes down, zero upper part
+        alo = simde_mm256_setzero_si256();                      // zero
+        ahi = simde_mm256_inserti128_si256(simde_mm256_setzero_si256(), simde_mm256_extracti128_si256(a, 1), 0);// shift a 16 bytes down, zero upper part
     }
     else {
-        return _mm256_setzero_si256();                     // zero
+        return simde_mm256_setzero_si256();                     // zero
     }
     if constexpr ((b & 0xF) == 0) return ahi;              // modulo 16. no more shift needeed
-    return _mm256_alignr_epi8(alo, ahi, b & 0xF);          // shift within 16-bytes lane
+    return simde_mm256_alignr_epi8(alo, ahi, b & 0xF);          // shift within 16-bytes lane
 }
 
 
@@ -4909,7 +4909,7 @@ static inline Vec8i gather8i(void const * a) {
         return blend8<j0, j1, j2, j3, j4, j5, j6, j7>(b, c);
     }
     // use AVX2 gather
-    return _mm256_i32gather_epi32((const int *)a, Vec8i(i0,i1,i2,i3,i4,i5,i6,i7), 4);
+    return simde_mm256_i32gather_epi32((const int *)a, Vec8i(i0,i1,i2,i3,i4,i5,i6,i7), 4);
 }
 
 template <int i0, int i1, int i2, int i3>
@@ -4942,7 +4942,7 @@ static inline Vec4q gather4q(void const * a) {
         return blend4<j0, j1, j2, j3>(b, c);
     }
     // use AVX2 gather
-    return _mm256_i32gather_epi64((const long long *)a, Vec4i(i0,i1,i2,i3), 8);
+    return simde_mm256_i32gather_epi64((const long long *)a, Vec4i(i0,i1,i2,i3), 8);
 }
 
 
@@ -4964,10 +4964,10 @@ static inline Vec4q gather4q(void const * a) {
 template <int i0, int i1, int i2, int i3, int i4, int i5, int i6, int i7>
 static inline void scatter(Vec8i const data, void * array) {
 #if INSTRSET >= 10 //  __AVX512VL__
-    __m256i indx = constant8ui<i0,i1,i2,i3,i4,i5,i6,i7>();
+    simde__m256i indx = constant8ui<i0,i1,i2,i3,i4,i5,i6,i7>();
     __mmask8 mask = uint8_t((i0>=0) | ((i1>=0)<<1) | ((i2>=0)<<2) | ((i3>=0)<<3) |
         ((i4>=0)<<4) | ((i5>=0)<<5) | ((i6>=0)<<6) | ((i7>=0)<<7));
-    _mm256_mask_i32scatter_epi32((int*)array, mask, indx, data, 4);
+    simde_mm256_mask_i32scatter_epi32((int*)array, mask, indx, data, 4);
 #elif INSTRSET >= 9  //  __AVX512F__
     __m512i indx = _mm512_castsi256_si512(constant8ui<i0,i1,i2,i3,i4,i5,i6,i7>());
     __mmask16 mask = uint16_t((i0>=0) | ((i1>=0)<<1) | ((i2>=0)<<2) | ((i3>=0)<<3) |
@@ -4987,9 +4987,9 @@ static inline void scatter(Vec4q const data, void * array) {
 #if INSTRSET >= 10 //  __AVX512VL__
     __m128i indx = constant4ui<i0,i1,i2,i3>();
     __mmask8 mask = uint8_t((i0>=0) | ((i1>=0)<<1) | ((i2>=0)<<2) | ((i3>=0)<<3));
-    _mm256_mask_i32scatter_epi64((long long *)array, mask, indx, data, 8);
+    simde_mm256_mask_i32scatter_epi64((long long *)array, mask, indx, data, 8);
 #elif INSTRSET >= 9  //  __AVX512F__
-    __m256i indx = _mm256_castsi128_si256(constant4ui<i0,i1,i2,i3>());
+    simde__m256i indx = simde_mm256_castsi128_si256(constant4ui<i0,i1,i2,i3>());
     __mmask16 mask = uint16_t((i0>=0) | ((i1>=0)<<1) | ((i2>=0)<<2) | ((i3>=0)<<3));
     _mm512_mask_i32scatter_epi64((long long*)array, (__mmask8)mask, indx, _mm512_castsi256_si512(data), 8);
 #else
@@ -5010,8 +5010,8 @@ static inline void scatter(Vec4q const data, void * array) {
 
 static inline void scatter(Vec8i const index, uint32_t limit, Vec8i const data, void * destination) {
 #if INSTRSET >= 10 //  __AVX512VL__
-    __mmask8 mask = _mm256_cmplt_epu32_mask(index, Vec8ui(limit));
-    _mm256_mask_i32scatter_epi32((int*)destination, mask, index, data, 4);
+    __mmask8 mask = simde_mm256_cmplt_epu32_mask(index, Vec8ui(limit));
+    simde_mm256_mask_i32scatter_epi32((int*)destination, mask, index, data, 4);
 #elif INSTRSET >= 9  //  __AVX512F__
     // 16 bit mask, upper 8 bits are 0. Usually, we can rely on the upper bit of an extended vector to be zero, but we will mask then off the be sure
     //__mmask16 mask = _mm512_cmplt_epu32_mask(_mm512_castsi256_si512(index), _mm512_castsi256_si512(Vec8ui(limit)));
@@ -5027,8 +5027,8 @@ static inline void scatter(Vec8i const index, uint32_t limit, Vec8i const data, 
 
 static inline void scatter(Vec4q const index, uint32_t limit, Vec4q const data, void * destination) {
 #if INSTRSET >= 10 //  __AVX512VL__
-    __mmask8 mask = _mm256_cmplt_epu64_mask(index, Vec4uq(uint64_t(limit)));
-    _mm256_mask_i64scatter_epi64((long long*)destination, mask, index, data, 8);
+    __mmask8 mask = simde_mm256_cmplt_epu64_mask(index, Vec4uq(uint64_t(limit)));
+    simde_mm256_mask_i64scatter_epi64((long long*)destination, mask, index, data, 8);
 #elif INSTRSET >= 9  //  __AVX512F__
     // 16 bit mask. upper 12 bits are 0
     __mmask16 mask = _mm512_mask_cmplt_epu64_mask(0xF, _mm512_castsi256_si512(index), _mm512_castsi256_si512(Vec4uq(uint64_t(limit))));
@@ -5044,11 +5044,11 @@ static inline void scatter(Vec4q const index, uint32_t limit, Vec4q const data, 
 static inline void scatter(Vec4i const index, uint32_t limit, Vec4q const data, void * destination) {
 #if INSTRSET >= 10 //  __AVX512VL__
     __mmask8 mask = _mm_cmplt_epu32_mask(index, Vec4ui(limit));
-    _mm256_mask_i32scatter_epi64((long long*)destination, mask, index, data, 8);
+    simde_mm256_mask_i32scatter_epi64((long long*)destination, mask, index, data, 8);
 #elif INSTRSET >= 9  //  __AVX512F__
     // 16 bit mask. upper 12 bits are 0
     __mmask16 mask = _mm512_mask_cmplt_epu32_mask(0xF, _mm512_castsi128_si512(index), _mm512_castsi128_si512(Vec4ui(limit)));
-    _mm512_mask_i32scatter_epi64((long long*)destination, (__mmask8)mask, _mm256_castsi128_si256(index), _mm512_castsi256_si512(data), 8);
+    _mm512_mask_i32scatter_epi64((long long*)destination, (__mmask8)mask, simde_mm256_castsi128_si256(index), _mm512_castsi256_si512(data), 8);
 #else
     int64_t* arr = (int64_t*)destination;
     for (int i = 0; i < 4; i++) {
@@ -5067,84 +5067,84 @@ static inline void scatter(Vec4i const index, uint32_t limit, Vec4q const data, 
 
 // Function extend_low : extends the low 16 elements to 16 bits with sign extension
 static inline Vec16s extend_low (Vec32c const a) {
-    __m256i a2   = _mm256_permute4x64_epi64(a, 0x10);            // get bits 64-127 to position 128-191
-    __m256i sign = _mm256_cmpgt_epi8(_mm256_setzero_si256(),a2); // 0 > a2
-    return         _mm256_unpacklo_epi8(a2, sign);               // interleave with sign extensions
+    simde__m256i a2   = simde_mm256_permute4x64_epi64(a, 0x10);            // get bits 64-127 to position 128-191
+    simde__m256i sign = simde_mm256_cmpgt_epi8(simde_mm256_setzero_si256(),a2); // 0 > a2
+    return         simde_mm256_unpacklo_epi8(a2, sign);               // interleave with sign extensions
 }
 
 // Function extend_high : extends the high 16 elements to 16 bits with sign extension
 static inline Vec16s extend_high (Vec32c const a) {
-    __m256i a2   = _mm256_permute4x64_epi64(a, 0xC8);            // get bits 128-191 to position 64-127
-    __m256i sign = _mm256_cmpgt_epi8(_mm256_setzero_si256(),a2); // 0 > a2
-    return         _mm256_unpackhi_epi8(a2, sign);               // interleave with sign extensions
+    simde__m256i a2   = simde_mm256_permute4x64_epi64(a, 0xC8);            // get bits 128-191 to position 64-127
+    simde__m256i sign = simde_mm256_cmpgt_epi8(simde_mm256_setzero_si256(),a2); // 0 > a2
+    return         simde_mm256_unpackhi_epi8(a2, sign);               // interleave with sign extensions
 }
 
 // Function extend_low : extends the low 16 elements to 16 bits with zero extension
 static inline Vec16us extend_low (Vec32uc const a) {
-    __m256i a2 = _mm256_permute4x64_epi64(a, 0x10);              // get bits 64-127 to position 128-191
-    return    _mm256_unpacklo_epi8(a2, _mm256_setzero_si256());  // interleave with zero extensions
+    simde__m256i a2 = simde_mm256_permute4x64_epi64(a, 0x10);              // get bits 64-127 to position 128-191
+    return    simde_mm256_unpacklo_epi8(a2, simde_mm256_setzero_si256());  // interleave with zero extensions
 }
 
 // Function extend_high : extends the high 19 elements to 16 bits with zero extension
 static inline Vec16us extend_high (Vec32uc const a) {
-    __m256i a2 = _mm256_permute4x64_epi64(a, 0xC8);              // get bits 128-191 to position 64-127
-    return  _mm256_unpackhi_epi8(a2, _mm256_setzero_si256());    // interleave with zero extensions
+    simde__m256i a2 = simde_mm256_permute4x64_epi64(a, 0xC8);              // get bits 128-191 to position 64-127
+    return  simde_mm256_unpackhi_epi8(a2, simde_mm256_setzero_si256());    // interleave with zero extensions
 }
 
 // Extend 16-bit integers to 32-bit integers, signed and unsigned
 
 // Function extend_low : extends the low 8 elements to 32 bits with sign extension
 static inline Vec8i extend_low (Vec16s const a) {
-    __m256i a2   = _mm256_permute4x64_epi64(a, 0x10);            // get bits 64-127 to position 128-191
-    __m256i sign = _mm256_srai_epi16(a2, 15);                    // sign bit
-    return         _mm256_unpacklo_epi16(a2 ,sign);              // interleave with sign extensions
+    simde__m256i a2   = simde_mm256_permute4x64_epi64(a, 0x10);            // get bits 64-127 to position 128-191
+    simde__m256i sign = simde_mm256_srai_epi16(a2, 15);                    // sign bit
+    return         simde_mm256_unpacklo_epi16(a2 ,sign);              // interleave with sign extensions
 }
 
 // Function extend_high : extends the high 8 elements to 32 bits with sign extension
 static inline Vec8i extend_high (Vec16s const a) {
-    __m256i a2   = _mm256_permute4x64_epi64(a, 0xC8);            // get bits 128-191 to position 64-127
-    __m256i sign = _mm256_srai_epi16(a2, 15);                    // sign bit
-    return         _mm256_unpackhi_epi16(a2, sign);              // interleave with sign extensions
+    simde__m256i a2   = simde_mm256_permute4x64_epi64(a, 0xC8);            // get bits 128-191 to position 64-127
+    simde__m256i sign = simde_mm256_srai_epi16(a2, 15);                    // sign bit
+    return         simde_mm256_unpackhi_epi16(a2, sign);              // interleave with sign extensions
 }
 
 // Function extend_low : extends the low 8 elements to 32 bits with zero extension
 static inline Vec8ui extend_low (Vec16us const a) {
-    __m256i a2   = _mm256_permute4x64_epi64(a, 0x10);            // get bits 64-127 to position 128-191
-    return    _mm256_unpacklo_epi16(a2, _mm256_setzero_si256()); // interleave with zero extensions
+    simde__m256i a2   = simde_mm256_permute4x64_epi64(a, 0x10);            // get bits 64-127 to position 128-191
+    return    simde_mm256_unpacklo_epi16(a2, simde_mm256_setzero_si256()); // interleave with zero extensions
 }
 
 // Function extend_high : extends the high 8 elements to 32 bits with zero extension
 static inline Vec8ui extend_high (Vec16us const a) {
-    __m256i a2   = _mm256_permute4x64_epi64(a, 0xC8);            // get bits 128-191 to position 64-127
-    return  _mm256_unpackhi_epi16(a2, _mm256_setzero_si256());   // interleave with zero extensions
+    simde__m256i a2   = simde_mm256_permute4x64_epi64(a, 0xC8);            // get bits 128-191 to position 64-127
+    return  simde_mm256_unpackhi_epi16(a2, simde_mm256_setzero_si256());   // interleave with zero extensions
 }
 
 // Extend 32-bit integers to 64-bit integers, signed and unsigned
 
 // Function extend_low : extends the low 4 elements to 64 bits with sign extension
 static inline Vec4q extend_low (Vec8i const a) {
-    __m256i a2   = _mm256_permute4x64_epi64(a, 0x10);            // get bits 64-127 to position 128-191
-    __m256i sign = _mm256_srai_epi32(a2, 31);                    // sign bit
-    return         _mm256_unpacklo_epi32(a2, sign);              // interleave with sign extensions
+    simde__m256i a2   = simde_mm256_permute4x64_epi64(a, 0x10);            // get bits 64-127 to position 128-191
+    simde__m256i sign = simde_mm256_srai_epi32(a2, 31);                    // sign bit
+    return         simde_mm256_unpacklo_epi32(a2, sign);              // interleave with sign extensions
 }
 
 // Function extend_high : extends the high 4 elements to 64 bits with sign extension
 static inline Vec4q extend_high (Vec8i const a) {
-    __m256i a2   = _mm256_permute4x64_epi64(a, 0xC8);            // get bits 128-191 to position 64-127
-    __m256i sign = _mm256_srai_epi32(a2, 31);                    // sign bit
-    return         _mm256_unpackhi_epi32(a2, sign);              // interleave with sign extensions
+    simde__m256i a2   = simde_mm256_permute4x64_epi64(a, 0xC8);            // get bits 128-191 to position 64-127
+    simde__m256i sign = simde_mm256_srai_epi32(a2, 31);                    // sign bit
+    return         simde_mm256_unpackhi_epi32(a2, sign);              // interleave with sign extensions
 }
 
 // Function extend_low : extends the low 4 elements to 64 bits with zero extension
 static inline Vec4uq extend_low (Vec8ui const a) {
-    __m256i a2   = _mm256_permute4x64_epi64(a, 0x10);            // get bits 64-127 to position 128-191
-    return  _mm256_unpacklo_epi32(a2, _mm256_setzero_si256());   // interleave with zero extensions
+    simde__m256i a2   = simde_mm256_permute4x64_epi64(a, 0x10);            // get bits 64-127 to position 128-191
+    return  simde_mm256_unpacklo_epi32(a2, simde_mm256_setzero_si256());   // interleave with zero extensions
 }
 
 // Function extend_high : extends the high 4 elements to 64 bits with zero extension
 static inline Vec4uq extend_high (Vec8ui const a) {
-    __m256i a2   = _mm256_permute4x64_epi64(a, 0xC8);            // get bits 128-191 to position 64-127
-    return  _mm256_unpackhi_epi32(a2, _mm256_setzero_si256());   // interleave with zero extensions
+    simde__m256i a2   = simde_mm256_permute4x64_epi64(a, 0xC8);            // get bits 128-191 to position 64-127
+    return  simde_mm256_unpackhi_epi32(a2, simde_mm256_setzero_si256());   // interleave with zero extensions
 }
 
 // Compress 16-bit integers to 8-bit integers, signed and unsigned, with and without saturation
@@ -5152,18 +5152,18 @@ static inline Vec4uq extend_high (Vec8ui const a) {
 // Function compress : packs two vectors of 16-bit integers into one vector of 8-bit integers
 // Overflow wraps around
 static inline Vec32c compress (Vec16s const low, Vec16s const high) {
-    __m256i mask  = _mm256_set1_epi32(0x00FF00FF);         // mask for low bytes
-    __m256i lowm  = _mm256_and_si256(low, mask);           // bytes of low
-    __m256i highm = _mm256_and_si256(high, mask);          // bytes of high
-    __m256i pk    = _mm256_packus_epi16(lowm, highm);      // unsigned pack
-    return          _mm256_permute4x64_epi64(pk, 0xD8);    // put in right place
+    simde__m256i mask  = simde_mm256_set1_epi32(0x00FF00FF);         // mask for low bytes
+    simde__m256i lowm  = simde_mm256_and_si256(low, mask);           // bytes of low
+    simde__m256i highm = simde_mm256_and_si256(high, mask);          // bytes of high
+    simde__m256i pk    = simde_mm256_packus_epi16(lowm, highm);      // unsigned pack
+    return          simde_mm256_permute4x64_epi64(pk, 0xD8);    // put in right place
 }
 
 // Function compress : packs two vectors of 16-bit integers into one vector of 8-bit integers
 // Signed, with saturation
 static inline Vec32c compress_saturated (Vec16s const low, Vec16s const high) {
-    __m256i pk    = _mm256_packs_epi16(low,high);          // packed with signed saturation
-    return          _mm256_permute4x64_epi64(pk, 0xD8);    // put in right place
+    simde__m256i pk    = simde_mm256_packs_epi16(low,high);          // packed with signed saturation
+    return          simde_mm256_permute4x64_epi64(pk, 0xD8);    // put in right place
 }
 
 // Function compress : packs two vectors of 16-bit integers to one vector of 8-bit integers
@@ -5175,11 +5175,11 @@ static inline Vec32uc compress (Vec16us const low, Vec16us const high) {
 // Function compress : packs two vectors of 16-bit integers into one vector of 8-bit integers
 // Unsigned, with saturation
 static inline Vec32uc compress_saturated (Vec16us const low, Vec16us const high) {
-    __m256i maxval  = _mm256_set1_epi32(0x00FF00FF);       // maximum value
-    __m256i low1    = _mm256_min_epu16(low,maxval);        // upper limit
-    __m256i high1   = _mm256_min_epu16(high,maxval);       // upper limit
-    __m256i pk      = _mm256_packus_epi16(low1,high1);     // this instruction saturates from signed 32 bit to unsigned 16 bit
-    return            _mm256_permute4x64_epi64(pk, 0xD8);  // put in right place
+    simde__m256i maxval  = simde_mm256_set1_epi32(0x00FF00FF);       // maximum value
+    simde__m256i low1    = simde_mm256_min_epu16(low,maxval);        // upper limit
+    simde__m256i high1   = simde_mm256_min_epu16(high,maxval);       // upper limit
+    simde__m256i pk      = simde_mm256_packus_epi16(low1,high1);     // this instruction saturates from signed 32 bit to unsigned 16 bit
+    return            simde_mm256_permute4x64_epi64(pk, 0xD8);  // put in right place
 }
 
 // Compress 32-bit integers to 16-bit integers, signed and unsigned, with and without saturation
@@ -5187,18 +5187,18 @@ static inline Vec32uc compress_saturated (Vec16us const low, Vec16us const high)
 // Function compress : packs two vectors of 32-bit integers into one vector of 16-bit integers
 // Overflow wraps around
 static inline Vec16s compress (Vec8i const low, Vec8i const high) {
-    __m256i mask  = _mm256_set1_epi32(0x0000FFFF);         // mask for low words
-    __m256i lowm  = _mm256_and_si256(low,mask);            // words of low
-    __m256i highm = _mm256_and_si256(high,mask);           // words of high
-    __m256i pk    = _mm256_packus_epi32(lowm,highm);       // unsigned pack
-    return          _mm256_permute4x64_epi64(pk, 0xD8);    // put in right place
+    simde__m256i mask  = simde_mm256_set1_epi32(0x0000FFFF);         // mask for low words
+    simde__m256i lowm  = simde_mm256_and_si256(low,mask);            // words of low
+    simde__m256i highm = simde_mm256_and_si256(high,mask);           // words of high
+    simde__m256i pk    = simde_mm256_packus_epi32(lowm,highm);       // unsigned pack
+    return          simde_mm256_permute4x64_epi64(pk, 0xD8);    // put in right place
 }
 
 // Function compress : packs two vectors of 32-bit integers into one vector of 16-bit integers
 // Signed with saturation
 static inline Vec16s compress_saturated (Vec8i const low, Vec8i const high) {
-    __m256i pk    =  _mm256_packs_epi32(low,high);         // pack with signed saturation
-    return           _mm256_permute4x64_epi64(pk, 0xD8);   // put in right place
+    simde__m256i pk    =  simde_mm256_packs_epi32(low,high);         // pack with signed saturation
+    return           simde_mm256_permute4x64_epi64(pk, 0xD8);   // put in right place
 }
 
 // Function compress : packs two vectors of 32-bit integers into one vector of 16-bit integers
@@ -5210,11 +5210,11 @@ static inline Vec16us compress (Vec8ui const low, Vec8ui const high) {
 // Function compress : packs two vectors of 32-bit integers into one vector of 16-bit integers
 // Unsigned, with saturation
 static inline Vec16us compress_saturated (Vec8ui const low, Vec8ui const high) {
-    __m256i maxval  = _mm256_set1_epi32(0x0000FFFF);       // maximum value
-    __m256i low1    = _mm256_min_epu32(low,maxval);        // upper limit
-    __m256i high1   = _mm256_min_epu32(high,maxval);       // upper limit
-    __m256i pk      = _mm256_packus_epi32(low1,high1);     // this instruction saturates from signed 32 bit to unsigned 16 bit
-    return            _mm256_permute4x64_epi64(pk, 0xD8);  // put in right place
+    simde__m256i maxval  = simde_mm256_set1_epi32(0x0000FFFF);       // maximum value
+    simde__m256i low1    = simde_mm256_min_epu32(low,maxval);        // upper limit
+    simde__m256i high1   = simde_mm256_min_epu32(high,maxval);       // upper limit
+    simde__m256i pk      = simde_mm256_packus_epi32(low1,high1);     // this instruction saturates from signed 32 bit to unsigned 16 bit
+    return            simde_mm256_permute4x64_epi64(pk, 0xD8);  // put in right place
 }
 
 // Compress 64-bit integers to 32-bit integers, signed and unsigned, with and without saturation
@@ -5222,10 +5222,10 @@ static inline Vec16us compress_saturated (Vec8ui const low, Vec8ui const high) {
 // Function compress : packs two vectors of 64-bit integers into one vector of 32-bit integers
 // Overflow wraps around
 static inline Vec8i compress (Vec4q const low, Vec4q const high) {
-    __m256i low2  = _mm256_shuffle_epi32(low,0xD8);        // low dwords of low  to pos. 0 and 32
-    __m256i high2 = _mm256_shuffle_epi32(high,0xD8);       // low dwords of high to pos. 0 and 32
-    __m256i pk    = _mm256_unpacklo_epi64(low2,high2);     // interleave
-    return          _mm256_permute4x64_epi64(pk, 0xD8);    // put in right place
+    simde__m256i low2  = simde_mm256_shuffle_epi32(low,0xD8);        // low dwords of low  to pos. 0 and 32
+    simde__m256i high2 = simde_mm256_shuffle_epi32(high,0xD8);       // low dwords of high to pos. 0 and 32
+    simde__m256i pk    = simde_mm256_unpacklo_epi64(low2,high2);     // interleave
+    return          simde_mm256_permute4x64_epi64(pk, 0xD8);    // put in right place
 }
 
 // Function compress : packs two vectors of 64-bit integers into one vector of 32-bit integers
@@ -5249,23 +5249,23 @@ static inline Vec8ui compress (Vec4uq const low, Vec4uq const high) {
 // Function compress : packs two vectors of 64-bit integers into one vector of 32-bit integers
 // Unsigned, with saturation
 static inline Vec8ui compress_saturated (Vec4uq const low, Vec4uq const high) {
-    __m256i zero     = _mm256_setzero_si256();             // 0
-    __m256i lowzero  = _mm256_cmpeq_epi32(low,zero);       // for each dword is zero
-    __m256i highzero = _mm256_cmpeq_epi32(high,zero);      // for each dword is zero
-    __m256i mone     = _mm256_set1_epi32(-1);              // FFFFFFFF
-    __m256i lownz    = _mm256_xor_si256(lowzero,mone);     // for each dword is nonzero
-    __m256i highnz   = _mm256_xor_si256(highzero,mone);    // for each dword is nonzero
-    __m256i lownz2   = _mm256_srli_epi64(lownz,32);        // shift down to low dword
-    __m256i highnz2  = _mm256_srli_epi64(highnz,32);       // shift down to low dword
-    __m256i lowsatur = _mm256_or_si256(low,lownz2);        // low, saturated
-    __m256i hisatur  = _mm256_or_si256(high,highnz2);      // high, saturated
+    simde__m256i zero     = simde_mm256_setzero_si256();             // 0
+    simde__m256i lowzero  = simde_mm256_cmpeq_epi32(low,zero);       // for each dword is zero
+    simde__m256i highzero = simde_mm256_cmpeq_epi32(high,zero);      // for each dword is zero
+    simde__m256i mone     = simde_mm256_set1_epi32(-1);              // FFFFFFFF
+    simde__m256i lownz    = simde_mm256_xor_si256(lowzero,mone);     // for each dword is nonzero
+    simde__m256i highnz   = simde_mm256_xor_si256(highzero,mone);    // for each dword is nonzero
+    simde__m256i lownz2   = simde_mm256_srli_epi64(lownz,32);        // shift down to low dword
+    simde__m256i highnz2  = simde_mm256_srli_epi64(highnz,32);       // shift down to low dword
+    simde__m256i lowsatur = simde_mm256_or_si256(low,lownz2);        // low, saturated
+    simde__m256i hisatur  = simde_mm256_or_si256(high,highnz2);      // high, saturated
     return  Vec8ui (compress(Vec4q(lowsatur), Vec4q(hisatur)));
 }
 
 // extend vectors to double size by adding zeroes
 
 #ifdef ZEXT_MISSING
-// GCC v. 9 is missing the _mm256_zextsi128_si256 intrinsic
+// GCC v. 9 is missing the simde_mm256_zextsi128_si256 intrinsic
 
 static inline Vec32c extend_z(Vec16c a) {
     return Vec32c(a, Vec16c(0));
@@ -5295,34 +5295,34 @@ static inline Vec4uq extend_z(Vec2uq a) {
 #else
 
 static inline Vec32c extend_z(Vec16c a) {
-    return _mm256_zextsi128_si256(a);
+    return simde_mm256_zextsi128_si256(a);
 }
 static inline Vec32uc extend_z(Vec16uc a) {
-    return _mm256_zextsi128_si256(a);
+    return simde_mm256_zextsi128_si256(a);
 }
 static inline Vec16s extend_z(Vec8s a) {
-    return _mm256_zextsi128_si256(a);
+    return simde_mm256_zextsi128_si256(a);
 }
 static inline Vec16us extend_z(Vec8us a) {
-    return _mm256_zextsi128_si256(a);
+    return simde_mm256_zextsi128_si256(a);
 }
 static inline Vec8i extend_z(Vec4i a) {
-    return _mm256_zextsi128_si256(a);
+    return simde_mm256_zextsi128_si256(a);
 }
 static inline Vec8ui extend_z(Vec4ui a) {
-    return _mm256_zextsi128_si256(a);
+    return simde_mm256_zextsi128_si256(a);
 }
 static inline Vec4q extend_z(Vec2q a) {
-    return _mm256_zextsi128_si256(a);
+    return simde_mm256_zextsi128_si256(a);
 }
 static inline Vec4uq extend_z(Vec2uq a) {
-    return _mm256_zextsi128_si256(a);
+    return simde_mm256_zextsi128_si256(a);
 }
 #endif // ZEXT_MISSING
 
 #if INSTRSET < 10  // broad boolean vectors
 #ifdef ZEXT_MISSING
-// GCC v. 9 is missing the _mm256_zextsi128_si256 intrinsic
+// GCC v. 9 is missing the simde_mm256_zextsi128_si256 intrinsic
 static inline Vec32cb extend_z(Vec16cb a) {
     return Vec32cb(a, Vec16cb(false));
 }
@@ -5338,16 +5338,16 @@ static inline Vec4qb extend_z(Vec2qb a) {
 
 #else
 static inline Vec32cb extend_z(Vec16cb a) {
-    return _mm256_zextsi128_si256(a);
+    return simde_mm256_zextsi128_si256(a);
 }
 static inline Vec16sb extend_z(Vec8sb a) {
-    return _mm256_zextsi128_si256(a);
+    return simde_mm256_zextsi128_si256(a);
 }
 static inline Vec8ib extend_z(Vec4ib a) {
-    return _mm256_zextsi128_si256(a);
+    return simde_mm256_zextsi128_si256(a);
 }
 static inline Vec4qb extend_z(Vec2qb a) {
-    return _mm256_zextsi128_si256(a);
+    return simde_mm256_zextsi128_si256(a);
 }
 #endif  // ZEXT_MISSING
 
@@ -5381,68 +5381,68 @@ static inline Vec4b extend_z(Vec2b a) {
 
 // vector of 8 32-bit signed integers
 static inline Vec8i operator / (Vec8i const a, Divisor_i const d) {
-    __m256i m   = _mm256_broadcastq_epi64(d.getm());       // broadcast multiplier
-    __m256i sgn = _mm256_broadcastq_epi64(d.getsign());    // broadcast sign of d
-    __m256i t1  = _mm256_mul_epi32(a,m);                   // 32x32->64 bit signed multiplication of even elements of a
-    __m256i t2  = _mm256_srli_epi64(t1,32);                // high dword of even numbered results
-    __m256i t3  = _mm256_srli_epi64(a,32);                 // get odd elements of a into position for multiplication
-    __m256i t4  = _mm256_mul_epi32(t3,m);                  // 32x32->64 bit signed multiplication of odd elements
-    __m256i t7  = _mm256_blend_epi32(t2,t4,0xAA);
-    __m256i t8  = _mm256_add_epi32(t7,a);                  // add
-    __m256i t9  = _mm256_sra_epi32(t8,d.gets1());          // shift right artihmetic
-    __m256i t10 = _mm256_srai_epi32(a,31);                 // sign of a
-    __m256i t11 = _mm256_sub_epi32(t10,sgn);               // sign of a - sign of d
-    __m256i t12 = _mm256_sub_epi32(t9,t11);                // + 1 if a < 0, -1 if d < 0
-    return        _mm256_xor_si256(t12,sgn);               // change sign if divisor negative
+    simde__m256i m   = simde_mm256_broadcastq_epi64(d.getm());       // broadcast multiplier
+    simde__m256i sgn = simde_mm256_broadcastq_epi64(d.getsign());    // broadcast sign of d
+    simde__m256i t1  = simde_mm256_mul_epi32(a,m);                   // 32x32->64 bit signed multiplication of even elements of a
+    simde__m256i t2  = simde_mm256_srli_epi64(t1,32);                // high dword of even numbered results
+    simde__m256i t3  = simde_mm256_srli_epi64(a,32);                 // get odd elements of a into position for multiplication
+    simde__m256i t4  = simde_mm256_mul_epi32(t3,m);                  // 32x32->64 bit signed multiplication of odd elements
+    simde__m256i t7  = simde_mm256_blend_epi32(t2,t4,0xAA);
+    simde__m256i t8  = simde_mm256_add_epi32(t7,a);                  // add
+    simde__m256i t9  = simde_mm256_sra_epi32(t8,d.gets1());          // shift right artihmetic
+    simde__m256i t10 = simde_mm256_srai_epi32(a,31);                 // sign of a
+    simde__m256i t11 = simde_mm256_sub_epi32(t10,sgn);               // sign of a - sign of d
+    simde__m256i t12 = simde_mm256_sub_epi32(t9,t11);                // + 1 if a < 0, -1 if d < 0
+    return        simde_mm256_xor_si256(t12,sgn);               // change sign if divisor negative
 }
 
 // vector of 8 32-bit unsigned integers
 static inline Vec8ui operator / (Vec8ui const a, Divisor_ui const d) {
-    __m256i m   = _mm256_broadcastq_epi64(d.getm());       // broadcast multiplier
-    __m256i t1  = _mm256_mul_epu32(a,m);                   // 32x32->64 bit unsigned multiplication of even elements of a
-    __m256i t2  = _mm256_srli_epi64(t1,32);                // high dword of even numbered results
-    __m256i t3  = _mm256_srli_epi64(a,32);                 // get odd elements of a into position for multiplication
-    __m256i t4  = _mm256_mul_epu32(t3,m);                  // 32x32->64 bit unsigned multiplication of odd elements
-    __m256i t7  = _mm256_blend_epi32(t2,t4,0xAA);
-    __m256i t8  = _mm256_sub_epi32(a,t7);                  // subtract
-    __m256i t9  = _mm256_srl_epi32(t8,d.gets1());          // shift right logical
-    __m256i t10 = _mm256_add_epi32(t7,t9);                 // add
-    return        _mm256_srl_epi32(t10,d.gets2());         // shift right logical
+    simde__m256i m   = simde_mm256_broadcastq_epi64(d.getm());       // broadcast multiplier
+    simde__m256i t1  = simde_mm256_mul_epu32(a,m);                   // 32x32->64 bit unsigned multiplication of even elements of a
+    simde__m256i t2  = simde_mm256_srli_epi64(t1,32);                // high dword of even numbered results
+    simde__m256i t3  = simde_mm256_srli_epi64(a,32);                 // get odd elements of a into position for multiplication
+    simde__m256i t4  = simde_mm256_mul_epu32(t3,m);                  // 32x32->64 bit unsigned multiplication of odd elements
+    simde__m256i t7  = simde_mm256_blend_epi32(t2,t4,0xAA);
+    simde__m256i t8  = simde_mm256_sub_epi32(a,t7);                  // subtract
+    simde__m256i t9  = simde_mm256_srl_epi32(t8,d.gets1());          // shift right logical
+    simde__m256i t10 = simde_mm256_add_epi32(t7,t9);                 // add
+    return        simde_mm256_srl_epi32(t10,d.gets2());         // shift right logical
 }
 
 // vector of 16 16-bit signed integers
 static inline Vec16s operator / (Vec16s const a, Divisor_s const d) {
-    __m256i m   = _mm256_broadcastq_epi64(d.getm());       // broadcast multiplier
-    __m256i sgn = _mm256_broadcastq_epi64(d.getsign());    // broadcast sign of d
-    __m256i t1  = _mm256_mulhi_epi16(a, m);                // multiply high signed words
-    __m256i t2  = _mm256_add_epi16(t1,a);                  // + a
-    __m256i t3  = _mm256_sra_epi16(t2,d.gets1());          // shift right artihmetic
-    __m256i t4  = _mm256_srai_epi16(a,15);                 // sign of a
-    __m256i t5  = _mm256_sub_epi16(t4,sgn);                // sign of a - sign of d
-    __m256i t6  = _mm256_sub_epi16(t3,t5);                 // + 1 if a < 0, -1 if d < 0
-    return        _mm256_xor_si256(t6,sgn);                // change sign if divisor negative
+    simde__m256i m   = simde_mm256_broadcastq_epi64(d.getm());       // broadcast multiplier
+    simde__m256i sgn = simde_mm256_broadcastq_epi64(d.getsign());    // broadcast sign of d
+    simde__m256i t1  = simde_mm256_mulhi_epi16(a, m);                // multiply high signed words
+    simde__m256i t2  = simde_mm256_add_epi16(t1,a);                  // + a
+    simde__m256i t3  = simde_mm256_sra_epi16(t2,d.gets1());          // shift right artihmetic
+    simde__m256i t4  = simde_mm256_srai_epi16(a,15);                 // sign of a
+    simde__m256i t5  = simde_mm256_sub_epi16(t4,sgn);                // sign of a - sign of d
+    simde__m256i t6  = simde_mm256_sub_epi16(t3,t5);                 // + 1 if a < 0, -1 if d < 0
+    return        simde_mm256_xor_si256(t6,sgn);                // change sign if divisor negative
 }
 
 // vector of 16 16-bit unsigned integers
 static inline Vec16us operator / (Vec16us const a, Divisor_us const d) {
-    __m256i m   = _mm256_broadcastq_epi64(d.getm());       // broadcast multiplier
-    __m256i t1  = _mm256_mulhi_epu16(a, m);                // multiply high signed words
-    __m256i t2  = _mm256_sub_epi16(a,t1);                  // subtract
-    __m256i t3  = _mm256_srl_epi16(t2,d.gets1());          // shift right logical
-    __m256i t4  = _mm256_add_epi16(t1,t3);                 // add
-    return        _mm256_srl_epi16(t4,d.gets2());          // shift right logical
+    simde__m256i m   = simde_mm256_broadcastq_epi64(d.getm());       // broadcast multiplier
+    simde__m256i t1  = simde_mm256_mulhi_epu16(a, m);                // multiply high signed words
+    simde__m256i t2  = simde_mm256_sub_epi16(a,t1);                  // subtract
+    simde__m256i t3  = simde_mm256_srl_epi16(t2,d.gets1());          // shift right logical
+    simde__m256i t4  = simde_mm256_add_epi16(t1,t3);                 // add
+    return        simde_mm256_srl_epi16(t4,d.gets2());          // shift right logical
 }
 
 // vector of 32 8-bit signed integers
 static inline Vec32c operator / (Vec32c const a, Divisor_s const d) {
 #if INSTRSET >= 10
     // sign-extend even-numbered and odd-numbered elements to 16 bits
-    Vec16s  even = _mm256_srai_epi16(_mm256_slli_epi16(a, 8),8);
-    Vec16s  odd  = _mm256_srai_epi16(a, 8);
+    Vec16s  even = simde_mm256_srai_epi16(simde_mm256_slli_epi16(a, 8),8);
+    Vec16s  odd  = simde_mm256_srai_epi16(a, 8);
     Vec16s  evend = even / d;         // divide even-numbered elements
     Vec16s  oddd  = odd  / d;         // divide odd-numbered  elements
-            oddd  = _mm256_slli_epi16(oddd, 8); // shift left to put back in place
-    __m256i res  = _mm256_mask_mov_epi8(evend, 0xAAAAAAAA, oddd); // interleave even and odd
+            oddd  = simde_mm256_slli_epi16(oddd, 8); // shift left to put back in place
+    simde__m256i res  = simde_mm256_mask_mov_epi8(evend, 0xAAAAAAAA, oddd); // interleave even and odd
     return res;
 #else
     // expand into two Vec16s
@@ -5457,12 +5457,12 @@ static inline Vec32c operator / (Vec32c const a, Divisor_s const d) {
 static inline Vec32uc operator / (Vec32uc const a, Divisor_us const d) {
     // zero-extend even-numbered and odd-numbered elements to 16 bits
 #if INSTRSET >= 10
-    Vec16us  even = _mm256_maskz_mov_epi8(__mmask32(0x55555555), a);
-    Vec16us  odd  = _mm256_srli_epi16(a, 8);
+    Vec16us  even = simde_mm256_maskz_mov_epi8(__mmask32(0x55555555), a);
+    Vec16us  odd  = simde_mm256_srli_epi16(a, 8);
     Vec16us  evend = even / d;          // divide even-numbered elements
     Vec16us  oddd  = odd  / d;          // divide odd-numbered  elements
-    oddd  = _mm256_slli_epi16(oddd, 8); // shift left to put back in place
-    __m256i res  = _mm256_mask_mov_epi8(evend, 0xAAAAAAAA, oddd); // interleave even and odd
+    oddd  = simde_mm256_slli_epi16(oddd, 8); // shift left to put back in place
+    simde__m256i res  = simde_mm256_mask_mov_epi8(evend, 0xAAAAAAAA, oddd); // interleave even and odd
     return res;
 #else
     // expand into two Vec16s
@@ -5528,13 +5528,13 @@ static inline Vec8i divide_by_i(Vec8i const x) {
     if constexpr ((d1 & (d1-1)) == 0) {
         // d1 is a power of 2. use shift
         constexpr int k = bit_scan_reverse_const(d1);
-        __m256i sign;
-        if constexpr (k > 1) sign = _mm256_srai_epi32(x, k-1); else sign = x;  // k copies of sign bit
-        __m256i bias    = _mm256_srli_epi32(sign, 32-k);   // bias = x >= 0 ? 0 : k-1
-        __m256i xpbias  = _mm256_add_epi32 (x, bias);      // x + bias
-        __m256i q       = _mm256_srai_epi32(xpbias, k);    // (x + bias) >> k
+        simde__m256i sign;
+        if constexpr (k > 1) sign = simde_mm256_srai_epi32(x, k-1); else sign = x;  // k copies of sign bit
+        simde__m256i bias    = simde_mm256_srli_epi32(sign, 32-k);   // bias = x >= 0 ? 0 : k-1
+        simde__m256i xpbias  = simde_mm256_add_epi32 (x, bias);      // x + bias
+        simde__m256i q       = simde_mm256_srai_epi32(xpbias, k);    // (x + bias) >> k
         if (d > 0)      return q;                          // d > 0: return  q
-        return _mm256_sub_epi32(_mm256_setzero_si256(), q);// d < 0: return -q
+        return simde_mm256_sub_epi32(simde_mm256_setzero_si256(), q);// d < 0: return -q
     }
     // general case
     constexpr int32_t sh = bit_scan_reverse_const(uint32_t(d1)-1);// ceil(log2(d1)) - 1. (d1 < 2 handled by power of 2 case)
@@ -5579,7 +5579,7 @@ static inline Vec8ui divide_by_ui(Vec8ui const x) {
     constexpr int b = bit_scan_reverse_const(d);           // floor(log2(d))
     if constexpr ((uint32_t(d) & (uint32_t(d)-1)) == 0) {
         // d is a power of 2. use shift
-        return  _mm256_srli_epi32(x, b);                   // x >> b
+        return  simde_mm256_srli_epi32(x, b);                   // x >> b
     }
     // general case (d > 2)
     constexpr uint32_t mult = uint32_t((uint64_t(1) << (b+32)) / d); // multiplier = 2^(32+b) / d
@@ -5588,22 +5588,22 @@ static inline Vec8ui divide_by_ui(Vec8ui const x) {
     constexpr uint32_t mult1 = round_down ? mult : mult + 1;
     // do 32*32->64 bit unsigned multiplication and get high part of result
 #if INSTRSET >= 10
-    const __m256i multv = _mm256_maskz_set1_epi32(0x55, mult1);// zero-extend mult and broadcast
+    const simde__m256i multv = simde_mm256_maskz_set1_epi32(0x55, mult1);// zero-extend mult and broadcast
 #else
-    const __m256i multv = Vec4uq(uint64_t(mult1));         // zero-extend mult and broadcast
+    const simde__m256i multv = Vec4uq(uint64_t(mult1));         // zero-extend mult and broadcast
 #endif
-    __m256i t1 = _mm256_mul_epu32(x,multv);                // 32x32->64 bit unsigned multiplication of x[0] and x[2]
+    simde__m256i t1 = simde_mm256_mul_epu32(x,multv);                // 32x32->64 bit unsigned multiplication of x[0] and x[2]
     if constexpr (round_down) {
-        t1     = _mm256_add_epi64(t1,multv);               // compensate for rounding error. (x+1)*m replaced by x*m+m to avoid overflow
+        t1     = simde_mm256_add_epi64(t1,multv);               // compensate for rounding error. (x+1)*m replaced by x*m+m to avoid overflow
     }
-    __m256i t2 = _mm256_srli_epi64(t1,32);                 // high dword of result 0 and 2
-    __m256i t3 = _mm256_srli_epi64(x,32);                  // get x[1] and x[3] into position for multiplication
-    __m256i t4 = _mm256_mul_epu32(t3,multv);               // 32x32->64 bit unsigned multiplication of x[1] and x[3]
+    simde__m256i t2 = simde_mm256_srli_epi64(t1,32);                 // high dword of result 0 and 2
+    simde__m256i t3 = simde_mm256_srli_epi64(x,32);                  // get x[1] and x[3] into position for multiplication
+    simde__m256i t4 = simde_mm256_mul_epu32(t3,multv);               // 32x32->64 bit unsigned multiplication of x[1] and x[3]
     if constexpr (round_down) {
-        t4     = _mm256_add_epi64(t4,multv);               // compensate for rounding error. (x+1)*m replaced by x*m+m to avoid overflow
+        t4     = simde_mm256_add_epi64(t4,multv);               // compensate for rounding error. (x+1)*m replaced by x*m+m to avoid overflow
     }
-    __m256i t7 = _mm256_blend_epi32(t2,t4,0xAA);
-    Vec8ui  q  = _mm256_srli_epi32(t7, b);                 // shift right by b
+    simde__m256i t7 = simde_mm256_blend_epi32(t2,t4,0xAA);
+    Vec8ui  q  = simde_mm256_srli_epi32(t7, b);                 // shift right by b
     return  q;                                             // no overflow possible
 }
 
@@ -5647,13 +5647,13 @@ static inline Vec16s divide_by_i(Vec16s const x) {
     if constexpr ((d1 & (d1-1)) == 0) {
         // d is a power of 2. use shift
         constexpr int k = bit_scan_reverse_const(uint32_t(d1));
-        __m256i sign;
-        if constexpr (k > 1) sign = _mm256_srai_epi16(x, k-1); else sign = x;// k copies of sign bit
-        __m256i bias    = _mm256_srli_epi16(sign, 16-k);   // bias = x >= 0 ? 0 : k-1
-        __m256i xpbias  = _mm256_add_epi16 (x, bias);      // x + bias
-        __m256i q       = _mm256_srai_epi16(xpbias, k);    // (x + bias) >> k
+        simde__m256i sign;
+        if constexpr (k > 1) sign = simde_mm256_srai_epi16(x, k-1); else sign = x;// k copies of sign bit
+        simde__m256i bias    = simde_mm256_srli_epi16(sign, 16-k);   // bias = x >= 0 ? 0 : k-1
+        simde__m256i xpbias  = simde_mm256_add_epi16 (x, bias);      // x + bias
+        simde__m256i q       = simde_mm256_srai_epi16(xpbias, k);    // (x + bias) >> k
         if constexpr (d0 > 0)  return q;                   // d0 > 0: return  q
-        return _mm256_sub_epi16(_mm256_setzero_si256(), q);// d0 < 0: return -q
+        return simde_mm256_sub_epi16(simde_mm256_setzero_si256(), q);// d0 < 0: return -q
     }
     // general case
     constexpr int L = bit_scan_reverse_const(uint16_t(d1-1)) + 1;// ceil(log2(d)). (d < 2 handled above)
@@ -5700,7 +5700,7 @@ static inline Vec16us divide_by_ui(Vec16us const x) {
     constexpr int b = bit_scan_reverse_const((uint32_t)d0);// floor(log2(d))
     if constexpr ((d0 & (d0-1)) == 0) {
         // d is a power of 2. use shift
-        return  _mm256_srli_epi16(x, b);                   // x >> b
+        return  simde_mm256_srli_epi16(x, b);                   // x >> b
     }
     // general case (d > 2)
     constexpr uint16_t mult = uint16_t((uint32_t(1) << (b+16)) / d0);// multiplier = 2^(32+b) / d
@@ -5711,11 +5711,11 @@ static inline Vec16us divide_by_ui(Vec16us const x) {
         x1 = x1 + 1;                                       // round down mult and compensate by adding 1 to x
     }
     constexpr uint16_t mult1 = round_down ? mult : mult + 1;
-    const __m256i multv = _mm256_set1_epi16((int16_t)mult1);// broadcast mult
-    __m256i xm = _mm256_mulhi_epu16(x1, multv);            // high part of 16x16->32 bit unsigned multiplication
-    Vec16us q    = _mm256_srli_epi16(xm, b);               // shift right by b
+    const simde__m256i multv = simde_mm256_set1_epi16((int16_t)mult1);// broadcast mult
+    simde__m256i xm = simde_mm256_mulhi_epu16(x1, multv);            // high part of 16x16->32 bit unsigned multiplication
+    Vec16us q    = simde_mm256_srli_epi16(xm, b);               // shift right by b
     if constexpr (round_down) {
-        Vec16sb overfl = (x1 == Vec16us(_mm256_setzero_si256())); // check for overflow of x+1
+        Vec16sb overfl = (x1 == Vec16us(simde_mm256_setzero_si256())); // check for overflow of x+1
         return select(overfl, Vec16us(uint16_t(mult1 >> (uint16_t)b)), q); // deal with overflow (rarely needed)
     }
     else {
@@ -5827,7 +5827,7 @@ static inline uint32_t to_bits(Vec32b const x) {
 
 // to_bits: convert boolean vector to integer bitfield
 static inline uint32_t to_bits(Vec32cb const x) {
-    return (uint32_t)_mm256_movemask_epi8(x);
+    return (uint32_t)simde_mm256_movemask_epi8(x);
 }
 
 static inline uint16_t to_bits(Vec16sb const x) {
@@ -5842,7 +5842,7 @@ static inline uint8_t to_bits(Vec8ib const x) {
 }
 
 static inline uint8_t to_bits(Vec4qb const x) {
-    uint32_t a = (uint32_t)_mm256_movemask_epi8(x);
+    uint32_t a = (uint32_t)simde_mm256_movemask_epi8(x);
     return ((a & 1) | ((a >> 7) & 2)) | (((a >> 14) & 4) | ((a >> 21) & 8));
 }
 

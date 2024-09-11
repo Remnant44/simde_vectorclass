@@ -5636,8 +5636,8 @@ static inline Vec4i lookup8(Vec4i const index, Vec4i const table0, Vec4i const t
 #ifdef __XOP__  // AMD XOP instruction set. Use VPPERM
     return (Vec4i)_mm_perm_epi8(table0, table1, index * 0x04040404 + 0x03020100);
 #elif INSTRSET >= 8 // AVX2. Use VPERMD
-    __m256i table01 = _mm256_inserti128_si256(_mm256_castsi128_si256(table0), table1, 1); // join tables into 256 bit vector
-    return _mm256_castsi256_si128(_mm256_permutevar8x32_epi32(table01, _mm256_castsi128_si256(index)));
+    simde__m256i table01 = simde_mm256_inserti128_si256(simde_mm256_castsi128_si256(table0), table1, 1); // join tables into 256 bit vector
+    return simde_mm256_castsi256_si128(simde_mm256_permutevar8x32_epi32(table01, simde_mm256_castsi128_si256(index)));
 
 #elif INSTRSET >= 4  // SSSE3
     Vec4i r0 = _mm_shuffle_epi8(table0, Vec16c(index * 0x04040404) + Vec16c(Vec4i(0x73727170)));
@@ -5653,10 +5653,10 @@ static inline Vec4i lookup8(Vec4i const index, Vec4i const table0, Vec4i const t
 
 static inline Vec4i lookup16(Vec4i const index, Vec4i const table0, Vec4i const table1, Vec4i const table2, Vec4i const table3) {
 #if INSTRSET >= 8 // AVX2. Use VPERMD
-    __m256i table01 = _mm256_inserti128_si256(_mm256_castsi128_si256(table0), table1, 1); // join tables into 256 bit vector
-    __m256i table23 = _mm256_inserti128_si256(_mm256_castsi128_si256(table2), table3, 1); // join tables into 256 bit vector
-    __m128i r0 = _mm256_castsi256_si128(_mm256_permutevar8x32_epi32(table01, _mm256_castsi128_si256(index)));
-    __m128i r1 = _mm256_castsi256_si128(_mm256_permutevar8x32_epi32(table23, _mm256_castsi128_si256(index ^ 8)));
+    simde__m256i table01 = simde_mm256_inserti128_si256(simde_mm256_castsi128_si256(table0), table1, 1); // join tables into 256 bit vector
+    simde__m256i table23 = simde_mm256_inserti128_si256(simde_mm256_castsi128_si256(table2), table3, 1); // join tables into 256 bit vector
+    __m128i r0 = simde_mm256_castsi256_si128(simde_mm256_permutevar8x32_epi32(table01, simde_mm256_castsi128_si256(index)));
+    __m128i r1 = simde_mm256_castsi256_si128(simde_mm256_permutevar8x32_epi32(table23, simde_mm256_castsi128_si256(index ^ 8)));
     return select(index >= 8, Vec4i(r1), Vec4i(r0));
     //return _mm_blendv_epi8(r0, r1, index >= 8);
 

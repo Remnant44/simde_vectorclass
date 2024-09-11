@@ -49,7 +49,7 @@ namespace VCL_NAMESPACE {
 *
 *****************************************************************************/
 
-// base class to replace __m256 when AVX is not supported
+// base class to replace simde__m256 when AVX is not supported
 class Vec256fe {
 protected:
     __m128 y0;                         // low half
@@ -67,7 +67,7 @@ public:
     }
 };
 
-// base class to replace __m256d when AVX is not supported
+// base class to replace simde__m256d when AVX is not supported
 class Vec256de {
 public:
     Vec256de() = default;              // default constructor
