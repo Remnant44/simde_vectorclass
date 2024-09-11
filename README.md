@@ -1,10 +1,20 @@
-# SIMDE Vectorclass
+# Vectorclass SIMDE (VCLSimde)
 This is a fork of Agner Fog's excellent vectorclass library, modified to use SIMDe as an intermediary for emulation of SIMD instruction sets that may not be present.
 
 The original vectorclass can emulate missing x86 simd instruction sets. Support of SIMDe allows for porting to webassembly, ARM, and other platforms.
 
+Explicit goals:
+* Use Vec8f or Vec16f as general purpose abstract SIMD blocks
+* Zero-cost abstraction when writing to the native ISA
+* Transparent fallback to AVX2/SSE as needed
+* High performance conversion to WebAssembly and NEON
 
-Below is the original README:
+Explicit non-goals:
+* Support of narrower than 128bit SIMD
+
+
+
+Below is the original VCL README:
 
 # version2
 Vector Class Library, latest version
