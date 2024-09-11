@@ -1,3 +1,11 @@
+# SIMDE Vectorclass
+This is a fork of Agner Fog's excellent vectorclass library, modified to use SIMDe as an intermediary for emulation of SIMD instruction sets that may not be present.
+
+The original vectorclass can emulate missing x86 simd instruction sets. Support of SIMDe allows for porting to webassembly, ARM, and other platforms.
+
+
+Below is the original README:
+
 # version2
 Vector Class Library, latest version
 
