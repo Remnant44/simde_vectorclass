@@ -13,8 +13,8 @@
 
 #include "instrset.h"
 
-#ifdef VCL_NAMESPACE
-namespace VCL_NAMESPACE {
+#ifdef SVCL_NAMESPACE
+namespace SVCL_NAMESPACE {
 #endif
 
 
@@ -171,6 +171,6 @@ bool hasAVX512FP16(void) {
 }
 
 
-#ifdef VCL_NAMESPACE
+#ifdef SVCL_NAMESPACE
 }
 #endif

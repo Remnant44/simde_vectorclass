@@ -49,8 +49,8 @@
 #endif
 
 
-#ifdef VCL_NAMESPACE
-namespace VCL_NAMESPACE {
+#ifdef SVCL_NAMESPACE
+namespace SVCL_NAMESPACE {
 #endif
 
 
@@ -3990,7 +3990,7 @@ static inline uint8_t to_bits(Vec4qb const x) {
     return uint8_t(to_bits(x.get_low()) | to_bits(x.get_high()) << 2);
 }
 
-#ifdef VCL_NAMESPACE
+#ifdef SVCL_NAMESPACE
 }
 #endif
 

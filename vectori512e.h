@@ -42,8 +42,8 @@
 #endif
 
 
-#ifdef VCL_NAMESPACE
-namespace VCL_NAMESPACE {
+#ifdef SVCL_NAMESPACE
+namespace SVCL_NAMESPACE {
 #endif
 
 
@@ -2355,7 +2355,7 @@ static inline uint8_t to_bits(Vec8b const a) {
 }
 
 
-#ifdef VCL_NAMESPACE
+#ifdef SVCL_NAMESPACE
 }
 #endif
 

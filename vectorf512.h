@@ -39,8 +39,8 @@
 
 #include "vectori512.h"
 
-#ifdef VCL_NAMESPACE
-namespace VCL_NAMESPACE {
+#ifdef SVCL_NAMESPACE
+namespace SVCL_NAMESPACE {
 #endif
 
 
@@ -2045,7 +2045,7 @@ static inline void scatter(Vec8i const index, uint32_t limit, Vec8d const data, 
 }
 
 
-#ifdef VCL_NAMESPACE
+#ifdef SVCL_NAMESPACE
 }
 #endif
 

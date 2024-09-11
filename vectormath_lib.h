@@ -31,8 +31,8 @@
 
 #include "vectorclass.h"     // make sure vector classes are defined first
 
-#ifdef   VCL_NAMESPACE
-namespace VCL_NAMESPACE {    // optional name space
+#ifdef   SVCL_NAMESPACE
+namespace SVCL_NAMESPACE {    // optional name space
 #endif
 
 #if defined(__INTEL_COMPILER) || defined(__INTEL_LLVM_COMPILER)
@@ -2202,9 +2202,9 @@ static inline Vec8d cdfnorminv (Vec8d const x) {  // inverse cumulative normal d
 
 #endif   // MAX_VECTOR_SIZE >= 512
 
-#ifdef   VCL_NAMESPACE
+#ifdef   SVCL_NAMESPACE
 }
-#endif   // VCL_NAMESPACE
+#endif   // SVCL_NAMESPACE
 
 #endif   // VECTORMATH_COMMON_H
 

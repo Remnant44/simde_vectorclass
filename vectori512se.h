@@ -43,8 +43,8 @@
 #endif
 
 
-#ifdef VCL_NAMESPACE
-namespace VCL_NAMESPACE {
+#ifdef SVCL_NAMESPACE
+namespace SVCL_NAMESPACE {
 #endif
 
 
@@ -2088,7 +2088,7 @@ static inline Vec64uc & operator /= (Vec64uc & a, Const_int_t<d> b) {
     return a;
 }
 
-#ifdef VCL_NAMESPACE
+#ifdef SVCL_NAMESPACE
 }
 #endif
 

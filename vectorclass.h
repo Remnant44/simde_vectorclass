@@ -27,7 +27,7 @@
 ******************************************************************************/
 
 #ifndef VECTORCLASS_H
-#define VECTORCLASS_H  20200
+#define VECTORCLASS_H  40000
 
 // Maximum vector size, bits. Allowed values are 128, 256, 512
 #ifndef MAX_VECTOR_SIZE

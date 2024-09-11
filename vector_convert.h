@@ -23,8 +23,8 @@
 #error Incompatible versions of vector class library mixed
 #endif
 
-#ifdef VCL_NAMESPACE
-namespace VCL_NAMESPACE {
+#ifdef SVCL_NAMESPACE
+namespace SVCL_NAMESPACE {
 #endif
 
 #if MAX_VECTOR_SIZE >= 256
@@ -821,7 +821,7 @@ static inline V fmodulo(V const numerator, double const denominator) {
     }
 }
 
-#ifdef VCL_NAMESPACE
+#ifdef SVCL_NAMESPACE
 }
 #endif
 

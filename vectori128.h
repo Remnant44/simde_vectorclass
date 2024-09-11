@@ -42,8 +42,8 @@
 #error Incompatible versions of vector class library mixed
 #endif
 
-#ifdef VCL_NAMESPACE         // optional namespace
-namespace VCL_NAMESPACE {
+#ifdef SVCL_NAMESPACE         // optional namespace
+namespace SVCL_NAMESPACE {
 #endif
 
 
@@ -6975,7 +6975,7 @@ static inline uint8_t to_bits(Vec2qb const x) {
 
 #endif
 
-#ifdef VCL_NAMESPACE
+#ifdef SVCL_NAMESPACE
 }
 #endif
 

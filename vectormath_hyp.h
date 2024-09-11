@@ -33,8 +33,8 @@
 
 #include "vectormath_exp.h"
 
-#ifdef VCL_NAMESPACE
-namespace VCL_NAMESPACE {
+#ifdef SVCL_NAMESPACE
+namespace SVCL_NAMESPACE {
 #endif
 
 /******************************************************************************
@@ -710,7 +710,7 @@ static inline Vec16f atanh(Vec16f const x) {
 }
 #endif // MAX_VECTOR_SIZE >= 512
 
-#ifdef VCL_NAMESPACE
+#ifdef SVCL_NAMESPACE
 }
 #endif
 

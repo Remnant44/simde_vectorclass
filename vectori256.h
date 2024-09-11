@@ -49,8 +49,8 @@
 #endif
 
 
-#ifdef VCL_NAMESPACE
-namespace VCL_NAMESPACE {
+#ifdef SVCL_NAMESPACE
+namespace SVCL_NAMESPACE {
 #endif
 
 // Generate a constant vector of 8 integers stored in memory.
@@ -5848,7 +5848,7 @@ static inline uint8_t to_bits(Vec4qb const x) {
 
 #endif
 
-#ifdef VCL_NAMESPACE
+#ifdef SVCL_NAMESPACE
 }
 #endif
 

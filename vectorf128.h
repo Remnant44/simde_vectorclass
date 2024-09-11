@@ -34,8 +34,8 @@
 #endif
 
 
-#ifdef VCL_NAMESPACE
-namespace VCL_NAMESPACE {
+#ifdef SVCL_NAMESPACE
+namespace SVCL_NAMESPACE {
 #endif
 
 /*****************************************************************************
@@ -1180,8 +1180,8 @@ static inline Vec4f pow(Vec4f const a, Const_int_t<n>) {
 }
 
 // implement the same as macro pow_const(vector, int)
-#ifdef VCL_NAMESPACE
-#define pow_const(x,n) pow(x, VCL_NAMESPACE::Const_int_t<n>())
+#ifdef SVCL_NAMESPACE
+#define pow_const(x,n) pow(x, SVCL_NAMESPACE::Const_int_t<n>())
 #else
 #define pow_const(x,n) pow(x,Const_int_t<n>())
 #endif
@@ -2974,7 +2974,7 @@ static inline uint8_t to_bits(Vec2db const x) {
 #endif  // INSTRSET < 10
 
 
-#ifdef VCL_NAMESPACE
+#ifdef SVCL_NAMESPACE
 }
 #endif
 

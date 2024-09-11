@@ -116,8 +116,8 @@
 
 
 // functions in instrset_detect.cpp:
-#ifdef VCL_NAMESPACE
-namespace VCL_NAMESPACE {
+#ifdef SVCL_NAMESPACE
+namespace SVCL_NAMESPACE {
 #endif
     int  instrset_detect(void);        // tells which instruction sets are supported
     bool hasFMA3(void);                // true if FMA3 instructions supported
@@ -132,7 +132,7 @@ namespace VCL_NAMESPACE {
     // function in physical_processors.cpp:
     int physicalProcessors(int * logical_processors = 0);
 
-#ifdef VCL_NAMESPACE
+#ifdef SVCL_NAMESPACE
 }
 #endif
 
@@ -194,8 +194,8 @@ We need different version checks with and whithout __apple_build_version__
 #endif
 
 
-#ifdef VCL_NAMESPACE
-namespace VCL_NAMESPACE {
+#ifdef SVCL_NAMESPACE
+namespace SVCL_NAMESPACE {
 #endif
 
 // Constant for indicating don't care in permute and blend functions.
@@ -383,8 +383,8 @@ constexpr int bit_scan_reverse_const(uint64_t const n) {
 *
 *****************************************************************************/
 
-#ifdef VCL_NAMESPACE
-#define NAMESPACEPREFIX VCL_NAMESPACE::
+#ifdef SVCL_NAMESPACE
+#define NAMESPACEPREFIX SVCL_NAMESPACE::
 #else 
 #define NAMESPACEPREFIX
 #endif
@@ -1468,7 +1468,7 @@ auto blend_half(W const& a, W const& b) {
 }
 
 
-#ifdef VCL_NAMESPACE
+#ifdef SVCL_NAMESPACE
 }
 #endif
 

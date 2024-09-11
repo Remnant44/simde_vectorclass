@@ -43,8 +43,8 @@
 #endif
 
 
-#ifdef VCL_NAMESPACE
-namespace VCL_NAMESPACE {
+#ifdef SVCL_NAMESPACE
+namespace SVCL_NAMESPACE {
 #endif
 
 // Generate a constant vector of 16 integers stored in memory.
@@ -2149,7 +2149,7 @@ static inline Vec16ui & operator /= (Vec16ui & a, Const_int_t<d> b) {
     return a;
 }
 
-#ifdef VCL_NAMESPACE
+#ifdef SVCL_NAMESPACE
 }
 #endif
 

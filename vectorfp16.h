@@ -43,8 +43,8 @@
 #include "vectorfp16e.h"
 #else
 
-#ifdef VCL_NAMESPACE
-namespace VCL_NAMESPACE {
+#ifdef SVCL_NAMESPACE
+namespace SVCL_NAMESPACE {
 #endif
 
 // type Float16 emulates _Float16 in vectorfp16e.h if _Float16 not defined
@@ -2663,7 +2663,7 @@ static inline Vec32h tanpi(Vec32h const x) {
 #endif  // MAX_VECTOR_SIZE >= 512
 
 
-#ifdef VCL_NAMESPACE
+#ifdef SVCL_NAMESPACE
 }
 #endif
 

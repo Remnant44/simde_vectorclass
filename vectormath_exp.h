@@ -38,8 +38,8 @@
 
 #include "vectormath_common.h"
 
-#ifdef VCL_NAMESPACE
-namespace VCL_NAMESPACE {
+#ifdef SVCL_NAMESPACE
+namespace SVCL_NAMESPACE {
 #endif
 
 /******************************************************************************
@@ -2166,7 +2166,7 @@ V power_rational (V const x) {
 }
 
 
-#ifdef VCL_NAMESPACE
+#ifdef SVCL_NAMESPACE
 }
 #endif
 

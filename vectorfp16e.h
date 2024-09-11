@@ -36,8 +36,8 @@
 #error Emulation of half precision floating point not supported for MAX_VECTOR_SIZE < 256
 #endif
 
-#ifdef VCL_NAMESPACE
-namespace VCL_NAMESPACE {
+#ifdef SVCL_NAMESPACE
+namespace SVCL_NAMESPACE {
 #endif
 
 
@@ -3241,7 +3241,7 @@ static inline Vec32h tanpi(Vec32h const x) {
 
 #endif  // MAX_VECTOR_SIZE >= 512
 
-#ifdef VCL_NAMESPACE
+#ifdef SVCL_NAMESPACE
 }
 #endif
 

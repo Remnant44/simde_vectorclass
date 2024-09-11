@@ -40,8 +40,8 @@
 
 #include "vectori512e.h"
 
-#ifdef VCL_NAMESPACE
-namespace VCL_NAMESPACE {
+#ifdef SVCL_NAMESPACE
+namespace SVCL_NAMESPACE {
 #endif
 
 /*****************************************************************************
@@ -1938,7 +1938,7 @@ static inline uint8_t to_bits(Vec8db const x) {
     return to_bits(Vec8qb(x));
 }
 
-#ifdef VCL_NAMESPACE
+#ifdef SVCL_NAMESPACE
 }
 #endif
 
