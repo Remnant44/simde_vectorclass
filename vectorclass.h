@@ -30,12 +30,14 @@
 #define VECTORCLASS_H  40000
 
 // Maximum vector size, bits. Allowed values are 128, 256, 512
+// Note that this is now the primary way to control which vectorclass sizes are included!
 #ifndef MAX_VECTOR_SIZE
 #define MAX_VECTOR_SIZE 512
 #endif
 
 // Determine instruction set, and define platform-dependent functions
 #include "instrset.h"        // Select supported instruction set
+#include "instrset_funcs.h" // Common functions
 
 #if INSTRSET < 2             // instruction set SSE2 is the minimum
 #error Please compile for the SSE2 instruction set or higher
@@ -48,13 +50,9 @@
 #if MAX_VECTOR_SIZE >= 256
 #if INSTRSET >= 8
 #include "vectori256.h"      // 256-bit integer vectors, requires AVX2 instruction set
-#else
-#include "vectori256e.h"     // 256-bit integer vectors, emulated
 #endif  // INSTRSET >= 8
 #if INSTRSET >= 7
 #include "vectorf256.h"      // 256-bit floating point vectors, requires AVX instruction set
-#else
-#include "vectorf256e.h"     // 256-bit floating point vectors, emulated
 #endif  //  INSTRSET >= 7
 #endif  //  MAX_VECTOR_SIZE >= 256
 
